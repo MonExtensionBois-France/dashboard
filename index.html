@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Extension Bois — Portail Marketing</title>
+    <link rel="icon" href="https://www.mon-extension-bois.com/wp-content/uploads/2025/03/extension-bois-logo.png">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --green-900:#1a3a17;--green-800:#2d5a27;--green-700:#3a7a2e;--green-600:#4e9a3a;
+            --green-500:#6BBF59;--green-400:#8bc862;--green-100:#e8f3dc;--green-50:#f3f9ee;
+            --orange:#FF8C42;--orange-light:#FFA76C;--orange-dark:#e07030;--orange-bg:rgba(255,140,66,.06);
+            --beige-100:#f5f2ec;--beige-50:#faf8f5;
+            --white:#fff;--text-900:#1a1a1a;--text-700:#3d3d3d;--text-500:#6b6b6b;--text-400:#8a8a8a;--text-300:#ababab;
+            --border:#e5e0d8;--border-light:#ede9e3;
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',sans-serif;background:var(--white);color:var(--text-700);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+        h1,h2,h3,h4{font-family:'Montserrat',sans-serif}
+
+        /* ══ NAV — fidèle au site ══ */
+        .site-topbar{background:var(--green-800);padding:8px 0}
+        .site-topbar-inner{max-width:1240px;margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;align-items:center}
+        .site-topbar a{color:rgba(255,255,255,.6);font-size:11px;text-decoration:none;font-weight:500;transition:.2s}
+        .site-topbar a:hover{color:#fff}
+        .site-topbar-right{display:flex;gap:12px;align-items:center}
+        .btn-franchise{background:var(--green-600);color:#fff!important;padding:5px 16px;border-radius:6px;font-weight:700;font-size:11px;letter-spacing:.3px}
+        .btn-franchise:hover{background:var(--green-500)!important}
+        .btn-projet{background:var(--orange);color:#fff!important;padding:5px 16px;border-radius:6px;font-weight:700;font-size:11px}
+        .btn-projet:hover{background:var(--orange-dark)!important}
+
+        .site-nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+        .site-nav-inner{max-width:1240px;margin:0 auto;padding:0 32px;height:70px;display:flex;align-items:center;justify-content:space-between}
+        .site-nav-left{display:flex;align-items:center;gap:40px}
+        .site-nav-logo{height:50px}
+        .site-nav-links{display:flex;gap:0}
+        .site-nav-links a{font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;color:var(--text-700);text-decoration:none;padding:24px 16px;text-transform:uppercase;letter-spacing:.5px;border-bottom:3px solid transparent;transition:.2s}
+        .site-nav-links a:hover{color:var(--green-700)}
+        .site-nav-links a.active{color:var(--green-800);border-bottom-color:var(--green-600)}
+        .site-nav-links a.nav-highlight{color:var(--orange);border-bottom-color:var(--orange);position:relative}
+        .site-nav-links a.nav-highlight::after{content:'';position:absolute;top:12px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+        .site-nav-links a.nav-highlight:hover{color:var(--orange-dark)}
+        .site-nav-right{display:flex;align-items:center;gap:10px}
+        .nav-live{font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;background:var(--green-100);color:var(--green-700);display:flex;align-items:center;gap:7px}
+        .nav-live .dot{width:7px;height:7px;border-radius:50%;background:var(--green-500);animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+
+        /* ══ HERO — style MEB "IMAGINEZ CONCRÉTISEZ PROFITEZ" ══ */
+        .hero{position:relative;overflow:hidden;background:var(--white)}
+        .hero-inner{max-width:1240px;margin:0 auto;padding:60px 32px 48px;display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+        .hero-visual{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:4/3}
+        .hero-visual img{width:100%;height:100%;object-fit:cover;display:block}
+        .hero-visual-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:40px}
+
+        .hero-word{display:inline-block;font-family:'Montserrat',sans-serif;font-size:44px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:1.15;padding:6px 20px;margin-bottom:4px}
+        .hero-word.green{background:var(--green-800);color:var(--white)}
+        .hero-word.orange{background:var(--orange);color:var(--white)}
+        .hero-subtitle{font-size:15px;color:var(--text-700);margin-top:16px;font-weight:500;line-height:1.6}
+
+        .hero-right{display:flex;flex-direction:column;gap:24px}
+        .hero-right-top{display:flex;align-items:flex-start;gap:20px}
+        .hero-right-icon{flex-shrink:0}
+        .hero-right-icon img{width:64px;height:auto}
+        .hero-right-title{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;color:var(--green-800);line-height:1.15;letter-spacing:-0.5px}
+        .hero-right-title span{display:block;background:var(--green-800);color:var(--white);padding:4px 14px;display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+        .hero-right-desc{font-size:14px;color:var(--text-500);line-height:1.7}
+        .hero-cta{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;background:var(--orange);color:#fff;border:none;border-radius:50px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:.3s;box-shadow:0 4px 20px rgba(255,140,66,.25);align-self:flex-start}
+        .hero-cta:hover{background:var(--orange-dark);transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,140,66,.35)}
+        .hero-cta svg{width:18px;height:18px}
+
+        /* ══ FLAQUE DECORATIVE (orange splash like MEB site) ══ */
+        .flaque-orange{position:absolute;pointer-events:none;z-index:0}
+        .flaque-divider{width:100%;text-align:center;padding:8px 0;position:relative}
+        .flaque-divider img{height:40px;width:auto}
+
+        /* ══ STATS BAR — style MEB compact ══ */
+        .stats-bar{background:var(--green-800);padding:0}
+        .stats-bar-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+        .stat-cell{padding:28px 32px;text-align:center;border-right:1px solid rgba(255,255,255,.08);position:relative}
+        .stat-cell:last-child{border-right:none}
+        .stat-num{font-family:'Montserrat',sans-serif;font-size:38px;font-weight:900;color:var(--white);letter-spacing:-1.5px}
+        .stat-num.orange{color:var(--orange-light)}
+        .stat-label{font-size:11px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-top:4px}
+
+        /* ══ GATEWAY — double porte d'entrée ══ */
+        .gateway{max-width:1240px;margin:0 auto;padding:48px 32px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+        .gw-card{position:relative;border-radius:20px;padding:40px 36px;text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;transition:all .5s cubic-bezier(.16,1,.3,1);cursor:pointer;min-height:260px}
+        .gw-card::before{content:'';position:absolute;inset:0;border-radius:20px;opacity:0;transition:opacity .5s;pointer-events:none}
+        .gw-card:hover{transform:translateY(-8px)}
+        .gw-card:hover::before{opacity:1}
+        .gw-card:hover .gw-arrow{transform:translateX(8px);opacity:1}
+        .gw-card:hover .gw-icon{transform:scale(1.1)}
+        .gw-card:hover .gw-flaque{transform:scale(1.15) rotate(5deg)}
+
+        .gw-agences{background:linear-gradient(135deg,var(--green-800) 0%,var(--green-700) 100%);box-shadow:0 8px 32px rgba(45,90,39,.2)}
+        .gw-agences::before{background:linear-gradient(135deg,var(--green-700) 0%,var(--green-600) 100%)}
+        .gw-agences:hover{box-shadow:0 20px 56px rgba(45,90,39,.35)}
+
+        .gw-visuels{background:linear-gradient(135deg,var(--orange-dark) 0%,var(--orange) 100%);box-shadow:0 8px 32px rgba(255,140,66,.2)}
+        .gw-visuels::before{background:linear-gradient(135deg,var(--orange) 0%,var(--orange-light) 100%)}
+        .gw-visuels:hover{box-shadow:0 20px 56px rgba(255,140,66,.35)}
+
+        .gw-flaque{position:absolute;pointer-events:none;opacity:.12;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+        .gw-agences .gw-flaque{right:-40px;bottom:-40px;width:220px}
+        .gw-visuels .gw-flaque{right:-30px;top:-30px;width:200px}
+
+        .gw-header{display:flex;align-items:center;gap:16px;margin-bottom:16px;position:relative;z-index:1}
+        .gw-icon{width:56px;height:56px;border-radius:14px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;transition:transform .4s cubic-bezier(.16,1,.3,1)}
+        .gw-icon svg{width:26px;height:26px;color:#fff}
+        .gw-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.1);padding:4px 12px;border-radius:20px}
+
+        .gw-title{font-family:'Montserrat',sans-serif;font-size:26px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:8px;position:relative;z-index:1}
+        .gw-desc{font-size:14px;color:rgba(255,255,255,.7);line-height:1.7;position:relative;z-index:1;flex:1}
+        .gw-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:20px;position:relative;z-index:1}
+        .gw-stats{display:flex;gap:24px}
+        .gw-stat{text-align:center}
+        .gw-stat-num{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:900;color:#fff;letter-spacing:-1px}
+        .gw-stat-label{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+        .gw-arrow{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;transition:all .4s cubic-bezier(.16,1,.3,1);opacity:.7}
+        .gw-arrow svg{width:20px;height:20px;color:#fff}
+
+        @keyframes gw-enter-left{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:translateX(0)}}
+        @keyframes gw-enter-right{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+        .gw-agences{animation:gw-enter-left .7s cubic-bezier(.16,1,.3,1) .2s both}
+        .gw-visuels{animation:gw-enter-right .7s cubic-bezier(.16,1,.3,1) .35s both}
+
+        /* ══ SECTION HEADER — flèche orange + titre ══ */
+        .section{max-width:1240px;margin:0 auto;padding:56px 32px 20px}
+        .section-intro{text-align:center;margin-bottom:48px;position:relative}
+        .section-arrow{display:block;margin:0 auto 20px;height:48px}
+        .section-tag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:var(--orange);margin-bottom:12px}
+        .section-title{font-family:'Montserrat',sans-serif;font-size:32px;font-weight:900;color:var(--text-900);letter-spacing:-1px;line-height:1.2}
+        .section-title em{font-style:normal;color:var(--green-700)}
+        .section-desc{font-size:15px;color:var(--text-400);max-width:560px;margin:12px auto 0;line-height:1.7}
+
+        /* ══ AGENCIES ZONE ══ */
+        .agencies-zone{background:linear-gradient(180deg,#f7f3ed 0%,#f0ebe1 100%);position:relative;overflow:hidden;padding-bottom:80px;border-top:1px solid var(--border-light)}
+        .agencies-zone::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;opacity:.06;background:repeating-linear-gradient(90deg,transparent,transparent 6px,rgba(139,90,43,.4) 6px,rgba(139,90,43,.4) 7px);pointer-events:none}
+        .agencies-zone .deco-house{position:absolute;pointer-events:none;opacity:.12}
+        .agencies-zone .deco-house.left{left:-10px;bottom:30px;width:200px}
+        .agencies-zone .deco-house.right{right:0;top:40px;width:160px;transform:scaleX(-1)}
+        .agencies-zone .deco-tree{position:absolute;pointer-events:none;opacity:.10}
+        .agencies-zone .deco-tree.t1{left:3%;top:20%;width:60px}
+        .agencies-zone .deco-tree.t2{right:2%;bottom:15%;width:70px}
+        .agencies-zone .deco-corner{position:absolute;pointer-events:none;opacity:.07}
+        .agencies-zone .deco-corner.tl{top:0;left:0;width:250px;height:250px;background:radial-gradient(ellipse at top left,rgba(45,90,39,.15),transparent 70%)}
+        .agencies-zone .deco-corner.br{bottom:0;right:0;width:300px;height:300px;background:radial-gradient(ellipse at bottom right,rgba(255,140,66,.10),transparent 70%)}
+
+        /* ══ GRID ══ */
+        .grid-wrap{max-width:1240px;margin:0 auto;padding:0 32px 0;position:relative;z-index:1}
+        .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+
+        /* ══ CARD — style MEB épuré ══ */
+        .card{background:var(--white);border:1px solid var(--border-light);border-radius:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:all .45s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.03)}
+        .card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green-600),var(--green-400));transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.16,1,.3,1)}
+        .card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(0,0,0,.08)}
+        .card:hover::after{transform:scaleX(1)}
+        .card:hover .card-arrow svg{transform:translateX(5px)}
+        .card-top{padding:24px 24px 0;display:flex;align-items:flex-start;justify-content:space-between}
+        .card-icon{width:48px;height:48px;border-radius:12px;background:var(--green-50);border:1px solid var(--green-100);display:flex;align-items:center;justify-content:center;transition:.3s}
+        .card-icon svg{width:20px;height:20px;color:var(--green-600)}
+        .card:hover .card-icon{background:var(--green-100);border-color:var(--green-400)}
+        .card-live{font-size:9px;font-weight:700;color:var(--green-600);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:5px}
+        .card-live .p{width:6px;height:6px;border-radius:50%;background:var(--green-500);animation:pulse 2s infinite}
+        .card-body{padding:18px 24px 20px;flex:1}
+        .card-name{font-family:'Montserrat',sans-serif;font-size:19px;font-weight:800;color:var(--text-900);letter-spacing:-.4px;margin-bottom:4px}
+        .card-dept{font-size:13px;color:var(--text-400);margin-bottom:14px}
+        .card-tags{display:flex;gap:6px;flex-wrap:wrap}
+        .card-tag{font-size:10px;font-weight:600;padding:4px 10px;border-radius:16px}
+        .card-tag.meta{background:rgba(24,119,242,.06);color:#1877f2;border:1px solid rgba(24,119,242,.1)}
+        .card-tag.google{background:rgba(66,133,244,.05);color:#4285f4;border:1px solid rgba(66,133,244,.08)}
+        .card-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-top:1px solid var(--border-light)}
+        .card-footer span{font-size:12px;font-weight:600;color:var(--text-400)}
+        .card-arrow svg{width:18px;height:18px;color:var(--text-300);transition:all .3s}
+        .card:hover .card-footer span{color:var(--green-700)}
+        .card:hover .card-arrow svg{color:var(--orange)}
+
+
+        /* ══ FOOTER ══ */
+        .footer{background:var(--white);border-top:1px solid var(--border);padding:40px 32px;text-align:center}
+        .footer-brand{display:inline-flex;align-items:center;gap:10px;margin-bottom:8px}
+        .footer-brand img{height:24px}
+        .footer-brand strong{font-family:'Montserrat',sans-serif;font-size:14px;color:var(--text-900)}
+        .footer-text{font-size:13px;color:var(--text-400);line-height:1.8}
+        .footer-text a{color:var(--green-700);text-decoration:none;font-weight:600}
+        .footer-text a:hover{text-decoration:underline}
+        .footer-meta{font-size:11px;color:var(--text-300);margin-top:10px}
+
+        /* ══ MAP ══ */
+        .map-wrap{max-width:1240px;margin:0 auto;padding:0 32px 48px;position:relative;z-index:1}
+        .map-container{position:relative;border-radius:24px;overflow:hidden;box-shadow:0 12px 48px rgba(26,58,23,.12),0 2px 8px rgba(0,0,0,.04);border:1px solid var(--border-light);background:var(--white)}
+        .map-container::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:24px;box-shadow:inset 0 0 40px rgba(245,242,236,.6);z-index:500}
+        .map-header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;background:linear-gradient(135deg,var(--green-800) 0%,var(--green-700) 100%);position:relative;overflow:hidden}
+        .map-header::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.05)}
+        .map-header-left{display:flex;align-items:center;gap:14px;position:relative;z-index:1}
+        .map-header-icon{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center}
+        .map-header-icon svg{width:18px;height:18px;color:#fff}
+        .map-header-title{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px}
+        .map-header-sub{font-size:12px;color:rgba(255,255,255,.6);font-weight:500}
+        .map-header-badge{font-size:10px;font-weight:700;padding:5px 14px;border-radius:20px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);text-transform:uppercase;letter-spacing:.8px;position:relative;z-index:1;display:flex;align-items:center;gap:7px}
+        .map-header-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+        #mebMap{width:100%;height:340px;position:relative;z-index:1}
+        .leaflet-container{background:#f2efe9!important;font-family:'Inter',sans-serif;outline:none!important;border:none!important}
+        #mebMap{border-top:none;border-bottom:none;outline:none;margin:-1px 0;padding:1px 0}
+        .leaflet-control-zoom{border:none!important;box-shadow:0 4px 16px rgba(0,0,0,.1)!important;border-radius:12px!important;overflow:hidden}
+        .leaflet-control-zoom a{width:36px!important;height:36px!important;line-height:36px!important;font-size:16px!important;color:var(--green-800)!important;background:var(--white)!important;border-bottom:1px solid var(--border-light)!important}
+        .leaflet-control-zoom a:hover{background:var(--green-50)!important;color:var(--green-600)!important}
+        .meb-pin{position:relative;width:44px;height:44px}
+        .meb-pin-body{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:linear-gradient(135deg,var(--green-600) 0%,var(--green-500) 100%);border:3px solid #fff;box-shadow:0 6px 20px rgba(26,58,23,.4);transition:transform .3s ease;cursor:pointer}
+        .meb-pin-body svg{width:16px;height:16px;color:#fff;transform:rotate(45deg)}
+        .meb-pin-body:hover{transform:rotate(-45deg) scale(1.15)}
+        .meb-pin-pulse{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:var(--green-500);opacity:.3;animation:pin-pulse 2s ease-out infinite}
+        @keyframes pin-pulse{0%{transform:translateX(-50%) scale(1);opacity:.3}100%{transform:translateX(-50%) scale(3);opacity:0}}
+        .meb-popup{text-align:center;padding:8px 6px;font-family:'Montserrat',sans-serif}
+        .meb-popup .popup-name{font-size:16px;font-weight:900;color:var(--text-900);margin-bottom:3px;letter-spacing:-.3px}
+        .meb-popup .popup-dept{font-size:11px;color:var(--text-400);margin-bottom:10px}
+        .meb-popup .popup-link{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#fff;text-decoration:none;padding:7px 18px;border-radius:24px;background:linear-gradient(135deg,var(--green-700),var(--green-600));box-shadow:0 3px 12px rgba(26,58,23,.25);transition:.2s}
+        .meb-popup .popup-link:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(26,58,23,.35)}
+        .leaflet-popup-content-wrapper{border-radius:16px!important;box-shadow:0 12px 36px rgba(0,0,0,.14)!important;border:1px solid var(--border-light)!important;padding:4px!important}
+        .leaflet-popup-tip{box-shadow:0 4px 12px rgba(0,0,0,.08)!important}
+        .map-footer{display:flex;align-items:center;justify-content:center;gap:24px;padding:16px 28px;border-top:1px solid var(--border-light);background:var(--beige-50)}
+        .map-footer-stat{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-500);font-weight:500}
+        .map-footer-dot{width:8px;height:8px;border-radius:50%}
+        .map-footer-dot.green{background:var(--green-500)}
+        .map-footer-dot.orange{background:var(--orange)}
+
+        /* ══ SCROLL REVEAL ══ */
+        .reveal{opacity:0;transform:translateY(28px);transition:all .6s cubic-bezier(.16,1,.3,1)}
+        .reveal.visible{opacity:1;transform:translateY(0)}
+
+        /* ══ RESPONSIVE ══ */
+        @media(max-width:1024px){
+            .hero-inner{grid-template-columns:1fr;gap:32px}
+            .hero-word{font-size:36px}
+            .gateway{grid-template-columns:1fr 1fr;gap:16px;padding:36px 20px}
+            .gw-title{font-size:22px}
+            .grid{grid-template-columns:repeat(2,1fr)}
+            .section-title{font-size:26px}
+        }
+        @media(max-width:768px){
+            .site-topbar{display:none}
+            .site-nav-links{display:none}
+            .site-nav-right{display:none}
+            .hero-inner{padding:36px 20px}
+            .hero-word{font-size:28px;padding:4px 14px}
+            .gateway{grid-template-columns:1fr;gap:16px;padding:32px 20px}
+            .gw-card{min-height:200px;padding:28px 24px}
+            .stats-bar-inner{grid-template-columns:repeat(2,1fr)}
+            .stat-cell:nth-child(2){border-right:none}
+            .stat-cell:nth-child(1),.stat-cell:nth-child(2){border-bottom:1px solid rgba(255,255,255,.08)}
+            .grid{grid-template-columns:1fr}
+            .section{padding:40px 20px 16px}
+            .grid-wrap{padding:0 20px 60px}
+            .map-wrap{padding:0 20px 32px}
+            .map-container{border-radius:18px}
+            #mebMap{height:280px}
+            .map-header{padding:16px 20px}
+            .map-header-title{font-size:14px}
+            .map-footer{gap:16px;padding:14px 20px}
+            .map-footer-stat{font-size:11px}
+            .card-top{padding:20px 20px 0}
+            .card-body{padding:14px 20px 16px}
+            .card-footer{padding:14px 20px}
+            .card-name{font-size:17px}
+            .deco-house{display:none}
+            .deco-tree{display:none}
+            .deco-corner{display:none}
+            .footer{padding:32px 20px}
+        }
+        @media(max-width:480px){
+            .hero-inner{padding:24px 14px}
+            .hero-word{font-size:20px;padding:3px 12px}
+            .hero-right-title{font-size:16px;line-height:1.25}
+            .stat-num{font-size:24px}
+            .stat-label{font-size:10px}
+            .gateway{padding:20px 14px;gap:12px}
+            .gw-card{min-height:170px;padding:22px 18px;border-radius:14px}
+            .gw-title{font-size:18px}
+            .gw-desc{font-size:12px}
+            .gw-stat-num{font-size:18px}
+            .gw-stat-label{font-size:9px}
+            .section{padding:28px 14px 10px}
+            .section-title{font-size:22px}
+            .section-desc{font-size:13px}
+            .map-wrap{padding:0 14px 24px}
+            #mebMap{height:240px}
+            .map-container{border-radius:14px}
+            .map-container::after{border-radius:14px}
+            .map-header{padding:14px 16px}
+            .map-header-icon{width:34px;height:34px;border-radius:8px}
+            .map-header-icon svg{width:15px;height:15px}
+            .map-header-title{font-size:13px}
+            .map-header-sub{font-size:11px}
+            .map-footer{padding:12px 16px;gap:12px}
+            .map-footer-stat{font-size:10px}
+            .meb-pin{width:36px;height:36px}
+            .meb-pin-body{width:36px;height:36px}
+            .meb-pin-body svg{width:13px;height:13px}
+            .grid-wrap{padding:0 14px 40px}
+            .grid{gap:14px}
+            .card{border-radius:12px}
+            .card-icon{width:40px;height:40px;border-radius:10px}
+            .card-icon svg{width:16px;height:16px}
+            .card-name{font-size:16px}
+            .card-dept{font-size:12px;margin-bottom:10px}
+            .card-tag{font-size:9px;padding:3px 8px}
+            .card-footer span{font-size:11px}
+            .footer{padding:24px 14px}
+            .footer-text{font-size:12px}
+        }
+
+        ::-webkit-scrollbar{width:8px}
+        ::-webkit-scrollbar-track{background:var(--beige-50)}
+        ::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+    </style>
+</head>
+<body>
+
+<!-- ══ TOPBAR (comme le site MEB) ══ -->
+<div class="site-topbar">
+    <div class="site-topbar-inner">
+        <a href="https://www.mon-extension-bois.com/" target="_blank">mon-extension-bois.com</a>
+        <div class="site-topbar-right"></div>
+    </div>
+</div>
+
+<!-- ══ NAV (fidèle au site) ══ -->
+<nav class="site-nav">
+    <div class="site-nav-inner">
+        <div class="site-nav-left">
+            <img src="https://www.mon-extension-bois.com/wp-content/uploads/2025/03/extension-bois-logo.png" alt="Mon Extension Bois" class="site-nav-logo">
+            <div class="site-nav-links">
+                <a href="#agencies" class="active">Nos Agences</a>
+                <a href="meb-creas/index.html" target="_blank" class="nav-highlight">Visuels Publicitaires</a>
+            </div>
+        </div>
+        <div class="site-nav-right">
+            <div class="nav-live"><span class="dot"></span> Temps réel</div>
+        </div>
+    </div>
+</nav>
+
+<!-- ══ HERO — style "IMAGINEZ CONCRÉTISEZ PROFITEZ" ══ -->
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-visual">
+            <img src="https://436f5178.delivery.rocketcdn.me/wp-content/uploads/2025/04/fond-extension-bois.png" alt="Extension bois Mon Extension Bois">
+            <div class="hero-visual-overlay">
+                <span class="hero-word green">Pilotez</span>
+                <span class="hero-word green">Analysez</span>
+                <span class="hero-word orange">Performez</span>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="hero-right-top">
+                <div>
+                    <div class="hero-right-title">Suivez vos campagnes avec votre<br><span>Dashboard Marketing</span></div>
+                </div>
+            </div>
+            <p class="hero-right-desc">Accédez aux performances de vos campagnes Meta Ads &amp; Google Ads sur l'ensemble du réseau Mon Extension Bois. Données Supermetrics en direct, par agence et par visuel.</p>
+            <a href="#agencies" class="hero-cta">
+                Découvrir les agences
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="m12 8 4 4-4 4"/><path d="M8 12h8"/></svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ══ STATS BAR ══ -->
+<div class="stats-bar">
+    <div class="stats-bar-inner">
+        <div class="stat-cell"><div class="stat-num" data-target="8">0</div><div class="stat-label">Agences</div></div>
+        <div class="stat-cell"><div class="stat-num orange" data-target="3173">0</div><div class="stat-label">Leads générés</div></div>
+        <div class="stat-cell"><div class="stat-num" data-target="34544">0</div><div class="stat-label">€ investis</div></div>
+        <div class="stat-cell"><div class="stat-num orange" data-target="15">0</div><div class="stat-label">Flux actifs</div></div>
+    </div>
+</div>
+
+<!-- ══ GATEWAY — double porte d'entrée ══ -->
+<section class="gateway">
+    <a href="#agencies" class="gw-card gw-agences">
+        <img src="https://436f5178.delivery.rocketcdn.me/wp-content/uploads/2025/03/extension-bois-flaque.png" alt="" class="gw-flaque">
+        <div class="gw-header">
+            <div class="gw-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <span class="gw-badge">Réseau France</span>
+        </div>
+        <div class="gw-title">Nos Agences</div>
+        <div class="gw-desc">Accédez aux dashboards Meta Ads &amp; Google Ads de chaque agence du réseau Mon Extension Bois.</div>
+        <div class="gw-bottom">
+            <div class="gw-stats">
+                <div class="gw-stat"><div class="gw-stat-num" data-target="8">0</div><div class="gw-stat-label">Agences</div></div>
+                <div class="gw-stat"><div class="gw-stat-num" data-target="15">0</div><div class="gw-stat-label">Flux actifs</div></div>
+            </div>
+            <div class="gw-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+        </div>
+    </a>
+    <a href="meb-creas/index.html" target="_blank" class="gw-card gw-visuels">
+        <img src="https://436f5178.delivery.rocketcdn.me/wp-content/uploads/2025/04/flaqueOrange.png" alt="" class="gw-flaque">
+        <div class="gw-header">
+            <div class="gw-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            </div>
+            <span class="gw-badge">Toutes les villes</span>
+        </div>
+        <div class="gw-title">Visuels Publicitaires</div>
+        <div class="gw-desc">Analysez les performances de chaque visuel sponsorisé Meta Ads : dépenses, leads, CPL et CTR par ensemble de publicités.</div>
+        <div class="gw-bottom">
+            <div class="gw-stats">
+                <div class="gw-stat"><div class="gw-stat-num" data-target="3173">0</div><div class="gw-stat-label">Leads</div></div>
+                <div class="gw-stat"><div class="gw-stat-num" data-target="120">0</div><div class="gw-stat-label">Visuels</div></div>
+            </div>
+            <div class="gw-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+        </div>
+    </a>
+</section>
+
+<!-- ══ AGENCES — zone vivante ══ -->
+<div class="agencies-zone">
+    <!-- Coins décoratifs -->
+    <div class="deco-corner tl"></div>
+    <div class="deco-corner br"></div>
+    <!-- Maison + extension (gauche) -->
+    <svg class="deco-house left" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+        <rect x="15" y="55" width="90" height="55" rx="3" fill="#2d5a27"/>
+        <polygon points="15,57 60,20 105,57" fill="#1a3a17"/>
+        <rect x="45" y="76" width="20" height="34" rx="2" fill="#FF8C42"/>
+        <rect x="25" y="66" width="14" height="12" rx="2" fill="rgba(255,255,255,.7)"/>
+        <rect x="75" y="66" width="14" height="12" rx="2" fill="rgba(255,255,255,.7)"/>
+        <rect x="105" y="62" width="55" height="48" rx="3" fill="#FF8C42"/>
+        <polygon points="102,64 132,40 162,64" fill="#e07030"/>
+        <rect x="120" y="74" width="16" height="14" rx="2" fill="rgba(255,255,255,.7)"/>
+        <rect x="10" y="108" width="160" height="12" rx="3" fill="#e8f3dc"/>
+    </svg>
+    <!-- Maison (droite) -->
+    <svg class="deco-house right" viewBox="0 0 160 110" xmlns="http://www.w3.org/2000/svg">
+        <rect x="15" y="45" width="75" height="50" rx="3" fill="#2d5a27"/>
+        <polygon points="15,47 52,15 90,47" fill="#1a3a17"/>
+        <rect x="38" y="62" width="16" height="28" rx="2" fill="#FF8C42"/>
+        <rect x="22" y="54" width="12" height="10" rx="2" fill="rgba(255,255,255,.7)"/>
+        <rect x="62" y="54" width="12" height="10" rx="2" fill="rgba(255,255,255,.7)"/>
+        <rect x="95" y="50" width="40" height="45" rx="3" fill="#FF8C42"/>
+        <polygon points="93,52 115,34 137,52" fill="#e07030"/>
+        <rect x="104" y="60" width="12" height="10" rx="2" fill="rgba(255,255,255,.7)"/>
+    </svg>
+    <!-- Arbres -->
+    <svg class="deco-tree t1" viewBox="0 0 50 80" xmlns="http://www.w3.org/2000/svg">
+        <rect x="21" y="50" width="8" height="25" rx="2" fill="#8B5A2B"/>
+        <circle cx="25" cy="35" r="20" fill="#4e9a3a"/>
+    </svg>
+    <svg class="deco-tree t2" viewBox="0 0 50 80" xmlns="http://www.w3.org/2000/svg">
+        <rect x="21" y="50" width="8" height="25" rx="2" fill="#8B5A2B"/>
+        <circle cx="25" cy="35" r="18" fill="#4e9a3a"/>
+    </svg>
+
+    <section class="section" id="agencies">
+        <div class="section-intro">
+            <img src="https://436f5178.delivery.rocketcdn.me/wp-content/uploads/2025/03/fleche-orange.png" alt="" class="section-arrow">
+            <div class="section-tag">Réseau France</div>
+            <div class="section-title">Nos <em>agences</em> &amp; campagnes</div>
+            <p class="section-desc">Chaque agence dispose de son propre dashboard avec les données Meta Ads &amp; Google Ads en temps réel.</p>
+        </div>
+    </section>
+    <div class="map-wrap reveal">
+        <div class="map-container">
+            <div class="map-header">
+                <div class="map-header-left">
+                    <div class="map-header-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                    <div>
+                        <div class="map-header-title">Implantations France</div>
+                        <div class="map-header-sub">7 agences &bull; 2 plateformes</div>
+                    </div>
+                </div>
+                <span class="map-header-badge">En direct</span>
+            </div>
+            <div id="mebMap"></div>
+            <div class="map-footer">
+                <div class="map-footer-stat"><span class="map-footer-dot green"></span> Agence active</div>
+                <div class="map-footer-stat"><span class="map-footer-dot orange"></span> Cliquez sur un pin pour accéder au dashboard</div>
+            </div>
+        </div>
+    </div>
+    <div class="grid-wrap">
+        <div class="grid" id="grid"></div>
+    </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+    <div class="footer-brand">
+        <img src="https://www.mon-extension-bois.com/wp-content/uploads/2025/03/extension-bois-logo.png" alt="">
+        <strong>Mon Extension Bois</strong>
+    </div>
+    <div class="footer-text">
+        Extensions &amp; surélévations en bois &bull; Fabriqué en France<br>
+        <a href="https://www.mon-extension-bois.com" target="_blank">www.mon-extension-bois.com</a>
+    </div>
+    <div class="footer-meta">Portail interne — Meta-Advertising</div>
+</footer>
+
+<script>
+var AGENCIES = [
+    { name:'Lille', dept:'Nord (59)', url:'https://monextensionbois-france.github.io/agence.lille/', tags:['Meta Ads','Google Ads'], icon:'map' },
+    { name:'Metz', dept:'Moselle (57)', url:'https://monextensionbois-france.github.io/agence.metz/', tags:['Meta Ads','Google Ads'], icon:'map' },
+    { name:'Arras', dept:'Pas-de-Calais (62)', url:'https://monextensionbois-france.github.io/agence.arras/', tags:['Meta Ads','Google Ads'], icon:'map' },
+    { name:'Cambrai', dept:'Nord (59)', url:'https://monextensionbois-france.github.io/agence.cambrai/', tags:['Meta Ads','Google Ads'], icon:'map' },
+    { name:'La Rochelle', dept:'Charente-Maritime (17)', url:'https://monextensionbois-france.github.io/agence.la-rochelle/', tags:['Meta Ads','Google Ads'], icon:'map' },
+    { name:'Vosges', dept:'Vosges (88)', url:'https://monextensionbois-france.github.io/dashboard/vosges/', tags:['Meta Ads'], icon:'map' },
+    { name:'National', dept:'France entière', url:'https://monextensionbois-france.github.io/national/', tags:['Meta Ads','Google Ads'], icon:'globe' },
+    { name:'Franchise', dept:'Réseau Franchise', url:'https://monextensionbois-france.github.io/franchise/', tags:['Meta Ads'], icon:'network' }
+];
+var ICONS = {
+    map:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    globe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+    network:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M5 3v4"/><path d="M19 3v4"/><path d="M5 17v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M3 19h4"/><path d="M17 5h4"/><path d="M17 19h4"/></svg>',
+    arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>'
+};
+
+function renderGrid() {
+    document.getElementById('grid').innerHTML = AGENCIES.map(function(a) {
+        var tags = a.tags.map(function(t) {
+            return '<span class="card-tag '+(t.includes('Google')?'google':'meta')+'">'+t+'</span>';
+        }).join('');
+        return '<a href="'+a.url+'" target="_blank" class="card reveal">'+
+            '<div class="card-top"><div class="card-icon">'+ICONS[a.icon]+'</div><div class="card-live"><span class="p"></span>Actif</div></div>'+
+            '<div class="card-body"><div class="card-name">'+a.name+'</div><div class="card-dept">'+a.dept+'</div><div class="card-tags">'+tags+'</div></div>'+
+            '<div class="card-footer"><span>Ouvrir le dashboard</span><span class="card-arrow">'+ICONS.arrow+'</span></div></a>';
+    }).join('');
+}
+
+function animateCounters() {
+    var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (!e.isIntersecting) return;
+            var el = e.target;
+            var target = parseInt(el.dataset.target);
+            var dur = target > 100 ? 2000 : 1000;
+            var start = performance.now();
+            function tick(now) {
+                var p = Math.min((now - start) / dur, 1);
+                var ease = 1 - Math.pow(1 - p, 4);
+                el.textContent = Math.round(target * ease).toLocaleString('fr-FR');
+                if (p < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+            obs.unobserve(el);
+        });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('[data-target]').forEach(function(el) { obs.observe(el); });
+}
+
+function initReveal() {
+    var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.1, rootMargin:'0px 0px -30px 0px' });
+    document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+}
+
+renderGrid();
+animateCounters();
+initReveal();
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function initMebMap() {
+    var COORDS = [
+        { name:'Lille', dept:'Nord (59)', lat:50.6292, lng:3.0573, url:'https://monextensionbois-france.github.io/agence.lille/' },
+        { name:'Arras', dept:'Pas-de-Calais (62)', lat:50.2917, lng:2.7811, url:'https://monextensionbois-france.github.io/agence.arras/' },
+        { name:'Cambrai', dept:'Nord (59)', lat:50.1764, lng:3.2356, url:'https://monextensionbois-france.github.io/agence.cambrai/' },
+        { name:'Metz', dept:'Moselle (57)', lat:49.1193, lng:6.1757, url:'https://monextensionbois-france.github.io/agence.metz/' },
+        { name:'Vosges', dept:'Vosges (88)', lat:48.1725, lng:6.4516, url:'https://monextensionbois-france.github.io/dashboard/vosges/' },
+        { name:'La Rochelle', dept:'Charente-Maritime (17)', lat:46.1591, lng:-1.1520, url:'https://monextensionbois-france.github.io/agence.la-rochelle/' },
+        { name:'Limoges', dept:'Haute-Vienne (87)', lat:45.8336, lng:1.2611, url:'#' }
+    ];
+    var el = document.getElementById('mebMap');
+    if (!el) return;
+    var map = L.map('mebMap', { zoomControl:false, attributionControl:false, scrollWheelZoom:false, dragging:true, doubleClickZoom:false, touchZoom:true });
+    L.control.zoom({ position:'topright' }).addTo(map);
+    map.fitBounds([[42.0, -5.0], [51.5, 9.5]]);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom:16, attribution:'' }).addTo(map);
+    var pinSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    COORDS.forEach(function(a, i) {
+        var icon = L.divIcon({
+            className:'',
+            html:'<div class="meb-pin" style="animation-delay:'+(.2+i*.15)+'s"><div class="meb-pin-pulse"></div><div class="meb-pin-body">'+pinSvg+'</div></div>',
+            iconSize:[44,44], iconAnchor:[4,44], popupAnchor:[18,-40]
+        });
+        var marker = L.marker([a.lat, a.lng], { icon:icon }).addTo(map);
+        marker.bindPopup(
+            '<div class="meb-popup">' +
+                '<div class="popup-name">'+a.name+'</div>' +
+                '<div class="popup-dept">'+a.dept+'</div>' +
+                '<a href="'+a.url+'" target="_blank" class="popup-link">Ouvrir le dashboard →</a>' +
+            '</div>',
+            { maxWidth:240 }
+        );
+    });
+    setTimeout(function(){ map.invalidateSize(); map.setView([47.8, 3.2], 6); }, 1200);
+})();
+</script>
+</body>
+</html>
