@@ -369,6 +369,49 @@ tbody tr:hover{background:rgba(139,26,74,0.04)}
 </main>
 
 <script>
+/* ==================== COLUMN ALIAS MAP (The Sheep FR → Supermetrics EN) ==================== */
+var COLUMN_ALIASES={
+'Nom de la campagne':'Campaign name',
+'Nom de l\'ensemble de publicités':'Ad set name',
+'Nom de la publicité':'Ad name',
+'Nom du groupe d\'annonces':'Ad group name',
+'Coût (EUR)':'Cost (EUR)',
+'Portée':'Reach',
+'Clics (tous)':'Clicks (all)',
+'CTR (tous)':'CTR (all)',
+'Fréquence':'Frequency',
+'CPM (coût pour 1000 impressions)':'CPM',
+'Prospects sur Facebook':'Facebook leads',
+'Cost per on-Facebook lead':'Cost per lead',
+'J\'aime la page':'Page likes',
+'Commentaires sur les publications':'Post comments',
+'Réactions aux publications':'Post reactions',
+'Partages de publications':'Post shares',
+'Enregistrements de publications':'Post saves',
+'Coût par conversion':'Cost per conversion',
+'Clics':'Clicks',
+'Conversion type name':'Conversion type',
+'Total conversion value':'Conversion value',
+'URL de la miniature de la création':'Ad creative thumbnail URL',
+'URL de l\'image de la création':'Ad creative image URL'
+};
+function normalizeRow(row){
+var out={};
+for(var k in row){
+if(!row.hasOwnProperty(k))continue;
+var nk=COLUMN_ALIASES[k]||k;
+out[nk]=row[k];
+}
+return out;
+}
+function normalizeRows(rows){
+if(!rows||!rows.length)return rows;
+var sample=rows[0],needsNorm=false;
+for(var k in sample){if(COLUMN_ALIASES[k]){needsNorm=true;break;}}
+if(!needsNorm)return rows;
+return rows.map(normalizeRow);
+}
+
 /* ==================== GLOBALS ==================== */
 const BASE='https://docs.google.com/spreadsheets/d/e/2PACX-1vRLvw6rB5MiI13k7n9ji69LXJRacaQdJwl5TnspvAtiAXtHTFT-4lDXH-OqMVaFMYFFqe1xQ-2opcgH/pub?output=csv&single=true&gid=';
 const GIDS={GADS:0,GA4_OVERVIEW:2102826176,GA4_PRODUITS:1889558120,GA4_UTM:2015079031};
@@ -400,16 +443,17 @@ function pN(v){if(!v||v==='')return 0;return parseFloat(String(v).replace(/"/g,'
 async function loadData(){
   setStatus('loading','Chargement des données Google Sheets...');
   try{
+    const _t='&_t='+Date.now();
     const [r1,r2,r3,r4]=await Promise.all([
-      fetch(BASE+GIDS.GADS).then(r=>r.text()),
-      fetch(BASE+GIDS.GA4_OVERVIEW).then(r=>r.text()),
-      fetch(BASE+GIDS.GA4_PRODUITS).then(r=>r.text()),
-      fetch(BASE+GIDS.GA4_UTM).then(r=>r.text())
+      fetch(BASE+GIDS.GADS+_t).then(r=>r.text()),
+      fetch(BASE+GIDS.GA4_OVERVIEW+_t).then(r=>r.text()),
+      fetch(BASE+GIDS.GA4_PRODUITS+_t).then(r=>r.text()),
+      fetch(BASE+GIDS.GA4_UTM+_t).then(r=>r.text())
     ]);
-    rawGads=parseCSV(r1);
-    rawGA4=parseCSV(r2);
-    rawProduits=parseCSV(r3);
-    rawUTM=parseCSV(r4);
+    rawGads=normalizeRows(parseCSV(r1));
+    rawGA4=normalizeRows(parseCSV(r2));
+    rawProduits=normalizeRows(parseCSV(r3));
+    rawUTM=normalizeRows(parseCSV(r4));
     console.log('GADS rows:',rawGads.length,'GA4 rows:',rawGA4.length,'Produits rows:',rawProduits.length,'UTM rows:',rawUTM.length);
     setStatus('success',`Données chargées — ${rawGads.length} Ads, ${rawGA4.length} GA4, ${rawProduits.length} Produits, ${rawUTM.length} UTM`);
     applyFilters();

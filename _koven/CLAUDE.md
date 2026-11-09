@@ -4,7 +4,7 @@
 Portail client Koven Agency (espace client multi-enseignes) + présentations commerciales pour les prospects.
 
 ## Fichiers
-- `portail-koven.html` — portail client principal
+- `index.html` — portail client principal (déployé sur koven-agency.vercel.app)
 - `presentations/` — présentations commerciales (ÔCargo, Tio Bigotes, Love&Cakes, etc.)
 
 ## Design

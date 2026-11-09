@@ -527,13 +527,33 @@
     function formatNum(n) { return n.toLocaleString('fr-FR'); }
     function formatPct(n) { return n.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' %'; }
 
+    var COLUMN_ALIASES={
+    'Nom de la campagne':'Campaign name',
+    'Nom de l\'ensemble de publicités':'Ad set name',
+    'Nom de la publicité':'Ad name',
+    'Nom du groupe d\'annonces':'Ad group name',
+    'Coût (EUR)':'Cost (EUR)',
+    'Portée':'Reach',
+    'Clics (tous)':'Clicks (all)',
+    'CTR (tous)':'CTR (all)',
+    'Fréquence':'Frequency',
+    'CPM (coût pour 1000 impressions)':'CPM',
+    'Prospects sur Facebook':'Facebook leads',
+    'Coût par prospect sur Facebook':'Cost per lead',
+    'Clics':'Clicks',
+    'Clics sur les liens':'Link clicks',
+    'URL de la miniature de la création':'Ad creative thumbnail URL',
+    'URL de l\'image de la création':'Ad creative image URL'
+    };
+    function normalizeHeader(h){return COLUMN_ALIASES[h]||h;}
+
     // === DATA LOADING ===
     async function loadData() {
         showStatus('Chargement des données...', 'loading');
         try {
             const [metaRes, googleRes] = await Promise.all([
-                fetch(BASE_URL + GID_META),
-                fetch(BASE_URL + GID_GOOGLE)
+                fetch(BASE_URL + GID_META + '&_t=' + Date.now()),
+                fetch(BASE_URL + GID_GOOGLE + '&_t=' + Date.now())
             ]);
             const metaText = await metaRes.text();
             const googleText = await googleRes.text();
@@ -551,7 +571,7 @@
 
     function parseSheetData(rows) {
         if (rows.length < 2) return [];
-        const headers = rows[0].map(h => h.toLowerCase().trim());
+        const headers = rows[0].map(h => normalizeHeader(h.trim()).toLowerCase().trim());
         return rows.slice(1).map(row => {
             const obj = {};
             headers.forEach((h, i) => { obj[h] = row[i] || ''; });
@@ -605,15 +625,15 @@
         const meta = getFilteredMeta();
         const google = getFilteredGoogle();
 
-        const metaSpend = meta.reduce((s, r) => s + parseNumber(r['coût (eur)'] || r['cout (eur)']), 0);
-        const googleSpend = google.reduce((s, r) => s + parseNumber(r['coût (eur)'] || r['cout (eur)']), 0);
+        const metaSpend = meta.reduce((s, r) => s + parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']), 0);
+        const googleSpend = google.reduce((s, r) => s + parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']), 0);
         const totalSpend = metaSpend + googleSpend;
         const totalImpressions = meta.reduce((s, r) => s + parseNumber(r['impressions']), 0) + google.reduce((s, r) => s + parseNumber(r['impressions']), 0);
-        const metaClicks = meta.reduce((s, r) => s + parseNumber(r['clics (tous)'] || r['clics']), 0);
-        const googleClicks = google.reduce((s, r) => s + parseNumber(r['clics']), 0);
+        const metaClicks = meta.reduce((s, r) => s + parseNumber(r['clicks (all)'] || r['clics (tous)'] || r['clicks'] || r['clics']), 0);
+        const googleClicks = google.reduce((s, r) => s + parseNumber(r['clicks'] || r['clics']), 0);
         const totalClicks = metaClicks + googleClicks;
         const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions * 100) : 0;
-        const metaLeads = meta.reduce((s, r) => s + parseNumber(r['prospects sur facebook']), 0);
+        const metaLeads = meta.reduce((s, r) => s + parseNumber(r['facebook leads'] || r['prospects sur facebook']), 0);
         const googleConversions = google.reduce((s, r) => s + parseNumber(r['conversions']), 0);
         const totalLeads = metaLeads + googleConversions;
         const cpl = totalLeads > 0 ? totalSpend / totalLeads : 0;
@@ -630,8 +650,8 @@
         ]);
 
         // Daily spend chart
-        const metaDays = groupByDate(meta, 'date', r => parseNumber(r['coût (eur)'] || r['cout (eur)']));
-        const googleDays = groupByDate(google, 'date', r => parseNumber(r['coût (eur)'] || r['cout (eur)']));
+        const metaDays = groupByDate(meta, 'date', r => parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']));
+        const googleDays = groupByDate(google, 'date', r => parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']));
         const allDays = [...new Set([...Object.keys(metaDays), ...Object.keys(googleDays)])].sort();
         renderChart('chartDailySpend', 'bar', {
             labels: allDays.map(d => formatDateLabel(d)),
@@ -662,13 +682,13 @@
 
     function renderMeta() {
         const meta = getFilteredMeta();
-        const spend = meta.reduce((s, r) => s + parseNumber(r['coût (eur)'] || r['cout (eur)']), 0);
+        const spend = meta.reduce((s, r) => s + parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']), 0);
         const impressions = meta.reduce((s, r) => s + parseNumber(r['impressions']), 0);
-        const clicks = meta.reduce((s, r) => s + parseNumber(r['clics (tous)'] || r['clics']), 0);
-        const linkClicks = meta.reduce((s, r) => s + parseNumber(r['clics sur les liens']), 0);
+        const clicks = meta.reduce((s, r) => s + parseNumber(r['clicks (all)'] || r['clics (tous)'] || r['clicks'] || r['clics']), 0);
+        const linkClicks = meta.reduce((s, r) => s + parseNumber(r['link clicks'] || r['clics sur les liens']), 0);
         const ctr = impressions > 0 ? (clicks / impressions * 100) : 0;
 
-        const leads = meta.reduce((s, r) => s + parseNumber(r['prospects sur facebook']), 0);
+        const leads = meta.reduce((s, r) => s + parseNumber(r['facebook leads'] || r['prospects sur facebook']), 0);
         const cplMeta = leads > 0 ? spend / leads : 0;
 
         document.getElementById('kpi-meta').innerHTML = renderKPIs([
@@ -684,12 +704,12 @@
         // Campaign table
         const campaigns = {};
         meta.forEach(r => {
-            const name = r['nom de la campagne'] || 'N/A';
+            const name = r['campaign name'] || r['nom de la campagne'] || 'N/A';
             if (!campaigns[name]) campaigns[name] = { spend: 0, impressions: 0, clicks: 0, leads: 0 };
-            campaigns[name].spend += parseNumber(r['coût (eur)'] || r['cout (eur)']);
+            campaigns[name].spend += parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']);
             campaigns[name].impressions += parseNumber(r['impressions']);
-            campaigns[name].clicks += parseNumber(r['clics (tous)'] || r['clics']);
-            campaigns[name].leads += parseNumber(r['prospects sur facebook']);
+            campaigns[name].clicks += parseNumber(r['clicks (all)'] || r['clics (tous)'] || r['clicks'] || r['clics']);
+            campaigns[name].leads += parseNumber(r['facebook leads'] || r['prospects sur facebook']);
         });
         renderTable('tableMeta',
             ['Campagne', 'Dépenses', 'Impressions', 'Clics', 'CTR', 'Leads', 'CPL'],
@@ -702,7 +722,7 @@
         );
 
         // Daily chart
-        const days = groupByDate(meta, 'date', r => parseNumber(r['coût (eur)'] || r['cout (eur)']));
+        const days = groupByDate(meta, 'date', r => parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']));
         const sortedDays = Object.keys(days).sort();
         renderChart('chartMetaDaily', 'bar', {
             labels: sortedDays.map(d => formatDateLabel(d)),
@@ -712,9 +732,9 @@
 
     function renderGoogle() {
         const google = getFilteredGoogle();
-        const spend = google.reduce((s, r) => s + parseNumber(r['coût (eur)'] || r['cout (eur)']), 0);
+        const spend = google.reduce((s, r) => s + parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']), 0);
         const impressions = google.reduce((s, r) => s + parseNumber(r['impressions']), 0);
-        const clicks = google.reduce((s, r) => s + parseNumber(r['clics']), 0);
+        const clicks = google.reduce((s, r) => s + parseNumber(r['clicks'] || r['clics']), 0);
         const ctr = impressions > 0 ? (clicks / impressions * 100) : 0;
         const conversions = google.reduce((s, r) => s + parseNumber(r['conversions']), 0);
         const cpc = clicks > 0 ? spend / clicks : 0;
@@ -733,13 +753,13 @@
         // Campaign table by ad group
         const groups = {};
         google.forEach(r => {
-            const campaign = r['nom de la campagne'] || 'N/A';
-            const group = r['nom du groupe d\'annonces'] || r['nom du groupe d\'annonces'] || 'N/A';
+            const campaign = r['campaign name'] || r['nom de la campagne'] || 'N/A';
+            const group = r['ad group name'] || r['nom du groupe d\'annonces'] || 'N/A';
             const key = campaign + ' | ' + group;
             if (!groups[key]) groups[key] = { campaign, group, spend: 0, impressions: 0, clicks: 0, conversions: 0 };
-            groups[key].spend += parseNumber(r['coût (eur)'] || r['cout (eur)']);
+            groups[key].spend += parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']);
             groups[key].impressions += parseNumber(r['impressions']);
-            groups[key].clicks += parseNumber(r['clics']);
+            groups[key].clicks += parseNumber(r['clicks'] || r['clics']);
             groups[key].conversions += parseNumber(r['conversions']);
         });
         renderTable('tableGoogle',
@@ -752,7 +772,7 @@
         );
 
         // Daily chart
-        const days = groupByDate(google, 'date', r => parseNumber(r['coût (eur)'] || r['cout (eur)']));
+        const days = groupByDate(google, 'date', r => parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']));
         const sortedDays = Object.keys(days).sort();
         renderChart('chartGoogleDaily', 'bar', {
             labels: sortedDays.map(d => formatDateLabel(d)),
@@ -773,18 +793,18 @@
             if (!d) return;
             const key = d.getMonth();
             if (!months[key]) months[key] = { meta: 0, google: 0, impressions: 0, clicks: 0 };
-            months[key].meta += parseNumber(r['coût (eur)'] || r['cout (eur)']);
+            months[key].meta += parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']);
             months[key].impressions += parseNumber(r['impressions']);
-            months[key].clicks += parseNumber(r['clics (tous)'] || r['clics']);
+            months[key].clicks += parseNumber(r['clicks (all)'] || r['clics (tous)'] || r['clicks'] || r['clics']);
         });
         googleYear.forEach(r => {
             const d = parseDate(r['date']);
             if (!d) return;
             const key = d.getMonth();
             if (!months[key]) months[key] = { meta: 0, google: 0, impressions: 0, clicks: 0 };
-            months[key].google += parseNumber(r['coût (eur)'] || r['cout (eur)']);
+            months[key].google += parseNumber(r['cost (eur)'] || r['coût (eur)'] || r['cout (eur)']);
             months[key].impressions += parseNumber(r['impressions']);
-            months[key].clicks += parseNumber(r['clics']);
+            months[key].clicks += parseNumber(r['clicks'] || r['clics']);
         });
 
         const sortedMonths = Object.keys(months).map(Number).sort((a, b) => a - b);

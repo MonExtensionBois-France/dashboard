@@ -565,6 +565,7 @@ function enterDashboard(page){
       document.getElementById('page-'+page).classList.add('active');
     }
   },400);
+  loadData();
 }
 function exitDashboard(){
   document.getElementById('dashboard').classList.remove('active');
@@ -578,6 +579,49 @@ var DATA={meta:[],ga4:[]};
 var charts={};
 
 function pN(v){if(v==null||v==='')return 0;return parseFloat(String(v).replace(/\s/g,'').replace(',','.'))||0}
+
+var COLUMN_ALIASES={
+'Nom de la campagne':'Campaign name',
+'Nom de l\'ensemble de publicités':'Ad set name',
+'Nom de la publicité':'Ad name',
+'Nom du groupe d\'annonces':'Ad group name',
+'Coût (EUR)':'Cost (EUR)',
+'Portée':'Reach',
+'Clics (tous)':'Clicks (all)',
+'CTR (tous)':'CTR (all)',
+'Fréquence':'Frequency',
+'CPM (coût pour 1000 impressions)':'CPM',
+'Prospects sur Facebook':'Facebook leads',
+'Cost per on-Facebook lead':'Cost per lead',
+'J\'aime la page':'Page likes',
+'Commentaires sur les publications':'Post comments',
+'Réactions aux publications':'Post reactions',
+'Partages de publications':'Post shares',
+'Enregistrements de publications':'Post saves',
+'Coût par conversion':'Cost per conversion',
+'Clics':'Clicks',
+'Conversion type name':'Conversion type',
+'Total conversion value':'Conversion value',
+'URL de la miniature de la création':'Ad creative thumbnail URL',
+'URL de l\'image de la création':'Ad creative image URL'
+};
+function normalizeRow(row){
+var out={};
+for(var k in row){
+if(!row.hasOwnProperty(k))continue;
+var nk=COLUMN_ALIASES[k]||k;
+out[nk]=row[k];
+}
+return out;
+}
+function normalizeRows(rows){
+if(!rows||!rows.length)return rows;
+var sample=rows[0],needsNorm=false;
+for(var k in sample){if(COLUMN_ALIASES[k]){needsNorm=true;break;}}
+if(!needsNorm)return rows;
+return rows.map(normalizeRow);
+}
+
 function fmt(n){return n==null?'—':n.toLocaleString('fr-FR',{maximumFractionDigits:0})}
 function fmtD(n){return n==null?'—':n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fmtE(n){return fmtD(n)+' €'}
@@ -586,7 +630,7 @@ function shortDate(d){var p=d.split('-');return p[2]+'/'+p[1]}
 function monthLabel(m){var ms=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];var p=m.split('-');return ms[parseInt(p[1])-1]+' '+p[0].slice(2)}
 
 function fetchSheet(key,cb){
-  Papa.parse(BASE+'/pub?gid='+SHEETS[key].gid+'&single=true&output=csv',{download:true,header:true,skipEmptyLines:true,complete:function(r){DATA[key]=r.data;cb()},error:cb});
+  Papa.parse(BASE+'/pub?gid='+SHEETS[key].gid+'&single=true&output=csv&_t='+Date.now(),{download:true,header:true,skipEmptyLines:true,complete:function(r){DATA[key]=normalizeRows(r.data);cb()},error:cb});
 }
 
 /* ═══ NAV ═══ */
@@ -878,14 +922,17 @@ function renderGA4(){
 }
 
 /* ═══ INIT ═══ */
-var loaded=0;
-function onLoad(){loaded++;if(loaded>=2){
-  var allDates=DATA.meta.map(function(r){return r['Date']}).concat(DATA.ga4.map(function(r){return r['Date']})).filter(Boolean).sort();
-  if(allDates.length)document.getElementById('last-update').textContent=shortDate(allDates[allDates.length-1]);
-  renderAll();
-}}
-fetchSheet('meta',onLoad);
-fetchSheet('ga4',onLoad);
+function loadData(){
+  var loaded=0;
+  function onLoad(){loaded++;if(loaded>=2){
+    var allDates=DATA.meta.map(function(r){return r['Date']}).concat(DATA.ga4.map(function(r){return r['Date']})).filter(Boolean).sort();
+    if(allDates.length)document.getElementById('last-update').textContent=shortDate(allDates[allDates.length-1]);
+    renderAll();
+  }}
+  fetchSheet('meta',onLoad);
+  fetchSheet('ga4',onLoad);
+}
+loadData();
 </script>
 </body>
 </html>

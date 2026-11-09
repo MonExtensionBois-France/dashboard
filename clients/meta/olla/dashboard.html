@@ -242,6 +242,41 @@ function fmtN(n,d){return n.toLocaleString('fr-FR',{minimumFractionDigits:d||0,m
 function fmtE(n){return fmtN(n,2)+' \u20ac';}
 function fmtP(n){return fmtN(n,2)+' %';}
 
+var COLUMN_ALIASES={
+'Nom de la campagne':'Campaign name',
+'Nom de l\'ensemble de publicités':'Ad set name',
+'Nom de la publicité':'Ad name',
+'Nom du groupe d\'annonces':'Ad group name',
+'Coût (EUR)':'Cost (EUR)',
+'Portée':'Reach',
+'Clics (tous)':'Clicks (all)',
+'CTR (tous)':'CTR (all)',
+'Fréquence':'Frequency',
+'CPM (coût pour 1000 impressions)':'CPM',
+'Prospects sur Facebook':'Facebook leads',
+'Coût par prospect sur Facebook':'Cost per lead',
+'Clics':'Clicks',
+'Clics sur les liens':'Link clicks',
+'URL de la miniature de la création':'Ad creative thumbnail URL',
+'URL de l\'image de la création':'Ad creative image URL'
+};
+function normalizeRow(row){
+var out={};
+for(var k in row){
+if(!row.hasOwnProperty(k))continue;
+var nk=COLUMN_ALIASES[k]||k;
+out[nk]=row[k];
+}
+return out;
+}
+function normalizeRows(rows){
+if(!rows||!rows.length)return rows;
+var sample=rows[0],needsNorm=false;
+for(var k in sample){if(COLUMN_ALIASES[k]){needsNorm=true;break;}}
+if(!needsNorm)return rows;
+return rows.map(normalizeRow);
+}
+
 // ── Globals ──
 var META_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRiWc8yPpg7phWPVu5gl2kvhvtGyldz8reMO5MX6PbGz7iAtirz35vlJtez3JQgtO4Km0LMO6OOmn_9/pub?output=csv&single=true&gid=1896356326';
 var GOOGLE_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRiWc8yPpg7phWPVu5gl2kvhvtGyldz8reMO5MX6PbGz7iAtirz35vlJtez3JQgtO4Km0LMO6OOmn_9/pub?output=csv&single=true&gid=415126205';
@@ -280,11 +315,11 @@ var TYPE_COLORS={
 // ── Data fetching ──
 async function loadData(){
     try{
-        var [mRes,gRes]=await Promise.all([fetch(META_URL),fetch(GOOGLE_URL)]);
+        var [mRes,gRes]=await Promise.all([fetch(META_URL+'&_t='+Date.now()),fetch(GOOGLE_URL+'&_t='+Date.now())]);
         var [mText,gText]=await Promise.all([mRes.text(),gRes.text()]);
-        var allMeta=parseCSV(mText);
-        rawMeta=allMeta.filter(function(r){return(r['Nom de la campagne']||'').toUpperCase().includes('OLLA');});
-        rawGoogle=parseCSV(gText);
+        var allMeta=normalizeRows(parseCSV(mText));
+        rawMeta=allMeta.filter(function(r){return(r['Campaign name']||r['Campaign name']||r['Nom de la campagne']||'').toUpperCase().includes('OLLA');});
+        rawGoogle=normalizeRows(parseCSV(gText));
         document.getElementById('loader').style.display='none';
         applyFilters();
         showPage('overview');
@@ -432,9 +467,9 @@ function dailyAgg(arr,spendKey,dateKey){
         if(!map[k])map[k]={spend:0,impressions:0,clicks:0,leads:0,conversions:0};
         map[k].spend+=num(r[spendKey||'Coût (EUR)']);
         map[k].impressions+=num(r['Impressions']);
-        map[k].clicks+=num(r['Clics (tous)']||r['Clics']);
-        map[k].leads+=num(r['Prospects sur Facebook']||'0');
-        map[k].conversions+=num(r['Conversions']||'0');
+        map[k].clicks+=num(r['Clicks (all)']||r['Clics (tous)']||r['Clicks']||r['Clics']);
+        map[k].leads+=num(r['Facebook leads']||r['Prospects sur Facebook']||'0');
+        map[k].conversions+=num(r['Conversions']||r['Conversions']||'0');
     });
     var keys=Object.keys(map).sort();
     return{dates:keys,data:keys.map(function(k){return map[k];})};
@@ -444,13 +479,13 @@ function dailyAgg(arr,spendKey,dateKey){
 function renderOverview(){
     var mSpend=0,mLeads=0,mImpr=0,mClicks=0;
     filteredMeta.forEach(function(r){
-        mSpend+=num(r['Coût (EUR)']);mLeads+=num(r['Prospects sur Facebook']);
-        mImpr+=num(r['Impressions']);mClicks+=num(r['Clics (tous)']);
+        mSpend+=num(r['Cost (EUR)']||r['Coût (EUR)']);mLeads+=num(r['Facebook leads']||r['Prospects sur Facebook']);
+        mImpr+=num(r['Impressions']);mClicks+=num(r['Clicks (all)']||r['Clics (tous)']);
     });
     var gSpend=0,gConv=0,gImpr=0,gClicks=0;
     filteredGoogle.forEach(function(r){
-        gSpend+=num(r['Coût (EUR)']);gConv+=num(r['Conversions']);
-        gImpr+=num(r['Impressions']);gClicks+=num(r['Clics']);
+        gSpend+=num(r['Cost (EUR)']||r['Coût (EUR)']);gConv+=num(r['Conversions']||r['Conversions']);
+        gImpr+=num(r['Impressions']);gClicks+=num(r['Clicks']||r['Clics']);
     });
     var totalActions=mLeads+gConv;
     var totalSpend=mSpend+gSpend;
@@ -516,9 +551,9 @@ function renderOverview(){
     // Type breakdown donut
     var typeSpend={};
     filteredMeta.forEach(function(r){
-        var t=getOllaType(r['Nom de la campagne']||'');
+        var t=getOllaType(r['Campaign name']||r['Nom de la campagne']||'');
         if(!typeSpend[t])typeSpend[t]=0;
-        typeSpend[t]+=num(r['Coût (EUR)']);
+        typeSpend[t]+=num(r['Cost (EUR)']||r['Coût (EUR)']);
     });
     var typeLabels=Object.keys(typeSpend).filter(function(t){return typeSpend[t]>0;});
     var typeData=typeLabels.map(function(t){return typeSpend[t];});
@@ -533,11 +568,11 @@ function renderOverview(){
 // ── META ADS ──
 function renderMeta(){
     // Filter by campaign type if active
-    var metaForKpis=currentTypeFilter==='all'?filteredMeta:filteredMeta.filter(function(r){return getOllaType(r['Nom de la campagne']||'')===currentTypeFilter});
+    var metaForKpis=currentTypeFilter==='all'?filteredMeta:filteredMeta.filter(function(r){return getOllaType(r['Campaign name']||r['Nom de la campagne']||'')===currentTypeFilter});
     var spend=0,leads=0,impr=0,clicks=0;
     metaForKpis.forEach(function(r){
-        spend+=num(r['Coût (EUR)']);leads+=num(r['Prospects sur Facebook']);
-        impr+=num(r['Impressions']);clicks+=num(r['Clics (tous)']);
+        spend+=num(r['Cost (EUR)']||r['Coût (EUR)']);leads+=num(r['Facebook leads']||r['Prospects sur Facebook']);
+        impr+=num(r['Impressions']);clicks+=num(r['Clicks (all)']||r['Clics (tous)']);
     });
     var cpl=leads>0?spend/leads:0;
     var ctr=impr>0?(clicks/impr*100):0;
@@ -566,10 +601,10 @@ function renderMeta(){
     // Campaign table with type detection
     var camps={};
     filteredMeta.forEach(function(r){
-        var n=r['Nom de la campagne']||'Inconnu';
+        var n=r['Campaign name']||r['Nom de la campagne']||'Inconnu';
         if(!camps[n])camps[n]={spend:0,leads:0,impr:0,clicks:0};
-        camps[n].spend+=num(r['Coût (EUR)']);camps[n].leads+=num(r['Prospects sur Facebook']);
-        camps[n].impr+=num(r['Impressions']);camps[n].clicks+=num(r['Clics (tous)']);
+        camps[n].spend+=num(r['Cost (EUR)']||r['Coût (EUR)']);camps[n].leads+=num(r['Facebook leads']||r['Prospects sur Facebook']);
+        camps[n].impr+=num(r['Impressions']);camps[n].clicks+=num(r['Clicks (all)']||r['Clics (tous)']);
     });
     var rows=Object.keys(camps).map(function(n){var c=camps[n];c.name=n;c.type=getOllaType(n);c.cpl=c.leads>0?c.spend/c.leads:0;c.ctr=c.impr>0?(c.clicks/c.impr*100):0;return c;});
 
@@ -611,12 +646,12 @@ function setTypeFilter(t){
 function renderMetaAudiences(){
     var audiences={};
     filteredMeta.forEach(function(r){
-        var n=r["Nom de l'ensemble de publicités"]||r['Nom de la campagne']||'Inconnu';
+        var n=r['Ad set name']||r["Nom de l'ensemble de publicités"]||r['Campaign name']||r['Nom de la campagne']||'Inconnu';
         if(!audiences[n])audiences[n]={spend:0,leads:0,impr:0,clicks:0};
-        audiences[n].spend+=num(r['Coût (EUR)']);
-        audiences[n].leads+=num(r['Prospects sur Facebook']);
+        audiences[n].spend+=num(r['Cost (EUR)']||r['Coût (EUR)']);
+        audiences[n].leads+=num(r['Facebook leads']||r['Prospects sur Facebook']);
         audiences[n].impr+=num(r['Impressions']);
-        audiences[n].clicks+=num(r['Clics (tous)']);
+        audiences[n].clicks+=num(r['Clicks (all)']||r['Clics (tous)']);
     });
     var rows=Object.keys(audiences).map(function(n){
         var a=audiences[n];a.name=n;
@@ -636,8 +671,8 @@ function renderMetaAudiences(){
 function renderGoogle(){
     var spend=0,clicks=0,conv=0,impr=0;
     filteredGoogle.forEach(function(r){
-        spend+=num(r['Coût (EUR)']);clicks+=num(r['Clics']);
-        conv+=num(r['Conversions']);impr+=num(r['Impressions']);
+        spend+=num(r['Cost (EUR)']||r['Coût (EUR)']);clicks+=num(r['Clicks']||r['Clics']);
+        conv+=num(r['Conversions']||r['Conversions']);impr+=num(r['Impressions']);
     });
     var cpa=conv>0?spend/conv:0;
     var ctr=impr>0?(clicks/impr*100):0;
@@ -664,10 +699,10 @@ function renderGoogle(){
 
     var groups={};
     filteredGoogle.forEach(function(r){
-        var n=r['Nom du groupe d\'annonces']||r['Nom de la campagne']||'Inconnu';
+        var n=r['Ad group name']||r['Nom du groupe d\'annonces']||r['Campaign name']||r['Nom de la campagne']||'Inconnu';
         if(!groups[n])groups[n]={spend:0,clicks:0,conv:0,impr:0};
-        groups[n].spend+=num(r['Coût (EUR)']);groups[n].clicks+=num(r['Clics']);
-        groups[n].conv+=num(r['Conversions']);groups[n].impr+=num(r['Impressions']);
+        groups[n].spend+=num(r['Cost (EUR)']||r['Coût (EUR)']);groups[n].clicks+=num(r['Clicks']||r['Clics']);
+        groups[n].conv+=num(r['Conversions']||r['Conversions']);groups[n].impr+=num(r['Impressions']);
     });
     var rows=Object.keys(groups).map(function(n){var g=groups[n];g.name=n;g.cpa=g.conv>0?g.spend/g.conv:0;g.ctr=g.impr>0?(g.clicks/g.impr*100):0;g.cpc=g.clicks>0?g.spend/g.clicks:0;return g;});
     buildTable('tableGoogle',['Groupe','Depenses','Clics','Conversions','CPA','CTR','CPC'],rows,function(r){
@@ -682,12 +717,12 @@ function renderEvolution(){
     filteredMeta.forEach(function(r){
         var m=monthKey(r);if(!m)return;
         if(!months[m])months[m]={mSpend:0,mLeads:0,gSpend:0,gConv:0};
-        months[m].mSpend+=num(r['Coût (EUR)']);months[m].mLeads+=num(r['Prospects sur Facebook']);
+        months[m].mSpend+=num(r['Cost (EUR)']||r['Coût (EUR)']);months[m].mLeads+=num(r['Facebook leads']||r['Prospects sur Facebook']);
     });
     filteredGoogle.forEach(function(r){
         var m=monthKey(r);if(!m)return;
         if(!months[m])months[m]={mSpend:0,mLeads:0,gSpend:0,gConv:0};
-        months[m].gSpend+=num(r['Coût (EUR)']);months[m].gConv+=num(r['Conversions']);
+        months[m].gSpend+=num(r['Cost (EUR)']||r['Coût (EUR)']);months[m].gConv+=num(r['Conversions']||r['Conversions']);
     });
     var keys=Object.keys(months).sort();
     var mLabels=keys.map(function(k){var p=k.split('-');var mois=['Jan','Fev','Mar','Avr','Mai','Juin','Juil','Aou','Sep','Oct','Nov','Dec'];return mois[parseInt(p[1])-1]+' '+p[0];});

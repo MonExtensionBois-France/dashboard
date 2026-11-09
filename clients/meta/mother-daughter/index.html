@@ -358,11 +358,54 @@ tbody tr:hover{background:linear-gradient(90deg,var(--rose-soft),var(--gold-soft
 var BASE='https://docs.google.com/spreadsheets/d/e/2PACX-1vR-oximcJ18BHNbcRb9FZSP7fWWArSLvwMlqvkVksSV5SY7iWSzrJAn9dv2S1sGha1g83xRXoZUYk8v';
 var SH={meta:'66695541',ga4:'392350086',leads:'1734203864'};var D={meta:[],ga4:[],leads:[]};var ch={};
 function pN(v){if(v==null||v==='')return 0;return parseFloat(String(v).replace(/\s/g,'').replace(',','.'))||0}
+
+var COLUMN_ALIASES={
+'Nom de la campagne':'Campaign name',
+'Nom de l\'ensemble de publicités':'Ad set name',
+'Nom de la publicité':'Ad name',
+'Nom du groupe d\'annonces':'Ad group name',
+'Coût (EUR)':'Cost (EUR)',
+'Portée':'Reach',
+'Clics (tous)':'Clicks (all)',
+'CTR (tous)':'CTR (all)',
+'Fréquence':'Frequency',
+'CPM (coût pour 1000 impressions)':'CPM',
+'Prospects sur Facebook':'Facebook leads',
+'Cost per on-Facebook lead':'Cost per lead',
+'J\'aime la page':'Page likes',
+'Commentaires sur les publications':'Post comments',
+'Réactions aux publications':'Post reactions',
+'Partages de publications':'Post shares',
+'Enregistrements de publications':'Post saves',
+'Coût par conversion':'Cost per conversion',
+'Clics':'Clicks',
+'Conversion type name':'Conversion type',
+'Total conversion value':'Conversion value',
+'URL de la miniature de la création':'Ad creative thumbnail URL',
+'URL de l\'image de la création':'Ad creative image URL'
+};
+function normalizeRow(row){
+var out={};
+for(var k in row){
+if(!row.hasOwnProperty(k))continue;
+var nk=COLUMN_ALIASES[k]||k;
+out[nk]=row[k];
+}
+return out;
+}
+function normalizeRows(rows){
+if(!rows||!rows.length)return rows;
+var sample=rows[0],needsNorm=false;
+for(var k in sample){if(COLUMN_ALIASES[k]){needsNorm=true;break;}}
+if(!needsNorm)return rows;
+return rows.map(normalizeRow);
+}
+
 function fmt(n){return n==null?'—':n.toLocaleString('fr-FR',{maximumFractionDigits:0})}
 function f2(n){return n==null?'—':n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fE(n){return f2(n)+' €'}function fP(n){return f2(n)+' %'}
 function sD(d){var p=d.split('-');return p[2]+'/'+p[1]}
-function fs(k,cb){Papa.parse(BASE+'/pub?gid='+SH[k]+'&single=true&output=csv',{download:true,header:true,skipEmptyLines:true,complete:function(r){D[k]=r.data;cb()},error:cb})}
+function fs(k,cb){Papa.parse(BASE+'/pub?gid='+SH[k]+'&single=true&output=csv&_t='+Date.now(),{download:true,header:true,skipEmptyLines:true,complete:function(r){D[k]=normalizeRows(r.data);cb()},error:cb})}
 function go(p){document.getElementById('portal').classList.add('hidden');document.getElementById('dashboard').classList.add('active');nav(p)}
 function back(){document.getElementById('dashboard').classList.remove('active');document.getElementById('portal').classList.remove('hidden')}
 function nav(p){document.querySelectorAll('.h-nav a').forEach(function(a){a.classList.remove('active');if(a.dataset.page===p)a.classList.add('active')});document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});document.getElementById('page-'+p).classList.add('active')}
