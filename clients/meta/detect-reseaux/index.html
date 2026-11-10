@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Detect Réseaux — Portail Marketing</title>
+<link rel="icon" href="https://detect-reseaux.fr/fichiers/detect-reseaux-logo-medium.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800;900&family=Roboto+Condensed:wght@400;600;700&family=Ubuntu:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#1D70B7;--blue-light:#2A8AD4;--blue-dark:#11416A;--blue-deep:#0A2E4D;
+  --blue-soft:rgba(29,112,183,.06);--blue-glow:rgba(29,112,183,.15);
+  --coral:#F16358;--coral-light:#F4817A;--coral-dark:#D94A3F;--coral-soft:rgba(241,99,88,.06);
+  --white:#ffffff;--bg:#F5F7FA;--cream:#f8f9fb;
+  --text-900:#1a1e2c;--text-700:#3d4255;--text-500:#6b7085;--text-400:#8a8fa5;--text-300:#b0b4c5;
+  --border:#e5e7eb;--border-light:#eef0f4;
+  --success:#10B981;--warning:#F59E0B;
+  --radius-sm:8px;--radius-md:14px;--radius-lg:20px;--radius-xl:28px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font:'Roboto',sans-serif;--font-head:'Ubuntu',sans-serif;--font-cond:'Roboto Condensed',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text-700);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ══ LOADER ══ */
+.page-loader{position:fixed;inset:0;z-index:10000;background:linear-gradient(135deg,var(--blue-deep) 0%,var(--blue-dark) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:all .8s var(--ease)}
+.page-loader.done{opacity:0;transform:scale(1.05);pointer-events:none}
+.loader-logo{height:56px;opacity:0;animation:ld-logo .8s var(--ease) .2s forwards;filter:brightness(0) invert(1)}
+@keyframes ld-logo{from{opacity:0;transform:translateY(15px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+.loader-ring{width:56px;height:56px;position:relative;opacity:0;animation:ld-ring-in .5s var(--ease) .5s forwards}
+.loader-ring::before,.loader-ring::after{content:'';position:absolute;inset:0;border-radius:50%;border:2.5px solid transparent}
+.loader-ring::before{border-top-color:var(--blue-light);animation:ld-spin 1s linear infinite}
+.loader-ring::after{border-bottom-color:rgba(255,255,255,.15);animation:ld-spin 1.5s linear reverse infinite}
+@keyframes ld-spin{to{transform:rotate(360deg)}}
+@keyframes ld-ring-in{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.loader-text{font-family:var(--font-cond);font-size:11px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:3px;text-transform:uppercase;opacity:0;animation:ld-text .5s var(--ease) .7s forwards}
+@keyframes ld-text{from{opacity:0;letter-spacing:6px}to{opacity:1;letter-spacing:3px}}
+.loader-bar{width:200px;height:2px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;opacity:0;animation:ld-text .4s var(--ease) .8s forwards}
+.loader-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--blue-light));border-radius:3px;animation:l-bar 1.6s var(--ease) .8s forwards;box-shadow:0 0 12px rgba(29,112,183,.4)}
+@keyframes l-bar{to{width:100%}}
+
+/* ══ ENTRANCE ANIMATIONS ══ */
+.site-nav{opacity:0;transform:translateY(-20px);animation:el-in .6s var(--ease) 2.4s forwards}
+@keyframes el-in{to{opacity:1;transform:translateY(0)}}
+.hero-badge{opacity:0;animation:hero-el .7s var(--ease) 2.5s forwards}
+.hero-h1{opacity:0;animation:hero-el .7s var(--ease) 2.7s forwards}
+.hero-desc{opacity:0;animation:hero-el .7s var(--ease) 2.9s forwards}
+.hero-actions{opacity:0;animation:hero-el .7s var(--ease) 3.1s forwards}
+@keyframes hero-el{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+.hero-map{opacity:0;animation:hero-map .9s var(--ease) 3s forwards}
+@keyframes hero-map{from{opacity:0;transform:translateX(40px) scale(.92)}to{opacity:1;transform:translateX(0) scale(1)}}
+.stats-inner{opacity:0;animation:stats-in .7s var(--ease) 3.3s forwards}
+@keyframes stats-in{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.stat-cell{opacity:0;animation:stat-pop .5s var(--ease) forwards}
+.stat-cell:nth-child(1){animation-delay:3.4s}.stat-cell:nth-child(2){animation-delay:3.5s}.stat-cell:nth-child(3){animation-delay:3.6s}.stat-cell:nth-child(4){animation-delay:3.7s}
+@keyframes stat-pop{from{opacity:0;transform:scale(.85) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* ══ NAV ══ */
+.site-nav{background:rgba(255,255,255,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:200;transition:box-shadow .3s}
+.site-nav.scrolled{box-shadow:0 4px 30px rgba(17,65,106,.06)}
+.nav-inner{max-width:1320px;margin:0 auto;padding:0 32px;height:72px;display:flex;align-items:center;justify-content:space-between}
+.nav-left{display:flex;align-items:center;gap:14px}
+.nav-logo{height:44px;width:auto}
+.nav-sep{width:1px;height:28px;background:var(--border);margin:0 4px}
+.nav-label{font-family:var(--font-cond);font-size:12px;font-weight:700;color:var(--blue-dark);text-transform:uppercase;letter-spacing:1.5px;opacity:.6}
+.nav-center{display:flex;gap:0}
+.nav-center a{font-size:13px;font-weight:600;color:var(--text-500);text-decoration:none;padding:24px 18px;transition:.2s;position:relative}
+.nav-center a:hover{color:var(--blue-dark)}
+.nav-center a.active{color:var(--blue-dark)}
+.nav-center a.active::after{content:'';position:absolute;bottom:0;left:18px;right:18px;height:2.5px;background:var(--blue);border-radius:2px}
+.nav-center a.highlight{color:var(--coral)}
+.nav-center a.highlight::after{background:var(--coral)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-live{font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;background:var(--blue-soft);color:var(--blue-dark);display:flex;align-items:center;gap:7px}
+.nav-live .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 2s infinite}
+.nav-site{font-size:12px;font-weight:600;color:var(--blue-dark);text-decoration:none;padding:8px 18px;border:1.5px solid var(--border);border-radius:8px;transition:.2s}
+.nav-site:hover{border-color:var(--blue-dark);background:var(--blue-soft)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+
+/* ══ HERO ══ */
+.hero{position:relative;overflow:hidden;min-height:520px;display:flex;align-items:center}
+.hero-canvas{position:absolute;inset:0;z-index:0}
+.hero-bg{position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,var(--blue-deep) 0%,var(--blue-dark) 30%,var(--blue) 70%,var(--blue-light) 100%)}
+.hero-photo{position:absolute;inset:0;z-index:0;background:url('https://detect-reseaux.fr/fichiers/IMG_4032-scaled.jpg') center/cover no-repeat;opacity:.08;mix-blend-mode:luminosity}
+.hero-bg::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-inner{position:relative;z-index:2;max-width:1320px;margin:0 auto;padding:80px 32px;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+.hero-content{color:#fff}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:6px 16px;margin-bottom:24px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.8)}
+.hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--coral-light);animation:pulse 2s infinite}
+.hero-h1{font-family:var(--font-head);font-size:46px;font-weight:700;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px}
+.hero-h1 .accent{background:linear-gradient(135deg,var(--coral-light) 0%,var(--coral) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-desc{font-size:16px;line-height:1.7;color:rgba(255,255,255,.7);max-width:480px;margin-bottom:32px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:var(--coral);color:#fff;border:none;border-radius:12px;font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .3s var(--ease);box-shadow:0 4px 20px rgba(241,99,88,.3)}
+.btn-primary:hover{background:var(--coral-dark);transform:translateY(-2px);box-shadow:0 8px 32px rgba(241,99,88,.4)}
+.btn-primary svg{width:18px;height:18px;flex-shrink:0}
+.btn-secondary{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:12px;font-family:var(--font-head);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .3s var(--ease)}
+.btn-secondary svg{width:18px;height:18px;flex-shrink:0}
+.btn-secondary:hover{background:rgba(255,255,255,.18);transform:translateY(-2px)}
+.btn-tertiary{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.1);border-radius:12px;font-family:var(--font-head);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .3s var(--ease)}
+.btn-tertiary svg{width:18px;height:18px;flex-shrink:0}
+.btn-tertiary:hover{background:rgba(255,255,255,.12);color:#fff}
+
+.hero-map{position:relative;width:100%;max-width:460px;justify-self:center;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);border:2px solid rgba(255,255,255,.15)}
+.hero-map .leaflet-map{width:100%;height:380px}
+.leaflet-container{background:var(--blue-deep)!important;font-family:var(--font)!important}
+.dr-marker{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 3px 12px rgba(0,0,0,.35);background:var(--blue);transition:transform .3s ease}
+.dr-marker:hover{transform:rotate(-45deg) scale(1.15)}
+.dr-marker svg{width:13px;height:13px;color:#fff;transform:rotate(45deg)}
+.dr-popup{text-align:center;padding:4px 2px;font-family:var(--font-head)}
+.dr-popup .popup-name{font-size:14px;font-weight:700;color:var(--text-900);margin-bottom:2px}
+.dr-popup .popup-dept{font-size:11px;color:var(--text-400);margin-bottom:6px}
+.dr-popup .popup-status{display:inline-block;font-size:10px;font-weight:700;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px;background:var(--blue-soft);color:var(--blue-dark)}
+.leaflet-popup-content-wrapper{border-radius:12px!important;box-shadow:0 8px 24px rgba(0,0,0,.15)!important;border:1px solid var(--border-light)!important}
+.leaflet-popup-tip{box-shadow:0 4px 12px rgba(0,0,0,.1)!important}
+
+/* ══ STATS ══ */
+.stats{max-width:1320px;margin:-40px auto 0;padding:0 32px;position:relative;z-index:3}
+.stats-inner{display:grid;grid-template-columns:repeat(4,1fr);background:var(--white);border-radius:var(--radius-lg);box-shadow:0 8px 40px rgba(17,65,106,.08);border:1px solid var(--border-light);overflow:hidden}
+.stat-cell{padding:28px 24px;text-align:center;border-right:1px solid var(--border-light);position:relative}
+.stat-cell:last-child{border-right:none}
+.stat-cell::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40px;height:3px;border-radius:0 0 3px 3px}
+.stat-cell:nth-child(odd)::before{background:var(--blue)}
+.stat-cell:nth-child(even)::before{background:var(--coral)}
+.stat-icon{width:36px;height:36px;margin:0 auto 10px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.stat-icon.blue{background:var(--blue-soft)}
+.stat-icon.blue svg{color:var(--blue);width:18px;height:18px}
+.stat-icon.coral{background:var(--coral-soft)}
+.stat-icon.coral svg{color:var(--coral);width:18px;height:18px}
+.stat-num{font-family:var(--font-head);font-size:32px;font-weight:700;color:var(--text-900);letter-spacing:-1px}
+.stat-label{font-size:11px;color:var(--text-400);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-top:4px}
+
+/* ══ GATEWAY ══ */
+.gateway{max-width:1320px;margin:0 auto;padding:48px 32px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.gw-card{position:relative;border-radius:var(--radius-lg);padding:36px 32px;text-decoration:none;color:inherit;display:flex;flex-direction:column;overflow:hidden;transition:all .5s var(--ease);cursor:pointer;min-height:240px;border:1px solid transparent}
+.gw-card:hover{transform:translateY(-8px)}
+.gw-card:hover .gw-arrow{transform:translateX(8px);opacity:1}
+.gw-card:hover .gw-icon{transform:scale(1.08)}
+.gw-solo{background:linear-gradient(135deg,var(--blue-deep) 0%,var(--blue-dark) 60%,var(--blue) 100%);box-shadow:0 8px 32px rgba(17,65,106,.2)}
+.gw-solo:hover{box-shadow:0 20px 56px rgba(17,65,106,.3)}
+.gw-multi{background:linear-gradient(135deg,var(--coral-dark) 0%,var(--coral) 60%,var(--coral-light) 100%);box-shadow:0 8px 32px rgba(241,99,88,.2)}
+.gw-multi:hover{box-shadow:0 20px 56px rgba(241,99,88,.3)}
+.gw-candidats{background:linear-gradient(135deg,#0a3d2e 0%,#10B981 100%);box-shadow:0 8px 32px rgba(16,185,129,.2)}
+.gw-candidats:hover{box-shadow:0 20px 56px rgba(16,185,129,.3)}
+.gw-header{display:flex;align-items:center;gap:14px;margin-bottom:14px;position:relative;z-index:1}
+.gw-icon{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;transition:transform .4s var(--ease)}
+.gw-icon svg{width:24px;height:24px;color:#fff}
+.gw-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.55);background:rgba(255,255,255,.08);padding:4px 12px;border-radius:20px}
+.gw-title{font-family:var(--font-head);font-size:22px;font-weight:700;color:#fff;letter-spacing:-.5px;margin-bottom:6px;position:relative;z-index:1}
+.gw-desc{font-size:13px;color:rgba(255,255,255,.65);line-height:1.7;position:relative;z-index:1;flex:1}
+.gw-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:20px;position:relative;z-index:1}
+.gw-stats{display:flex;gap:24px}
+.gw-stat-num{font-family:var(--font-head);font-size:22px;font-weight:700;color:#fff;letter-spacing:-1px}
+.gw-stat-label{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.gw-arrow{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;transition:all .4s var(--ease);opacity:.6}
+.gw-arrow svg{width:18px;height:18px;color:#fff}
+
+.gw-solo{animation:gw-anim .7s var(--ease) 3.6s both}
+.gw-multi{animation:gw-anim .7s var(--ease) 3.75s both}
+.gw-candidats{animation:gw-anim .7s var(--ease) 3.9s both}
+@keyframes gw-anim{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ══ SERVICES STRIP ══ */
+.services-strip{max-width:1320px;margin:0 auto;padding:40px 32px 0}
+.services-inner{display:flex;justify-content:center;gap:32px;flex-wrap:wrap}
+.service-pill{display:flex;align-items:center;gap:10px;padding:10px 20px;background:var(--white);border:1px solid var(--border-light);border-radius:40px;box-shadow:0 2px 8px rgba(0,0,0,.03);transition:all .3s;opacity:0;animation:pill-in .5s var(--ease) forwards}
+.service-pill:nth-child(1){animation-delay:4s}.service-pill:nth-child(2){animation-delay:4.1s}.service-pill:nth-child(3){animation-delay:4.2s}.service-pill:nth-child(4){animation-delay:4.3s}
+@keyframes pill-in{from{opacity:0;transform:translateY(15px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+.service-pill:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(29,112,183,.1);transform:translateY(-2px)}
+.service-pill-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.service-pill-icon.geo{background:var(--blue-soft)}
+.service-pill-icon.geo svg{color:var(--blue);width:16px;height:16px}
+.service-pill-icon.study{background:var(--coral-soft)}
+.service-pill-icon.study svg{color:var(--coral);width:16px;height:16px}
+.service-pill-icon.secure{background:rgba(16,185,129,.08)}
+.service-pill-icon.secure svg{color:var(--success);width:16px;height:16px}
+.service-pill-icon.tech{background:rgba(245,158,11,.08)}
+.service-pill-icon.tech svg{color:var(--warning);width:16px;height:16px}
+.service-pill span{font-size:13px;font-weight:600;color:var(--text-700)}
+
+/* ══ SECTIONS ══ */
+.section-header{max-width:1320px;margin:0 auto;padding:64px 32px 0;text-align:center}
+.section-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:var(--blue);margin-bottom:14px}
+.section-tag svg{width:16px;height:16px}
+.section-title{font-family:var(--font-head);font-size:34px;font-weight:700;color:var(--text-900);letter-spacing:-1.2px;line-height:1.15}
+.section-title .blue{color:var(--blue)}
+.section-title .coral{color:var(--coral)}
+.section-desc{font-size:15px;color:var(--text-400);max-width:520px;margin:14px auto 0;line-height:1.7}
+
+/* ══ DASHBOARD PANEL ══ */
+.dash-panel{display:none;animation:fadeUp .5s ease}
+.dash-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.dash-wrap{max-width:1320px;margin:0 auto;padding:32px 32px 0}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:24px}
+.kpi-card{background:var(--white);border-radius:var(--radius-md);padding:20px 22px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.03);border:1px solid var(--border-light);transition:all .35s var(--ease);position:relative;overflow:hidden}
+.kpi-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(29,112,183,.1);border-color:rgba(29,112,183,.15)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius-md) var(--radius-md) 0 0}
+.kpi-card.c-blue::before{background:linear-gradient(90deg,var(--blue),var(--blue-light))}
+.kpi-card.c-coral::before{background:linear-gradient(90deg,var(--coral),var(--coral-light))}
+.kpi-card.c-green::before{background:linear-gradient(90deg,var(--success),#34D399)}
+.kpi-card.c-navy::before{background:linear-gradient(90deg,var(--blue-dark),var(--blue))}
+.kpi-label{font-size:11px;font-weight:700;color:var(--text-400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.kpi-value{font-family:var(--font-head);font-size:30px;font-weight:700;color:var(--text-900);line-height:1;margin-bottom:6px}
+.kpi-sub{font-size:12px;color:var(--text-400);display:flex;align-items:center;gap:6px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-weight:600;font-size:11px;padding:2px 8px;border-radius:20px}
+.kpi-trend.up{color:#059669;background:rgba(16,185,129,.1)}
+.kpi-trend.down{color:#DC2626;background:rgba(220,38,38,.1)}
+
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.chart-card{background:var(--white);border-radius:var(--radius-md);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.03);border:1px solid var(--border-light)}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--text-900)}
+.chart-legend{display:flex;gap:14px}
+.chart-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-400)}
+.chart-legend-dot{width:8px;height:8px;border-radius:50%}
+.chart-wrap{position:relative;height:260px}
+
+.campaign-compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:32px}
+.camp-card{background:var(--white);border-radius:var(--radius-md);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.03);border:1px solid var(--border-light);transition:all .35s}
+.camp-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.08);transform:translateY(-2px)}
+.camp-head{padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+.camp-head.solo{background:linear-gradient(135deg,var(--blue-dark),var(--blue))}
+.camp-head.multi{background:linear-gradient(135deg,var(--coral-dark),var(--coral))}
+.camp-head-title{font-family:var(--font-head);font-size:16px;font-weight:700;color:#fff}
+.camp-head-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:11px;color:#fff;font-weight:600}
+.camp-body{padding:20px 24px}
+.camp-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light)}
+.camp-row:last-child{border-bottom:none}
+.camp-row-label{font-size:13px;color:var(--text-500);font-weight:500}
+.camp-row-val{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text-900)}
+
+
+/* ══ PORTAIL CANDIDATS — FULL SCREEN ══ */
+.portal{position:fixed;inset:0;z-index:8000;background:var(--bg);transform:translateY(100%);transition:transform .5s var(--ease);overflow-y:auto;display:flex;flex-direction:column}
+.portal.open{transform:translateY(0)}
+.portal-nav{background:var(--white);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:10;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.portal-nav-left{display:flex;align-items:center;gap:14px}
+.portal-nav-logo{height:36px}
+.portal-nav-title{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--text-900);display:flex;align-items:center;gap:10px}
+.portal-nav-title .sep{width:1px;height:24px;background:var(--border)}
+.portal-nav-title .label{color:var(--coral)}
+.portal-back{display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-family:var(--font);font-size:13px;font-weight:600;color:var(--text-500);cursor:pointer;transition:all .2s}
+.portal-back:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.portal-back svg{width:16px;height:16px}
+.portal-body{flex:1;max-width:1320px;width:100%;margin:0 auto;padding:32px 32px 64px}
+.portal-hero{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px}
+.portal-hero-left h2{font-family:var(--font-head);font-size:28px;font-weight:700;color:var(--text-900);letter-spacing:-.8px}
+.portal-hero-left p{font-size:14px;color:var(--text-400);margin-top:4px}
+.portal-hero-right{display:flex;align-items:center;gap:8px}
+.portal-live{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--success);background:rgba(16,185,129,.08);padding:6px 14px;border-radius:20px}
+.portal-live .dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+
+.cand-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.cand-stat-card{background:var(--white);border-radius:var(--radius-md);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.03);border:1px solid var(--border-light);text-align:center;transition:all .3s}
+.cand-stat-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.cand-stat-icon{width:40px;height:40px;border-radius:12px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center}
+.cand-stat-icon.blue{background:var(--blue-soft)}
+.cand-stat-icon.blue svg{color:var(--blue);width:18px;height:18px}
+.cand-stat-icon.coral{background:var(--coral-soft)}
+.cand-stat-icon.coral svg{color:var(--coral);width:18px;height:18px}
+.cand-stat-icon.green{background:rgba(16,185,129,.08)}
+.cand-stat-icon.green svg{color:var(--success);width:18px;height:18px}
+.cand-stat-val{font-family:var(--font-head);font-size:32px;font-weight:700;color:var(--text-900)}
+.cand-stat-label{font-size:11px;font-weight:700;color:var(--text-400);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+
+.cand-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;flex:1;max-width:400px;transition:border-color .25s,box-shadow .25s}
+.search-box:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,112,183,.1)}
+.search-box svg{width:18px;height:18px;color:var(--text-300);flex-shrink:0}
+.search-box input{border:none;outline:none;font-family:var(--font);font-size:14px;color:var(--text-900);width:100%;background:transparent}
+.search-box input::placeholder{color:var(--text-300)}
+.filter-group{display:flex;gap:8px;flex-wrap:wrap}
+.filter-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--white);font-family:var(--font);font-size:13px;font-weight:500;color:var(--text-500);cursor:pointer;transition:all .25s}
+.filter-btn:hover{border-color:var(--blue);color:var(--blue)}
+.filter-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+.cand-list{display:flex;flex-direction:column;gap:10px}
+.cand-card{background:var(--white);border-radius:var(--radius-md);box-shadow:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.03);border:1px solid var(--border-light);overflow:hidden;transition:all .3s}
+.cand-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.08);border-color:rgba(29,112,183,.15)}
+.cand-main{display:flex;align-items:center;padding:16px 22px;gap:14px}
+.cand-avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
+.cand-avatar.unknown{background:linear-gradient(135deg,var(--blue-dark),var(--blue))}
+.cand-info{flex:1;min-width:0}
+.cand-name{font-family:var(--font-head);font-size:15px;font-weight:600;color:var(--text-900)}
+.cand-meta{font-size:12px;color:var(--text-400);margin-top:2px;display:flex;gap:12px;flex-wrap:wrap}
+.cand-meta span{display:flex;align-items:center;gap:4px}
+.cand-status{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;background:var(--blue-soft);color:var(--blue)}
+
+/* ══ MODAL FICHE CANDIDAT ══ */
+.modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(10,46,77,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .35s var(--ease)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:var(--radius-lg);width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.25);transform:translateY(30px) scale(.96);transition:transform .4s var(--ease);position:relative}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-header{position:relative;padding:32px 32px 24px;border-bottom:1px solid var(--border-light);display:flex;align-items:flex-start;gap:18px}
+.modal-avatar{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:22px;font-weight:700;color:#fff;flex-shrink:0;background:linear-gradient(135deg,var(--blue-dark),var(--blue))}
+.modal-header-info{flex:1}
+.modal-name{font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--text-900)}
+.modal-location{font-size:14px;color:var(--text-400);margin-top:4px;display:flex;align-items:center;gap:6px}
+.modal-location svg{width:14px;height:14px}
+.modal-status{margin-top:8px;display:inline-flex;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;background:var(--blue-soft);color:var(--blue)}
+.modal-close{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:10px;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:rgba(241,99,88,.1)}
+.modal-close svg{width:18px;height:18px;color:var(--text-400)}
+.modal-body{padding:24px 32px 32px}
+.modal-section{margin-bottom:24px}
+.modal-section:last-child{margin-bottom:0}
+.modal-section-title{font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--text-900);margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px}
+.modal-section-title svg{width:16px;height:16px;color:var(--blue)}
+.modal-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-info-item{background:var(--bg);border-radius:var(--radius-sm);padding:14px 16px}
+.modal-info-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-300);margin-bottom:4px}
+.modal-info-val{font-size:15px;font-weight:500;color:var(--text-900);word-break:break-word}
+.modal-resp{background:var(--bg);border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:10px;border-left:3px solid var(--blue)}
+.modal-resp:last-child{margin-bottom:0}
+.modal-resp-q{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px}
+.modal-resp-a{font-size:14px;color:var(--text-700);line-height:1.6}
+.modal::-webkit-scrollbar{width:6px}
+.modal::-webkit-scrollbar-track{background:transparent}
+.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@media(max-width:640px){.modal{max-width:100%;border-radius:16px 16px 0 0;max-height:85vh;margin-top:auto}.modal-header{padding:24px 20px 18px}.modal-body{padding:18px 20px 24px}.modal-info-grid{grid-template-columns:1fr}.modal-name{font-size:18px}}
+
+.cand-view-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--white);font-family:var(--font);font-size:12px;font-weight:600;color:var(--blue);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.cand-view-btn:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+.cand-view-btn svg{width:14px;height:14px}
+
+.cand-empty{text-align:center;padding:48px 20px;color:var(--text-400)}
+.cand-empty svg{width:48px;height:48px;color:var(--text-300);margin-bottom:12px}
+.cand-empty-title{font-family:var(--font-head);font-size:18px;font-weight:600;color:var(--text-700);margin-bottom:6px}
+.cand-empty-desc{font-size:14px}
+.cand-loading{text-align:center;padding:40px;color:var(--text-400);font-size:14px}
+.cand-loading .spin{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:ld-spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+
+/* ══ RADAR SWEEP — hero decoration ══ */
+.hero-radar{position:absolute;bottom:40px;left:40px;width:120px;height:120px;z-index:1;opacity:.25}
+.radar-ring{position:absolute;inset:0;border:1.5px solid rgba(255,255,255,.15);border-radius:50%}
+.radar-ring:nth-child(2){inset:15px}
+.radar-ring:nth-child(3){inset:30px}
+.radar-cross{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,.1)}
+.radar-cross-v{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.1)}
+.radar-sweep{position:absolute;inset:0;border-radius:50%;overflow:hidden}
+.radar-sweep::after{content:'';position:absolute;top:0;left:50%;width:50%;height:50%;transform-origin:bottom left;background:conic-gradient(from 0deg,transparent,rgba(29,112,183,.4));animation:radarSpin 3s linear infinite}
+@keyframes radarSpin{to{transform:rotate(360deg)}}
+.radar-dot{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--coral-light);animation:radarBlink 3s ease infinite}
+.radar-dot:nth-child(6){top:22%;left:60%;animation-delay:.5s}
+.radar-dot:nth-child(7){top:65%;left:30%;animation-delay:1.5s}
+.radar-dot:nth-child(8){top:40%;left:75%;animation-delay:2.2s}
+@keyframes radarBlink{0%,70%,100%{opacity:0;transform:scale(0)}75%{opacity:1;transform:scale(1.5)}85%{opacity:.5;transform:scale(1)}}
+
+/* ══ SCAN LINE EFFECT ══ */
+/* ══ UNDERGROUND NETWORK VISUALIZATION ══ */
+.ug-strip{max-width:1320px;margin:0 auto;padding:36px 32px 0}
+.ug-box{position:relative;height:110px;border-radius:var(--radius-md);overflow:hidden;background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 35%,#2a1f0f 36%,#3d2e1a 100%);box-shadow:0 4px 24px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+.ug-surface{position:absolute;top:35%;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 2%,rgba(255,255,255,.12) 15%,rgba(255,255,255,.18) 50%,rgba(255,255,255,.12) 85%,transparent 98%)}
+.ug-surface::before{content:'SURFACE';position:absolute;top:-16px;left:20px;font-size:8px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.2)}
+.ug-pipe{position:absolute;border-radius:6px;display:flex;align-items:center;overflow:hidden}
+.ug-pipe::after{content:'';position:absolute;top:0;bottom:0;width:24px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:ugFlow 1.8s linear infinite;border-radius:6px}
+@keyframes ugFlow{from{left:-24px}to{left:calc(100% + 24px)}}
+.ug-pipe .ug-tag{position:absolute;left:8px;font-size:7px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.85);z-index:2;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.ug-p1{top:42%;left:8%;width:40%;height:10px;background:linear-gradient(90deg,#2980b9,#3498db);box-shadow:0 0 10px rgba(41,128,185,.4)}
+.ug-p1::after{animation-duration:1.6s}
+.ug-p2{top:56%;left:22%;width:55%;height:7px;background:linear-gradient(90deg,#c0392b,#e74c3c);box-shadow:0 0 8px rgba(231,76,60,.35)}
+.ug-p2::after{animation-duration:2.2s;animation-delay:.4s}
+.ug-p3{top:70%;left:12%;width:65%;height:9px;background:linear-gradient(90deg,#d4a017,#f1c40f);box-shadow:0 0 10px rgba(241,196,15,.3)}
+.ug-p3::after{animation-duration:2.8s;animation-delay:.8s}
+.ug-p4{top:83%;left:30%;width:45%;height:6px;background:linear-gradient(90deg,#1e8449,#27ae60);box-shadow:0 0 8px rgba(39,174,96,.3)}
+.ug-p4::after{animation-duration:3.2s;animation-delay:1.2s}
+.ug-scan{position:absolute;top:0;bottom:0;width:3px;background:var(--blue-light);box-shadow:0 0 16px 4px rgba(29,112,183,.5),0 0 40px 8px rgba(29,112,183,.15);animation:ugScan 4s ease-in-out infinite;z-index:5;opacity:.9}
+.ug-scan::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:#fff;border-radius:50%;box-shadow:0 0 8px var(--blue-light)}
+.ug-scan::after{content:'';position:absolute;top:0;bottom:0;left:-20px;width:43px;background:linear-gradient(90deg,transparent,rgba(29,112,183,.08),transparent);pointer-events:none}
+@keyframes ugScan{0%,100%{left:5%}50%{left:92%}}
+.ug-label{position:absolute;bottom:6px;right:14px;font-size:7px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.15)}
+
+
+/* ══ ENHANCED GATEWAY PATTERNS ══ */
+.gw-card::before{content:'';position:absolute;inset:0;opacity:.06;pointer-events:none;z-index:0}
+.gw-solo::before{background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='35' fill='none' stroke='%23fff' stroke-width='.5'/%3E%3Ccircle cx='40' cy='40' r='25' fill='none' stroke='%23fff' stroke-width='.5'/%3E%3Ccircle cx='40' cy='40' r='15' fill='none' stroke='%23fff' stroke-width='.5'/%3E%3Ccircle cx='40' cy='40' r='2' fill='%23fff'/%3E%3C/svg%3E") center/80px;opacity:.08}
+.gw-multi::before{background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30 h60 M30 0 v60 M0 0 L60 60 M60 0 L0 60' stroke='%23fff' stroke-width='.4' fill='none'/%3E%3C/svg%3E") center/60px;opacity:.06}
+.gw-candidats::before{background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='5' y='5' width='30' height='30' rx='4' fill='none' stroke='%23fff' stroke-width='.4'/%3E%3Cpath d='M12 20h16M20 12v16' stroke='%23fff' stroke-width='.4'/%3E%3C/svg%3E") center/40px;opacity:.07}
+.gw-card::after{content:'';position:absolute;top:-50%;right:-30%;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;transition:transform .6s var(--ease);z-index:0}
+.gw-card:hover::after{transform:scale(1.3)}
+
+
+/* ══ FOOTER ══ */
+.footer{background:var(--blue-deep);padding:48px 32px;text-align:center}
+.footer-brand{display:inline-flex;align-items:center;gap:12px;margin-bottom:12px}
+.footer-brand img{height:36px;filter:brightness(0) invert(1);opacity:.9}
+.footer-text{font-size:13px;color:rgba(255,255,255,.5);line-height:1.8}
+.footer-text a{color:var(--blue-light);text-decoration:none;font-weight:600}
+.footer-text a:hover{text-decoration:underline}
+.footer-meta{font-size:11px;color:rgba(255,255,255,.25);margin-top:12px}
+
+/* ══ REVEAL ══ */
+.reveal{opacity:0;transform:translateY(30px);transition:all .7s var(--ease)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.section-header .section-tag,.section-header .section-title,.section-header .section-desc{opacity:0;transform:translateY(20px);transition:all .6s var(--ease)}
+.section-header.visible .section-tag{opacity:1;transform:translateY(0);transition-delay:.05s}
+.section-header.visible .section-title{opacity:1;transform:translateY(0);transition-delay:.15s}
+.section-header.visible .section-desc{opacity:1;transform:translateY(0);transition-delay:.25s}
+/* ══ PERIOD SELECTOR ══ */
+.period-bar{max-width:1320px;margin:0 auto;padding:20px 32px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.period-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);white-space:nowrap}
+.period-btns{display:flex;gap:6px;flex-wrap:wrap}
+.period-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border-light);background:var(--glass);color:var(--text-sec);font-size:12px;font-weight:500;cursor:pointer;transition:all .25s var(--ease);backdrop-filter:blur(8px);font-family:var(--font-body)}
+.period-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(29,112,183,.06)}
+.period-btn.active{background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dark) 100%);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(29,112,183,.25)}
+.period-sep{width:1px;height:24px;background:var(--border-light);margin:0 4px}
+.period-dates{display:flex;align-items:center;gap:8px}
+.period-input{padding:7px 12px;border-radius:10px;border:1px solid var(--border-light);background:var(--glass);color:var(--text-main);font-size:12px;font-family:var(--font-body);outline:none;transition:border-color .2s;width:130px}
+.period-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(29,112,183,.1)}
+.period-dates span{color:var(--text-muted);font-size:11px}
+.period-range-tag{font-size:11px;color:var(--text-muted);padding:5px 12px;background:rgba(29,112,183,.06);border-radius:12px;white-space:nowrap}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:32px;padding:60px 24px}
+  .hero-h1{font-size:36px}
+  .hero-map{max-width:360px}
+  .stats-inner{grid-template-columns:repeat(2,1fr)}
+  .stat-cell:nth-child(2){border-right:none}
+  .stat-cell:nth-child(1),.stat-cell:nth-child(2){border-bottom:1px solid var(--border-light)}
+  .gateway{grid-template-columns:1fr;gap:14px;padding:40px 24px 0}
+  .chart-grid,.campaign-compare{grid-template-columns:1fr}
+  .cand-stats{grid-template-columns:repeat(2,1fr)}
+  .dash-wrap{padding:24px 24px 0}
+}
+@media(max-width:768px){
+  /* Nav */
+  .nav-center{display:none}
+  .nav-site{display:none}
+  .nav-inner{padding:0 16px;height:56px}
+  .nav-logo{height:38px}
+  .nav-sep{display:none}
+  .nav-label{display:none}
+  .nav-live{font-size:10px;padding:5px 10px}
+  /* Hero */
+  .hero{min-height:auto;overflow:visible}
+  .hero-inner{padding:36px 16px;gap:24px}
+  .hero-h1{font-size:26px;letter-spacing:-1px}
+  .hero-badge{font-size:10px;padding:5px 12px}
+  .hero-desc{font-size:13px;margin-bottom:24px}
+  .hero-map{max-width:100%;margin-top:0;border-radius:14px}
+  .hero-map .leaflet-map{height:240px}
+  .hero-actions{flex-direction:column;gap:10px}
+  .btn-primary,.btn-secondary{width:100%;justify-content:center;padding:12px 20px;font-size:13px}
+  .hero-radar{display:none}
+  /* Stats */
+  .stats{margin-top:-20px;padding:0 16px}
+  .stats-inner{grid-template-columns:repeat(2,1fr)}
+  .stat-cell{padding:20px 16px}
+  .stat-num{font-size:26px}
+  .stat-icon{width:30px;height:30px;margin-bottom:8px}
+  .stat-icon svg{width:14px!important;height:14px!important}
+  /* Gateway */
+  .gateway{padding:24px 16px 0;gap:12px}
+  .gw-card{min-height:auto;padding:24px 20px}
+  .gw-title{font-size:18px}
+  .gw-desc{font-size:12px}
+  .gw-icon{width:44px;height:44px;border-radius:12px}
+  .gw-icon svg{width:20px;height:20px}
+  .gw-stat-num{font-size:18px}
+  .gw-stat-label{font-size:8px}
+  /* Services */
+  .services-strip{padding:24px 16px 0}
+  .services-inner{gap:8px;justify-content:flex-start}
+  .service-pill{padding:7px 12px}
+  .service-pill-icon{width:28px;height:28px}
+  .service-pill-icon svg{width:13px!important;height:13px!important}
+  .service-pill span{font-size:11px}
+  /* Underground */
+  .ug-strip{padding:24px 16px 0}
+  .ug-box{height:80px}
+  .ug-tag{font-size:6px!important;letter-spacing:1px!important}
+  .ug-label{font-size:6px;letter-spacing:1.5px}
+  .ug-surface::before{font-size:6px;left:12px;top:-13px}
+  /* Period selector */
+  .period-bar{padding:16px 16px 0;gap:8px}
+  .period-label{font-size:10px}
+  .period-btn{padding:6px 12px;font-size:11px}
+  .period-sep{display:none}
+  .period-dates{width:100%;margin-top:4px}
+  .period-input{width:110px;font-size:11px;padding:6px 10px}
+  /* Performances */
+  .section-header{padding:40px 16px 0}
+  .section-tag{font-size:10px;letter-spacing:2px}
+  .section-title{font-size:22px}
+  .section-desc{font-size:13px}
+  .dash-wrap{padding:16px 16px 0}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi-card{padding:16px 18px}
+  .kpi-value{font-size:24px}
+  .kpi-label{font-size:10px}
+  .chart-card{padding:16px}
+  .chart-wrap{height:200px}
+  .chart-title{font-size:12px}
+  .chart-legend{display:none}
+  .camp-head{padding:14px 18px}
+  .camp-head-title{font-size:14px}
+  .camp-body{padding:14px 18px}
+  .camp-row-label{font-size:12px}
+  .camp-row-val{font-size:13px}
+  /* Portail Candidats */
+  .portal-nav{padding:0 16px;height:52px}
+  .portal-nav-logo{height:28px}
+  .portal-nav-title{font-size:13px}
+  .portal-nav-title .sep{height:20px}
+  .portal-back{padding:6px 12px;font-size:12px}
+  .portal-back svg{width:14px;height:14px}
+  .portal-body{padding:20px 16px 40px}
+  .portal-hero{margin-bottom:20px}
+  .portal-hero-left h2{font-size:20px}
+  .portal-hero-left p{font-size:12px}
+  .portal-live{font-size:11px;padding:5px 10px}
+  .cand-stats{grid-template-columns:repeat(2,1fr);gap:10px}
+  .cand-stat-card{padding:16px 14px}
+  .cand-stat-val{font-size:24px}
+  .cand-stat-label{font-size:9px}
+  .cand-stat-icon{width:34px;height:34px;margin-bottom:8px}
+  .cand-stat-icon svg{width:16px!important;height:16px!important}
+  .cand-toolbar{flex-direction:column;align-items:stretch;gap:12px}
+  .search-box{max-width:100%;padding:8px 14px}
+  .search-box input{font-size:13px}
+  .filter-group{justify-content:center}
+  .cand-card{border-radius:12px}
+  .cand-main{padding:14px 16px;gap:10px;flex-wrap:wrap}
+  .cand-avatar{width:38px;height:38px;font-size:13px;border-radius:10px}
+  .cand-name{font-size:14px}
+  .cand-meta{flex-direction:column;gap:2px;font-size:11px}
+  .cand-status{font-size:10px;padding:3px 10px}
+  .cand-view-btn{width:100%;justify-content:center;padding:10px 14px;margin-top:8px;border-radius:10px;font-size:13px}
+  /* Modal */
+  .modal-overlay{padding:0;align-items:flex-end}
+  .modal{max-width:100%;border-radius:20px 20px 0 0;max-height:88vh}
+  .modal-header{padding:20px 16px 16px}
+  .modal-avatar{width:48px;height:48px;font-size:18px;border-radius:14px}
+  .modal-name{font-size:18px}
+  .modal-location{font-size:12px}
+  .modal-close{top:16px;right:16px;width:32px;height:32px}
+  .modal-body{padding:16px 16px 24px}
+  .modal-info-grid{grid-template-columns:1fr;gap:10px}
+  .modal-info-item{padding:12px 14px}
+  .modal-info-val{font-size:14px}
+  .modal-resp{padding:14px 14px;margin-bottom:8px}
+  .modal-resp-q{font-size:11px}
+  .modal-resp-a{font-size:13px}
+  .modal-section-title{font-size:12px}
+  /* Footer */
+  .footer{padding:32px 16px}
+  .footer-brand img{height:30px}
+  .footer-text{font-size:12px}
+  .footer-meta{font-size:10px}
+  /* Tabs perf */
+  .filter-btn{padding:7px 14px;font-size:12px}
+}
+@media(max-width:380px){
+  .hero-h1{font-size:22px}
+  .stat-cell{padding:16px 12px}
+  .stat-num{font-size:22px}
+  .stat-label{font-size:9px;letter-spacing:1px}
+  .gw-card{padding:20px 16px}
+  .gw-title{font-size:16px}
+  .gw-badge{font-size:8px;padding:3px 8px}
+  .kpi-grid{grid-template-columns:1fr}
+  .section-title{font-size:20px}
+  .ug-box{height:65px}
+  .portal-hero-left h2{font-size:18px}
+  .cand-stat-card{padding:14px 10px}
+  .cand-stat-val{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ PAGE LOADER ══ -->
+<div class="page-loader" id="pageLoader">
+  <img src="https://detect-reseaux.fr/fichiers/detect-reseaux-logo-long-medium-retina.png" alt="Detect Réseaux" class="loader-logo">
+  <div class="loader-ring"></div>
+  <div class="loader-text">Chargement du portail</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- ══ NAV ══ -->
+<nav class="site-nav" id="siteNav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <img src="https://detect-reseaux.fr/fichiers/detect-reseaux-logo-long-medium-retina.png" alt="Detect Réseaux" class="nav-logo">
+      <div class="nav-sep"></div>
+      <div class="nav-label">Portail Marketing</div>
+    </div>
+    <div class="nav-center">
+      <a href="#" class="active" data-nav="home">Accueil</a>
+      <a href="#perf" data-nav="perf">Performances</a>
+      <a href="#candidates" data-nav="cand" class="highlight">Portail Candidats</a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-live"><span class="dot"></span> Données en direct</div>
+      <a href="https://detect-reseaux.fr" target="_blank" class="nav-site">detect-reseaux.fr</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-photo"></div>
+  <canvas class="hero-canvas" id="networkCanvas"></canvas>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge"><span class="dot"></span> Leader national en détection de réseaux</div>
+      <h1 class="hero-h1">Pilotez vos <span class="accent">performances</span> de recrutement</h1>
+      <p class="hero-desc">Suivez en temps réel les campagnes Meta Ads de recrutement de franchisés. Performances Solo & Multi-Équipe, candidats qualifiés et portail de suivi.</p>
+      <div class="hero-actions">
+        <a href="#perf" class="btn-primary" id="btnPerf">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Voir les performances
+        </a>
+        <a href="#candidates" class="btn-secondary" id="btnCand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+          Portail Candidats
+        </a>
+      </div>
+    </div>
+    <div class="hero-map">
+      <div id="agencyMap" class="leaflet-map"></div>
+    </div>
+  </div>
+  <div class="hero-radar">
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-cross"></div>
+    <div class="radar-cross-v"></div>
+    <div class="radar-sweep"></div>
+    <div class="radar-dot"></div>
+    <div class="radar-dot"></div>
+    <div class="radar-dot"></div>
+  </div>
+</section>
+
+<!-- ══ STATS ══ -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat-cell">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <div class="stat-num">25+</div>
+      <div class="stat-label">Agences</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-icon coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+      <div class="stat-num">2</div>
+      <div class="stat-label">Campagnes</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+      <div class="stat-num">17</div>
+      <div class="stat-label">Années d'expérience</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-icon coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+      <div class="stat-num">24/7</div>
+      <div class="stat-label">Suivi en direct</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GATEWAY ══ -->
+<div class="gateway">
+  <a href="#perf" class="gw-card gw-solo" onclick="showPanel('solo')">
+    <div class="gw-header">
+      <div class="gw-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
+      <span class="gw-badge">Modèle solo</span>
+    </div>
+    <div class="gw-title">Campagne Modèle Solo</div>
+    <div class="gw-desc">Performances de la campagne orientée modèle solo. Dépenses, leads, CPL et évolution.</div>
+    <div class="gw-bottom">
+      <div class="gw-stats">
+        <div class="gw-stat"><div class="gw-stat-num">—</div><div class="gw-stat-label">Leads</div></div>
+        <div class="gw-stat"><div class="gw-stat-num">—</div><div class="gw-stat-label">CPL</div></div>
+      </div>
+      <div class="gw-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    </div>
+  </a>
+  <a href="#perf" class="gw-card gw-multi" onclick="showPanel('multi')">
+    <div class="gw-header">
+      <div class="gw-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M17 14a4 4 0 014 4v3"/></svg></div>
+      <span class="gw-badge">Modèle avec équipe</span>
+    </div>
+    <div class="gw-title">Campagne Modèle avec Équipe</div>
+    <div class="gw-desc">Performances de la campagne modèle avec équipe. Recrutement de franchisés avec modèle de gestion d'équipe.</div>
+    <div class="gw-bottom">
+      <div class="gw-stats">
+        <div class="gw-stat"><div class="gw-stat-num">—</div><div class="gw-stat-label">Leads</div></div>
+        <div class="gw-stat"><div class="gw-stat-num">—</div><div class="gw-stat-label">CPL</div></div>
+      </div>
+      <div class="gw-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    </div>
+  </a>
+  <a href="#candidates" class="gw-card gw-candidats">
+    <div class="gw-header">
+      <div class="gw-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg></div>
+      <span class="gw-badge">Temps réel</span>
+    </div>
+    <div class="gw-title">Portail Candidats</div>
+    <div class="gw-desc">Suivi en direct des candidats issus des campagnes Meta. Informations, réponses au formulaire et statuts.</div>
+    <div class="gw-bottom">
+      <div class="gw-stats">
+        <div class="gw-stat"><div class="gw-stat-num" id="gwCandTotal">—</div><div class="gw-stat-label">Candidats</div></div>
+        <div class="gw-stat"><div class="gw-stat-num" id="gwCandWeek">—</div><div class="gw-stat-label">Cette sem.</div></div>
+      </div>
+      <div class="gw-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+    </div>
+  </a>
+</div>
+
+<!-- ══ SERVICES STRIP ══ -->
+<div class="services-strip">
+  <div class="services-inner">
+    <div class="service-pill">
+      <div class="service-pill-icon geo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <span>Géo-référencement</span>
+    </div>
+    <div class="service-pill">
+      <div class="service-pill-icon study"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div>
+      <span>Études de projet</span>
+    </div>
+    <div class="service-pill">
+      <div class="service-pill-icon secure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <span>Sécurisation de chantier</span>
+    </div>
+    <div class="service-pill">
+      <div class="service-pill-icon tech"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
+      <span>Techniques &amp; Équipements</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ UNDERGROUND NETWORK VISUALIZATION ══ -->
+<div class="ug-strip reveal">
+  <div class="ug-box">
+    <div class="ug-surface"></div>
+    <div class="ug-scan"></div>
+    <div class="ug-pipe ug-p1"><span class="ug-tag">Eau</span></div>
+    <div class="ug-pipe ug-p2"><span class="ug-tag">Gaz</span></div>
+    <div class="ug-pipe ug-p3"><span class="ug-tag">Élec</span></div>
+    <div class="ug-pipe ug-p4"><span class="ug-tag">Télécom</span></div>
+    <div class="ug-label">Détection géo-radar</div>
+  </div>
+</div>
+
+<!-- ══ PERFORMANCES SECTION ══ -->
+<div class="section-header reveal" id="perf">
+  <div class="section-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Performances Meta Ads</div>
+  <h2 class="section-title">Campagnes de <span class="blue">recrutement</span> franchisés</h2>
+  <p class="section-desc">Suivi des performances par type de campagne — Modèle Solo & Modèle avec Équipe.</p>
+</div>
+
+<!-- Period selector -->
+<div class="period-bar reveal">
+  <div class="period-label">Période</div>
+  <div class="period-btns">
+    <button class="period-btn" onclick="setPeriod('7d')">7 jours</button>
+    <button class="period-btn" onclick="setPeriod('30d')">30 jours</button>
+    <button class="period-btn" onclick="setPeriod('month')">Ce mois</button>
+    <button class="period-btn" onclick="setPeriod('lastmonth')">Mois dernier</button>
+    <button class="period-btn active" onclick="setPeriod('all')">Tout</button>
+  </div>
+  <div class="period-sep"></div>
+  <div class="period-dates">
+    <input type="date" class="period-input" id="periodFrom" onchange="setPeriod('custom')">
+    <span>→</span>
+    <input type="date" class="period-input" id="periodTo" onchange="setPeriod('custom')">
+  </div>
+  <div class="period-range-tag" id="periodTag"></div>
+</div>
+
+<!-- Tab buttons for perf -->
+<div class="dash-wrap">
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap" class="reveal">
+    <button class="filter-btn active" onclick="showPanel('overview')" id="tabOverview">Vue d'ensemble</button>
+    <button class="filter-btn" onclick="showPanel('solo')" id="tabSolo">Campagne Modèle Solo</button>
+    <button class="filter-btn" onclick="showPanel('multi')" id="tabMulti">Campagne Modèle avec Équipe</button>
+  </div>
+</div>
+
+<!-- PANEL: Overview -->
+<div class="dash-panel active" id="panel-overview">
+  <div class="dash-wrap">
+    <div class="kpi-grid reveal">
+      <div class="kpi-card c-blue"><div class="kpi-label">Dépenses</div><div class="kpi-value">€0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-coral"><div class="kpi-label">Impressions</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-green"><div class="kpi-label">Clics</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">CTR</div><div class="kpi-value">0%</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-blue"><div class="kpi-label">Leads</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-coral"><div class="kpi-label">CPL moyen</div><div class="kpi-value">€0</div><div class="kpi-sub">—</div></div>
+    </div>
+    <div class="chart-grid reveal">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Dépenses & Leads</div>
+          <div class="chart-legend"><div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--blue)"></span>Dépenses</div><div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--coral)"></span>Leads</div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chartOverview1"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">CPL par campagne</div>
+          <div class="chart-legend"><div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--blue)"></span>Solo</div><div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--coral)"></span>Multi</div></div>
+        </div>
+        <div class="chart-wrap"><canvas id="chartOverview2"></canvas></div>
+      </div>
+    </div>
+    <div class="campaign-compare reveal">
+      <div class="camp-card">
+        <div class="camp-head solo"><span class="camp-head-title">Campagne Modèle Solo</span><span class="camp-head-badge">Modèle solo</span></div>
+        <div class="camp-body">
+          <div class="camp-row"><span class="camp-row-label">Dépenses</span><span class="camp-row-val">€0</span></div>
+          <div class="camp-row"><span class="camp-row-label">Impressions</span><span class="camp-row-val">0</span></div>
+          <div class="camp-row"><span class="camp-row-label">Clics</span><span class="camp-row-val">0</span></div>
+          <div class="camp-row"><span class="camp-row-label">CTR</span><span class="camp-row-val">0%</span></div>
+          <div class="camp-row"><span class="camp-row-label">Leads</span><span class="camp-row-val">0</span></div>
+          <div class="camp-row"><span class="camp-row-label">CPL</span><span class="camp-row-val">€0</span></div>
+        </div>
+      </div>
+      <div class="camp-card">
+        <div class="camp-head multi"><span class="camp-head-title">Campagne Modèle avec Équipe</span><span class="camp-head-badge">Modèle avec équipe</span></div>
+        <div class="camp-body">
+          <div class="camp-row"><span class="camp-row-label">Dépenses</span><span class="camp-row-val">€0</span></div>
+          <div class="camp-row"><span class="camp-row-label">Impressions</span><span class="camp-row-val">0</span></div>
+          <div class="camp-row"><span class="camp-row-label">Clics</span><span class="camp-row-val">0</span></div>
+          <div class="camp-row"><span class="camp-row-label">CTR</span><span class="camp-row-val">0%</span></div>
+          <div class="camp-row"><span class="camp-row-label">Leads</span><span class="camp-row-val">0</span></div>
+          <div class="camp-row"><span class="camp-row-label">CPL</span><span class="camp-row-val">€0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: Solo -->
+<div class="dash-panel" id="panel-solo">
+  <div class="dash-wrap">
+    <div class="kpi-grid reveal">
+      <div class="kpi-card c-blue"><div class="kpi-label">Dépenses</div><div class="kpi-value">€0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-coral"><div class="kpi-label">Impressions</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-green"><div class="kpi-label">Clics</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">CTR</div><div class="kpi-value">0%</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-blue"><div class="kpi-label">Leads</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-coral"><div class="kpi-label">CPL</div><div class="kpi-value">€0</div><div class="kpi-sub">—</div></div>
+    </div>
+    <div class="chart-grid reveal">
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Évolution Modèle Solo — Dépenses & Leads</div></div><div class="chart-wrap"><canvas id="chartSolo1"></canvas></div></div>
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Évolution Modèle Solo — CTR & CPL</div></div><div class="chart-wrap"><canvas id="chartSolo2"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: Multi -->
+<div class="dash-panel" id="panel-multi">
+  <div class="dash-wrap">
+    <div class="kpi-grid reveal">
+      <div class="kpi-card c-blue"><div class="kpi-label">Dépenses</div><div class="kpi-value">€0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-coral"><div class="kpi-label">Impressions</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-green"><div class="kpi-label">Clics</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">CTR</div><div class="kpi-value">0%</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-blue"><div class="kpi-label">Leads</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+      <div class="kpi-card c-coral"><div class="kpi-label">CPL</div><div class="kpi-value">€0</div><div class="kpi-sub">—</div></div>
+    </div>
+    <div class="chart-grid reveal">
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Évolution Modèle Équipe — Dépenses & Leads</div></div><div class="chart-wrap"><canvas id="chartMulti1"></canvas></div></div>
+      <div class="chart-card"><div class="chart-header"><div class="chart-title">Évolution Modèle Équipe — CTR & CPL</div></div><div class="chart-wrap"><canvas id="chartMulti2"></canvas></div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ PORTAIL CANDIDATS — FULL SCREEN ══ -->
+<div class="portal" id="candidatePortal">
+  <div class="portal-nav">
+    <div class="portal-nav-left">
+      <img src="https://detect-reseaux.fr/fichiers/detect-reseaux-logo-long-medium-retina.png" alt="Detect Réseaux" class="portal-nav-logo">
+      <div class="portal-nav-title"><span class="sep"></span><span class="label">Portail Candidats</span></div>
+    </div>
+    <button class="portal-back" onclick="closePortal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      Retour au portail
+    </button>
+  </div>
+  <div class="portal-body">
+    <div class="portal-hero">
+      <div class="portal-hero-left">
+        <h2>Suivi des candidats</h2>
+        <p>Tous les prospects issus des campagnes Meta Ads</p>
+      </div>
+      <div class="portal-hero-right">
+        <div class="portal-live"><span class="dot"></span> Synchronisé en direct</div>
+      </div>
+    </div>
+    <div class="cand-stats">
+      <div class="cand-stat-card">
+        <div class="cand-stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
+        <div class="cand-stat-val" id="candTotal">—</div><div class="cand-stat-label">Total candidats</div>
+      </div>
+      <div class="cand-stat-card">
+        <div class="cand-stat-icon coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <div class="cand-stat-val" id="candWeek">—</div><div class="cand-stat-label">Cette semaine</div>
+      </div>
+      <div class="cand-stat-card">
+        <div class="cand-stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div>
+        <div class="cand-stat-val" id="candSolo">—</div><div class="cand-stat-label">Modèle Solo</div>
+      </div>
+      <div class="cand-stat-card">
+        <div class="cand-stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M17 14a4 4 0 014 4v3"/><circle cx="17" cy="7" r="3"/></svg></div>
+        <div class="cand-stat-val" id="candMulti">—</div><div class="cand-stat-label">Modèle avec Équipe</div>
+      </div>
+    </div>
+    <div class="cand-toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" placeholder="Rechercher un candidat par nom, ville, email..." id="searchInput">
+      </div>
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all">Tous</button>
+      </div>
+    </div>
+    <div class="cand-list" id="candList">
+      <div class="cand-loading"><span class="spin"></span> Chargement des candidats...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL FICHE CANDIDAT ══ -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent">
+    <button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <div class="modal-header">
+      <div class="modal-avatar" id="modalAvatar"></div>
+      <div class="modal-header-info">
+        <div class="modal-name" id="modalName"></div>
+        <div class="modal-location" id="modalLocation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="modalLocationText"></span></div>
+        <div class="modal-status" id="modalStatus">Nouveau prospect</div>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer-brand"><img src="https://detect-reseaux.fr/fichiers/detect-reseaux-logo-long-medium-retina.png" alt="Detect Réseaux"></div>
+  <div class="footer-text">Portail Marketing &copy; 2026 &nbsp;|&nbsp; Propulsé par <a href="https://meta-advertising.io" target="_blank">Meta-Advertising</a></div>
+  <div class="footer-meta">Données Meta Ads • Mise à jour en temps réel</div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ══ LOADER ══ */
+window.addEventListener('load',function(){setTimeout(function(){document.getElementById('pageLoader').classList.add('done')},2400)});
+
+/* ══ NAV SCROLL ══ */
+window.addEventListener('scroll',function(){document.getElementById('siteNav').classList.toggle('scrolled',window.scrollY>50)});
+
+/* ══ NETWORK CANVAS ══ */
+(function(){
+  var c=document.getElementById('networkCanvas'),ctx=c.getContext('2d'),dots=[],NUM=70,mouse={x:-1,y:-1};
+  function resize(){c.width=c.parentElement.offsetWidth;c.height=c.parentElement.offsetHeight}
+  window.addEventListener('resize',resize);resize();
+  for(var i=0;i<NUM;i++)dots.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:Math.random()*2+1});
+  c.addEventListener('mousemove',function(e){var r=c.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top});
+  c.addEventListener('mouseleave',function(){mouse.x=-1;mouse.y=-1});
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(var i=0;i<dots.length;i++){
+      var d=dots[i];d.x+=d.vx;d.y+=d.vy;
+      if(d.x<0||d.x>c.width)d.vx*=-1;if(d.y<0||d.y>c.height)d.vy*=-1;
+      ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.3)';ctx.fill();
+      for(var j=i+1;j<dots.length;j++){
+        var d2=dots[j],dx=d.x-d2.x,dy=d.y-d2.y,dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<130){ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d2.x,d2.y);ctx.strokeStyle='rgba(255,255,255,'+(1-dist/130)*.12+')';ctx.lineWidth=.5;ctx.stroke()}
+      }
+      if(mouse.x>0){var mdx=d.x-mouse.x,mdy=d.y-mouse.y,md=Math.sqrt(mdx*mdx+mdy*mdy);
+        if(md<180){ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(mouse.x,mouse.y);ctx.strokeStyle='rgba(255,255,255,'+(1-md/180)*.2+')';ctx.lineWidth=.8;ctx.stroke()}}
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══ LEAFLET MAP ══ */
+(function(){
+  var AGENCIES=[
+    {name:'Bourg-en-Bresse',dept:'Ain (01)',lat:46.2056,lng:5.2255},
+    {name:'La Chapelle aux Brocs',dept:'Corrèze / Haute-Vienne (19/87)',lat:45.1500,lng:1.6833},
+    {name:'Dijon',dept:'Côte-d\'Or (21)',lat:47.3220,lng:5.0415},
+    {name:'Périgueux',dept:'Dordogne (24)',lat:45.1847,lng:0.7211},
+    {name:'Bourg-lès-Valence',dept:'Drôme / Ardèche (26/07)',lat:44.9486,lng:4.8914},
+    {name:'Gallargues',dept:'Gard (30)',lat:43.7230,lng:4.1660},
+    {name:'Toulouse',dept:'Haute-Garonne (31)',lat:43.6115,lng:1.4530},
+    {name:'Bruges (Bordeaux)',dept:'Gironde (33)',lat:44.8723,lng:-0.6163},
+    {name:'Lunel',dept:'Hérault (34)',lat:43.6745,lng:4.1354},
+    {name:'Saint-Agnin-sur-Bion',dept:'Isère (38)',lat:45.5350,lng:5.2620},
+    {name:'Sorbiers',dept:'Loire (42)',lat:45.4880,lng:4.4340},
+    {name:'Les Sorinières (Nantes)',dept:'Loire-Atlantique (44)',lat:47.1520,lng:-1.5310},
+    {name:'Pompey (Nancy)',dept:'Meurthe-et-Moselle (54)',lat:48.7700,lng:6.1230},
+    {name:'Lorient',dept:'Morbihan (56)',lat:47.7486,lng:-3.3660},
+    {name:'Dunkerque',dept:'Nord (59)',lat:51.0343,lng:2.3768},
+    {name:'Clermont-Ferrand',dept:'Puy-de-Dôme (63)',lat:45.7772,lng:3.0870},
+    {name:'Ustaritz (Bayonne)',dept:'Pyrénées-Atlantiques (64)',lat:43.3961,lng:-1.4562},
+    {name:'Brunstatt (Mulhouse)',dept:'Alsace (67/68)',lat:47.7200,lng:7.3150},
+    {name:'Lyon',dept:'Rhône (69)',lat:45.7640,lng:4.8357},
+    {name:'Le Mans',dept:'Sarthe (72)',lat:47.9960,lng:0.1926},
+    {name:'Bonne (Annecy)',dept:'Savoie / Haute-Savoie (73/74)',lat:46.1658,lng:6.3190},
+    {name:'Montauban',dept:'Tarn-et-Garonne (82)',lat:44.0170,lng:1.3540},
+    {name:'Toulon',dept:'Var (83)',lat:43.1242,lng:5.9280},
+    {name:'Île-de-France Nord',dept:'Hauts-de-Seine (92)',lat:48.8922,lng:2.2417},
+    {name:'Fort-de-France',dept:'Martinique (972)',lat:14.6160,lng:-61.0588}
+  ];
+  var map=L.map('agencyMap',{zoomControl:false,attributionControl:false,scrollWheelZoom:false,dragging:true});
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16}).addTo(map);
+  map.fitBounds([[42.0,-5.0],[51.5,9.5]]);
+  var pinSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="10" r="3"/></svg>';
+  AGENCIES.forEach(function(a){
+    var icon=L.divIcon({className:'',html:'<div class="dr-marker">'+pinSvg+'</div>',iconSize:[30,30],iconAnchor:[15,30],popupAnchor:[0,-28]});
+    L.marker([a.lat,a.lng],{icon:icon}).addTo(map).bindPopup('<div class="dr-popup"><div class="popup-name">'+a.name+'</div><div class="popup-dept">'+a.dept+'</div><div class="popup-status">Agence active</div></div>');
+  });
+  setTimeout(function(){map.invalidateSize()},3500);
+})();
+
+/* ══ PANEL SWITCHING ══ */
+function showPanel(id){
+  document.querySelectorAll('.dash-panel').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.dash-wrap .filter-btn').forEach(function(b){b.classList.remove('active')});
+  var panel=document.getElementById('panel-'+id);
+  if(panel){panel.classList.add('active');panel.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible')})}
+  var tabBtn=document.getElementById('tab'+id.charAt(0).toUpperCase()+id.slice(1));
+  if(tabBtn)tabBtn.classList.add('active');
+  if(id==='overview')document.getElementById('tabOverview').classList.add('active');
+}
+
+/* ══ PORTAL OPEN/CLOSE ══ */
+function openPortal(){
+  document.getElementById('candidatePortal').classList.add('open');
+  document.body.style.overflow='hidden';
+  renderCandidates('all','');
+}
+function closePortal(){
+  document.getElementById('candidatePortal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.querySelectorAll('a[href="#candidates"],.gw-candidats').forEach(function(el){
+  el.addEventListener('click',function(e){e.preventDefault();openPortal()});
+});
+
+/* ══ NAV LINKS ══ */
+document.querySelectorAll('.nav-center a').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var nav=a.dataset.nav;
+    if(nav==='home'){e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})}
+    if(nav==='cand'){e.preventDefault();openPortal()}
+  });
+});
+
+/* ══ REVEAL ══ */
+var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el)});
+document.querySelectorAll('.section-header').forEach(function(el){obs.observe(el)});
+
+/* ══ META ADS DATA ══ */
+var META_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQZZqBeck80LcNEZUPOx-EjBHY_xnR1yGINcHIllM-P7lBh_rT1zdZTLxp6nyOE06ppyCagPog6Dxx1/pub?gid=699320221&single=true&output=csv';
+Chart.defaults.font.family="'Roboto',sans-serif";Chart.defaults.color='#6b7085';
+
+function parseNum(v){if(!v)return 0;return parseFloat(v.replace(/"/g,'').replace(/,/g,'.').replace(/\s/g,''))||0}
+
+var COLUMN_ALIASES={
+'Nom de la campagne':'Campaign name',
+'Nom de l\'ensemble de publicités':'Ad set name',
+'Nom de la publicité':'Ad name',
+'Nom du groupe d\'annonces':'Ad group name',
+'Coût (EUR)':'Cost (EUR)',
+'Portée':'Reach',
+'Clics (tous)':'Clicks (all)',
+'CTR (tous)':'CTR (all)',
+'Fréquence':'Frequency',
+'CPM (coût pour 1000 impressions)':'CPM',
+'Prospects sur Facebook':'Facebook leads',
+'Cost per on-Facebook lead':'Cost per lead',
+'J\'aime la page':'Page likes',
+'Commentaires sur les publications':'Post comments',
+'Réactions aux publications':'Post reactions',
+'Partages de publications':'Post shares',
+'Enregistrements de publications':'Post saves',
+'Coût par conversion':'Cost per conversion',
+'Clics':'Clicks',
+'Conversion type name':'Conversion type',
+'Total conversion value':'Conversion value',
+'URL de la miniature de la création':'Ad creative thumbnail URL',
+'URL de l\'image de la création':'Ad creative image URL'
+};
+function normalizeRow(row){
+var out={};
+for(var k in row){
+if(!row.hasOwnProperty(k))continue;
+var nk=COLUMN_ALIASES[k]||k;
+out[nk]=row[k];
+}
+return out;
+}
+function normalizeRows(rows){
+if(!rows||!rows.length)return rows;
+var sample=rows[0],needsNorm=false;
+for(var k in sample){if(COLUMN_ALIASES[k]){needsNorm=true;break;}}
+if(!needsNorm)return rows;
+return rows.map(normalizeRow);
+}
+var _missingCols={};
+function safeCol(row,col){
+  if(row && col in row) return row[col];
+  if(!_missingCols[col]){_missingCols[col]=true;console.warn('⚠️ Colonne manquante: '+col)}
+  return '';
+}
+function showMissingWarning(){
+  var cols=Object.keys(_missingCols);
+  if(!cols.length)return;
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;padding:8px 16px;background:#f59e0b;color:#000;font:13px/1.4 sans-serif;text-align:center;z-index:99999;';
+  d.textContent='⚠️ '+cols.length+' colonne(s) manquante(s) dans les donn\u00e9es : '+cols.join(', ');
+  document.body.appendChild(d);
+  setTimeout(function(){d.remove()},15000);
+}
+
+
+function fmtNum(n){return n.toLocaleString('fr-FR',{maximumFractionDigits:0})}
+function fmtDec(n,d){return n.toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function fmtDate(d){var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
+
+var RAW_ALL=[],RAW_SOLO=[],RAW_MULTI=[];
+var chartInstances={};
+var currentPeriod='all';
+
+function loadMetaData(){
+  fetch(META_URL+'&_t='+Date.now()).then(function(r){return r.text()}).then(function(csv){
+    var rows=normalizeRows(parseCSV(csv));
+    if(!rows.length)return;
+    RAW_ALL=[];RAW_SOLO=[];RAW_MULTI=[];
+    rows.forEach(function(r){
+      var name=r['Campaign name']||'';
+      var entry={
+        date:r['Date']||'',
+        spend:parseNum(r['Cost (EUR)']),
+        impressions:parseNum(r['Impressions']),
+        reach:parseNum(r['Reach']),
+        clicks:parseNum(r['Clicks (all)']),
+        ctr:parseNum(r['CTR']||r['CTR (link click-through rate)']||''),
+        leads:parseNum(r['On-Facebook leads']),
+        cpl:parseNum(r['Cost per on-Facebook lead']),
+        engagements:parseNum(r['Page engagements'])
+      };
+      RAW_ALL.push(entry);
+      if(name.indexOf('Solo')>=0)RAW_SOLO.push(entry);
+      else if(name.indexOf('quipe')>=0||name.indexOf('Equipe')>=0)RAW_MULTI.push(entry);
+    });
+    var allDates=RAW_ALL.map(function(r){return r.date}).filter(Boolean).sort();
+    if(allDates.length){
+      document.getElementById('periodFrom').value=allDates[0];
+      document.getElementById('periodTo').value=allDates[allDates.length-1];
+    }
+    renderMetaData();showMissingWarning();
+  }).catch(function(err){console.log('Meta data fetch error:',err)});
+}
+
+function getDateRange(mode){
+  var today=new Date();
+  var to=today.toISOString().slice(0,10);
+  var from;
+  if(mode==='7d'){from=new Date(today);from.setDate(from.getDate()-6);from=from.toISOString().slice(0,10)}
+  else if(mode==='30d'){from=new Date(today);from.setDate(from.getDate()-29);from=from.toISOString().slice(0,10)}
+  else if(mode==='month'){from=to.slice(0,8)+'01'}
+  else if(mode==='lastmonth'){var d=new Date(today.getFullYear(),today.getMonth()-1,1);from=d.toISOString().slice(0,10);var e=new Date(today.getFullYear(),today.getMonth(),0);to=e.toISOString().slice(0,10)}
+  else if(mode==='custom'){from=document.getElementById('periodFrom').value;to=document.getElementById('periodTo').value}
+  else{return null}
+  return{from:from,to:to};
+}
+
+function filterByPeriod(arr,range){
+  if(!range)return arr;
+  return arr.filter(function(r){return r.date>=range.from&&r.date<=range.to});
+}
+
+function setPeriod(mode){
+  currentPeriod=mode;
+  var btns=document.querySelectorAll('.period-btn');
+  btns.forEach(function(b){b.classList.remove('active')});
+  if(mode!=='custom'){
+    var labels={'7d':0,'30d':1,'month':2,'lastmonth':3,'all':4};
+    if(labels[mode]!==undefined&&btns[labels[mode]])btns[labels[mode]].classList.add('active');
+  }
+  var range=getDateRange(mode);
+  if(range){
+    document.getElementById('periodFrom').value=range.from;
+    document.getElementById('periodTo').value=range.to;
+  }
+  renderMetaData();
+}
+
+function renderMetaData(){
+  var range=currentPeriod==='all'?null:getDateRange(currentPeriod);
+  var all=filterByPeriod(RAW_ALL,range);
+  var solo=filterByPeriod(RAW_SOLO,range);
+  var multi=filterByPeriod(RAW_MULTI,range);
+
+  var tag=document.getElementById('periodTag');
+  if(range&&tag){tag.textContent=fmtDate(range.from)+' → '+fmtDate(range.to)+' · '+all.length+' entrées';tag.style.display=''}
+  else if(tag){tag.textContent='Toutes les données · '+all.length+' entrées';tag.style.display=''}
+
+  function sum(arr,k){var t=0;arr.forEach(function(r){t+=r[k]});return t}
+
+  var totalSpend=sum(all,'spend'),totalImpr=sum(all,'impressions'),totalClicks=sum(all,'clicks');
+  var totalLeads=sum(all,'leads'),totalCtr=totalImpr?totalClicks/totalImpr*100:0;
+  var totalCpl=totalLeads?totalSpend/totalLeads:0;
+  var soloSpend=sum(solo,'spend'),soloImpr=sum(solo,'impressions'),soloClicks=sum(solo,'clicks');
+  var soloLeads=sum(solo,'leads'),soloCtr=soloImpr?soloClicks/soloImpr*100:0,soloCpl=soloLeads?soloSpend/soloLeads:0;
+  var multiSpend=sum(multi,'spend'),multiImpr=sum(multi,'impressions'),multiClicks=sum(multi,'clicks');
+  var multiLeads=sum(multi,'leads'),multiCtr=multiImpr?multiClicks/multiImpr*100:0,multiCpl=multiLeads?multiSpend/multiLeads:0;
+
+  function setKPI(panel,vals){
+    var cards=document.querySelectorAll('#panel-'+panel+' .kpi-value');
+    if(cards.length>=6){
+      cards[0].textContent='€'+fmtDec(vals[0],2);
+      cards[1].textContent=fmtNum(vals[1]);
+      cards[2].textContent=fmtNum(vals[2]);
+      cards[3].textContent=fmtDec(vals[3],2)+'%';
+      cards[4].textContent=fmtNum(vals[4]);
+      cards[5].textContent=vals[5]?'€'+fmtDec(vals[5],2):'—';
+    }
+  }
+  setKPI('overview',[totalSpend,totalImpr,totalClicks,totalCtr,totalLeads,totalCpl]);
+  setKPI('solo',[soloSpend,soloImpr,soloClicks,soloCtr,soloLeads,soloCpl]);
+  setKPI('multi',[multiSpend,multiImpr,multiClicks,multiCtr,multiLeads,multiCpl]);
+
+  var campRows=document.querySelectorAll('#panel-overview .camp-card');
+  if(campRows.length>=2){
+    var sv=campRows[0].querySelectorAll('.camp-row-val');
+    if(sv.length>=6){sv[0].textContent='€'+fmtDec(soloSpend,2);sv[1].textContent=fmtNum(soloImpr);sv[2].textContent=fmtNum(soloClicks);sv[3].textContent=fmtDec(soloCtr,2)+'%';sv[4].textContent=fmtNum(soloLeads);sv[5].textContent=soloCpl?'€'+fmtDec(soloCpl,2):'—'}
+    var mv=campRows[1].querySelectorAll('.camp-row-val');
+    if(mv.length>=6){mv[0].textContent='€'+fmtDec(multiSpend,2);mv[1].textContent=fmtNum(multiImpr);mv[2].textContent=fmtNum(multiClicks);mv[3].textContent=fmtDec(multiCtr,2)+'%';mv[4].textContent=fmtNum(multiLeads);mv[5].textContent=multiCpl?'€'+fmtDec(multiCpl,2):'—'}
+  }
+
+  var gwSoloStats=document.querySelectorAll('.gw-solo .gw-stat-num');
+  if(gwSoloStats.length>=2){gwSoloStats[0].textContent=fmtNum(soloLeads);gwSoloStats[1].textContent=soloCpl?'€'+fmtDec(soloCpl,2):'—'}
+  var gwMultiStats=document.querySelectorAll('.gw-multi .gw-stat-num');
+  if(gwMultiStats.length>=2){gwMultiStats[0].textContent=fmtNum(multiLeads);gwMultiStats[1].textContent=multiCpl?'€'+fmtDec(multiCpl,2):'—'}
+
+  function groupByDate(arr){var m={};arr.forEach(function(r){if(!m[r.date])m[r.date]={spend:0,clicks:0,impressions:0,leads:0};m[r.date].spend+=r.spend;m[r.date].clicks+=r.clicks;m[r.date].impressions+=r.impressions;m[r.date].leads+=r.leads});for(var d in m){var g=m[d];g.ctr=g.impressions?g.clicks/g.impressions*100:0;g.cpl=g.leads?g.spend/g.leads:0}return m}
+  var allByDate=groupByDate(all),soloByDate=groupByDate(solo),multiByDate=groupByDate(multi);
+  var dates=Object.keys(allByDate).sort();
+  var labels=dates.map(function(d){var p=d.split('-');return p[2]+'/'+p[1]});
+  function vals(byDate,dates,key){return dates.map(function(d){return byDate[d]?byDate[d][key]:0})}
+
+  mkChart('chartOverview1',labels,vals(allByDate,dates,'spend'),vals(allByDate,dates,'leads'),'Dépenses (€)','Leads','Dépenses (€)','Leads','#1D70B7','#F16358','bar','line');
+  mkChart('chartOverview2',labels,vals(soloByDate,dates,'cpl'),vals(multiByDate,dates,'cpl'),'CPL Solo (€)','CPL Équipe (€)','CPL Solo (€)','CPL Équipe (€)','#1D70B7','#F16358','line','line');
+  mkChart('chartSolo1',labels,vals(soloByDate,dates,'spend'),vals(soloByDate,dates,'leads'),'Dépenses (€)','Leads','Dépenses (€)','Leads','#1D70B7','#10B981','bar','line');
+  mkChart('chartSolo2',labels,vals(soloByDate,dates,'ctr'),vals(soloByDate,dates,'cpl'),'CTR (%)','CPL (€)','CTR (%)','CPL (€)','#1D70B7','#F16358','line','line');
+  mkChart('chartMulti1',labels,vals(multiByDate,dates,'spend'),vals(multiByDate,dates,'leads'),'Dépenses (€)','Leads','Dépenses (€)','Leads','#F16358','#1D70B7','bar','line');
+  mkChart('chartMulti2',labels,vals(multiByDate,dates,'ctr'),vals(multiByDate,dates,'cpl'),'CTR (%)','CPL (€)','CTR (%)','CPL (€)','#F16358','#1D70B7','line','line');
+}
+
+function mkOpts(yL,yR){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1e2c',titleColor:'#fff',bodyColor:'#cbd5e1',borderColor:'rgba(255,255,255,.1)',borderWidth:1,cornerRadius:10,padding:12,titleFont:{weight:600}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{position:'left',title:{display:true,text:yL,font:{size:11}},grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:11}}},y1:{position:'right',title:{display:true,text:yR||'',font:{size:11}},grid:{display:false},ticks:{font:{size:11}}}}}}
+function mkChart(id,labels,d1,d2,lA,lB,yL,yR,c1,c2,tA,tB){
+  var el=document.getElementById(id);if(!el)return;
+  if(chartInstances[id]){chartInstances[id].destroy()}
+  chartInstances[id]=new Chart(el,{type:'bar',data:{labels:labels,datasets:[{label:lA,data:d1,type:tA||'bar',backgroundColor:c1+'33',borderColor:c1,borderWidth:2,borderRadius:6,yAxisID:'y',tension:.4,pointRadius:tA==='line'?3:0,fill:tA==='line'},{label:lB,data:d2,type:tB||'line',backgroundColor:c2+'22',borderColor:c2,borderWidth:2,yAxisID:'y1',tension:.4,pointRadius:3,fill:false}]},options:mkOpts(yL,yR)});
+}
+loadMetaData();
+
+/* ══ CANDIDATES DATA ══ */
+var SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRX93CXW3aDexDYPSS_jxMDwGCjwSu2OxaKYCpfo7bfvVhJrhXCNTLLCgzPeAc0qwkxvqy0VxfyhOAG/pub?gid=0&single=true&output=csv';
+var DEMO_CANDIDATES=[
+  {'Nom':'zerguini','Prénom':'oudherguine','Email':'zerguini14@gmail.com','Numéro de téléphone':'06 23 64 59 04','Code postal':'29260','Ville':'lesneven','Sur quelle zone souhaitez-vous vous implanter ?':'Zone Brest','De quel apport personnel disposez-vous ?':'Moins de 30 K€','Quelle est votre profession actuelle ?':'technicien fibre optique'}
+];
+var CANDIDATES=[];
+
+function parseCSV(text){
+  var lines=text.split('\n').filter(function(l){return l.trim()});
+  if(lines.length<2)return[];
+  function splitRow(line){
+    var result=[],cur='',inQ=false;
+    for(var c=0;c<line.length;c++){
+      var ch=line[c];
+      if(ch==='"'){inQ=!inQ}
+      else if(ch===','&&!inQ){result.push(cur.trim());cur=''}
+      else{cur+=ch}
+    }
+    result.push(cur.trim());
+    return result;
+  }
+  var headers=splitRow(lines[0]);
+  var rows=[];
+  for(var i=1;i<lines.length;i++){
+    var vals=splitRow(lines[i]);
+    var row={};
+    for(var j=0;j<headers.length;j++){
+      row[headers[j]]=j<vals.length?vals[j]:'';
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+function loadCandidates(){
+  fetch(SHEET_URL+'&_t='+Date.now()).then(function(r){return r.text()}).then(function(csv){
+    var parsed=normalizeRows(parseCSV(csv));
+    CANDIDATES=parsed.length?parsed:DEMO_CANDIDATES;
+    updateCandUI();
+  }).catch(function(){
+    CANDIDATES=DEMO_CANDIDATES;
+    updateCandUI();
+  });
+}
+
+function updateCandUI(){
+  var total=CANDIDATES.length;
+  document.getElementById('candTotal').textContent=total;
+  document.getElementById('gwCandTotal').textContent=total;
+  document.getElementById('candWeek').textContent=total;
+  document.getElementById('gwCandWeek').textContent=total;
+  function sumLeads(arr){var t=0;arr.forEach(function(r){t+=r.leads});return t}
+  var sl=sumLeads(RAW_SOLO),ml=sumLeads(RAW_MULTI);
+  document.getElementById('candSolo').textContent=sl;
+  document.getElementById('candMulti').textContent=ml;
+  renderCandidates('all','');
+}
+
+function renderCandidates(filter,search){
+  var list=document.getElementById('candList');
+  var filtered=CANDIDATES.filter(function(c){
+    if(search){var s=search.toLowerCase();var match=false;for(var k in c){if(c[k]&&c[k].toLowerCase().indexOf(s)>=0){match=true;break}}if(!match)return false}
+    return true;
+  });
+  if(!filtered.length){list.innerHTML='<div class="cand-empty"><div class="cand-empty-title">Aucun résultat</div><div class="cand-empty-desc">Essayez avec d\'autres termes de recherche.</div></div>';return}
+  list.innerHTML='';
+  filtered.forEach(function(c,idx){
+    var realIdx=CANDIDATES.indexOf(c);
+    var nom=c['Nom']||'';var prenom=c['Prénom']||c['Prenom']||'';
+    var fullName=(prenom+' '+nom).trim()||'Candidat '+(idx+1);
+    var initials=(prenom?prenom[0]:'')+(nom?nom[0]:'');if(!initials)initials='?';
+    var email=c['Email']||'—';
+    var phone=c['Numéro de téléphone']||c['Numero de telephone']||'—';
+    var ville=c['Ville']||'—';
+    var cp=c['Code postal']||'—';
+    var profession=c['Quelle est votre profession actuelle ?']||c['Quelle est votre profession actuelle']||'';
+    var html='<div class="cand-card">';
+    html+='<div class="cand-main">';
+    html+='<div class="cand-avatar unknown">'+initials.toUpperCase()+'</div>';
+    html+='<div class="cand-info"><div class="cand-name">'+fullName+'</div>';
+    html+='<div class="cand-meta"><span>'+ville+(cp!=='—'?' ('+cp+')':'')+'</span><span>'+email+'</span><span>'+phone+'</span></div>';
+    if(profession)html+='<div class="cand-meta" style="margin-top:4px;font-style:italic;color:var(--text-500)"><span>'+profession+'</span></div>';
+    html+='</div>';
+    html+='<span class="cand-status">Nouveau</span>';
+    html+='<button class="cand-view-btn" onclick="openModal('+realIdx+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg> Voir la fiche</button>';
+    html+='</div></div>';
+    list.insertAdjacentHTML('beforeend',html);
+  });
+}
+
+function openModal(idx){
+  var c=CANDIDATES[idx];if(!c)return;
+  var nom=c['Nom']||'';var prenom=c['Prénom']||c['Prenom']||'';
+  var fullName=(prenom+' '+nom).trim()||'Candidat '+(idx+1);
+  var initials=(prenom?prenom[0]:'')+(nom?nom[0]:'');if(!initials)initials='?';
+  var email=c['Email']||'—';
+  var phone=c['Numéro de téléphone']||c['Numero de telephone']||'—';
+  var cp=c['Code postal']||'—';
+  var ville=c['Ville']||'—';
+  var zone=c['Sur quelle zone souhaitez-vous vous implanter ?']||c['Sur quelle zone souhaitez-vous vous implanter']||'—';
+  var apport=c['De quel apport personnel disposez-vous ?']||c['De quel apport personnel disposez-vous']||'—';
+  var profession=c['Quelle est votre profession actuelle ?']||c['Quelle est votre profession actuelle']||'—';
+
+  document.getElementById('modalAvatar').textContent=initials.toUpperCase();
+  document.getElementById('modalName').textContent=fullName;
+  document.getElementById('modalLocationText').textContent=ville+(cp!=='—'?' ('+cp+')':'');
+  document.getElementById('modalStatus').textContent='Nouveau prospect';
+
+  var body='<div class="modal-section">';
+  body+='<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg> Informations de contact</div>';
+  body+='<div class="modal-info-grid">';
+  body+='<div class="modal-info-item"><div class="modal-info-label">Prénom</div><div class="modal-info-val">'+prenom+'</div></div>';
+  body+='<div class="modal-info-item"><div class="modal-info-label">Nom</div><div class="modal-info-val">'+nom+'</div></div>';
+  body+='<div class="modal-info-item"><div class="modal-info-label">Email</div><div class="modal-info-val">'+email+'</div></div>';
+  body+='<div class="modal-info-item"><div class="modal-info-label">Téléphone</div><div class="modal-info-val">'+phone+'</div></div>';
+  body+='<div class="modal-info-item"><div class="modal-info-label">Code postal</div><div class="modal-info-val">'+cp+'</div></div>';
+  body+='<div class="modal-info-item"><div class="modal-info-label">Ville</div><div class="modal-info-val">'+ville+'</div></div>';
+  body+='</div></div>';
+
+  body+='<div class="modal-section">';
+  body+='<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Réponses au formulaire</div>';
+  body+='<div class="modal-resp"><div class="modal-resp-q">Sur quelle zone souhaitez-vous vous implanter ?</div><div class="modal-resp-a">'+zone+'</div></div>';
+  body+='<div class="modal-resp"><div class="modal-resp-q">De quel apport personnel disposez-vous ?</div><div class="modal-resp-a">'+apport+'</div></div>';
+  body+='<div class="modal-resp"><div class="modal-resp-q">Quelle est votre profession actuelle ?</div><div class="modal-resp-a">'+profession+'</div></div>';
+  body+='</div>';
+
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    if(document.getElementById('modalOverlay').classList.contains('open'))closeModal();
+    else if(document.getElementById('candidatePortal').classList.contains('open'))closePortal();
+  }
+});
+
+document.querySelectorAll('.cand-section .filter-btn, .cand-toolbar .filter-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    btn.parentElement.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+    btn.classList.add('active');
+    renderCandidates(btn.dataset.filter,document.getElementById('searchInput').value);
+  });
+});
+document.getElementById('searchInput').addEventListener('input',function(){
+  var active=document.querySelector('.cand-toolbar .filter-btn.active');
+  renderCandidates(active?active.dataset.filter:'all',this.value);
+});
+
+loadCandidates();
+</script>
+</body>
+</html>

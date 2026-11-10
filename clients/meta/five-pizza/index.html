@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="pragma" content="no-cache">
+<title>Five Pizza Original &mdash; Dashboard Marketing</title>
+<link rel="icon" href="https://fivepizzaoriginal.com/wp-content/uploads/2022/07/logo-typo-blanc-f-noir0-150x150.png">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Oswald:wght@300;400;500;600;700&display=swap" rel="preload" as="style" onload="this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
+<style>
+
+:root{
+  --black:#000000;--dark:#0A0A0A;--surface:#111111;--card:#1A1A1A;--card-hover:#1F1F1F;
+  --yellow:#FAEB8E;--yellow-dim:rgba(250,235,142,.15);--green:#61CE70;--blue:#6EC1E4;--peach:#FFBC7D;
+  --white:#FFFFFF;--text:#7A7A7A;--text-light:#54595F;--beige:#C9C0BB;--cream:#F0F0EE;
+  --heading:'Oswald','Impact','Arial Black',sans-serif;
+  --font:'Open Sans','Helvetica Neue',Arial,sans-serif;
+  --radius:5px;--radius-lg:10px;
+  --ease:cubic-bezier(.25,.46,.45,.94);--ease-out:cubic-bezier(.16,1,.3,1);--ease-spring:cubic-bezier(.34,1.56,.64,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--black);color:var(--white);line-height:1.6;overflow-x:hidden}
+img{display:block;max-width:100%}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--dark)}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:rgba(250,235,142,.3)}
+
+.scroll-progress{position:fixed;top:0;left:0;width:0;height:3px;background:linear-gradient(90deg,var(--yellow),var(--green));z-index:10000;pointer-events:none;transition:width .05s linear}
+
+/* ═══ LOADER ═══ */
+.loader{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--black);transition:opacity .8s var(--ease-out),visibility .8s}
+.loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.loader-pizza{width:80px;height:80px;margin-bottom:20px;animation:loaderSpin 2s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(250,235,142,.3))}
+@keyframes loaderSpin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
+.loader-logo{width:min(240px,60vw);height:auto;margin-bottom:20px;opacity:0;animation:fadeUp .5s var(--ease-out) .1s forwards}
+.loader-bar{width:200px;height:3px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.loader-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--yellow),var(--green));border-radius:3px;animation:barFill 2s var(--ease-out) .3s forwards}
+@keyframes barFill{to{width:100%}}
+.loader-label{margin-top:10px;font-family:var(--heading);font-size:12px;color:var(--yellow);letter-spacing:3px;text-transform:uppercase;opacity:0;animation:fadeUp .4s var(--ease-out) .5s forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ MARQUEE TICKER ═══ */
+.marquee{overflow:hidden;padding:10px 0;background:var(--yellow);white-space:nowrap;position:relative}
+.marquee-track{display:inline-flex;animation:marqueeScroll 25s linear infinite}
+@keyframes marqueeScroll{to{transform:translateX(-50%)}}
+.marquee-item{display:inline-flex;align-items:center;gap:12px;padding:0 24px;font-family:var(--heading);font-size:13px;font-weight:700;color:var(--black);text-transform:uppercase;letter-spacing:2px}
+.marquee-item svg{width:10px;height:10px;fill:var(--black)}
+.marquee-dark{background:var(--surface);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04)}
+.marquee-dark .marquee-item{color:var(--text)}
+.marquee-dark .marquee-item svg{fill:var(--text)}
+
+/* ═══ HERO ═══ */
+.hero{position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;overflow:clip;background:var(--black)}
+.hero.gone{display:none}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,.3) 0%,rgba(0,0,0,.85) 70%,#000 100%);z-index:1}
+.hero-bg video{width:100%;height:100%;object-fit:cover}
+.hero-bg-fallback{position:absolute;inset:0;background:linear-gradient(135deg,var(--black) 0%,#111 40%,var(--black) 100%)}
+.hero-bg-pizza{position:absolute;opacity:.08;pointer-events:none;animation:heroPizzaDrift 20s var(--ease) infinite alternate}
+.hero-bg-pizza img{width:100%;height:100%;object-fit:contain;filter:brightness(.6) saturate(.7)}
+.hp-1{width:220px;height:220px;top:5%;left:3%;animation-delay:0s}
+.hp-2{width:180px;height:180px;top:60%;left:1%;animation-delay:2s;animation-duration:18s}
+.hp-3{width:250px;height:250px;top:3%;right:2%;left:auto;animation-delay:1s;animation-duration:22s}
+.hp-4{width:150px;height:150px;top:55%;right:4%;left:auto;animation-delay:3s;animation-duration:16s}
+.hp-5{width:130px;height:130px;bottom:10%;left:12%;top:auto;animation-delay:1.5s;animation-duration:24s}
+@keyframes heroPizzaDrift{0%{transform:translate(0,0) rotate(0deg)}33%{transform:translate(10px,-15px) rotate(5deg)}66%{transform:translate(-8px,10px) rotate(-3deg)}100%{transform:translate(5px,-8px) rotate(2deg)}}
+
+.hero-nav{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:20px 40px}
+.hero-nav-logo{height:70px;transition:transform .3s var(--ease-spring)}.hero-nav-logo:hover{transform:scale(1.05)}
+.hero-nav-tag{font-family:var(--heading);font-size:12px;font-weight:700;color:var(--white);letter-spacing:2px;text-transform:uppercase;padding:8px 18px;border:2px solid rgba(255,255,255,.15);border-radius:var(--radius);transition:all .3s}
+.hero-nav-tag:hover{border-color:var(--yellow);color:var(--yellow)}
+
+.hero-body{position:relative;z-index:2;padding:120px 40px 60px;max-width:100%;text-align:center}
+.hero-logo-main{width:min(420px,80vw);height:auto;margin-bottom:32px;opacity:0;animation:heroLogoIn .8s var(--ease-out) .1s forwards;filter:drop-shadow(0 0 40px rgba(250,235,142,.12))}
+@keyframes heroLogoIn{from{opacity:0;transform:scale(.7) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.hero-kicker{font-family:var(--heading);font-size:14px;font-weight:700;color:var(--yellow);letter-spacing:4px;text-transform:uppercase;margin-bottom:20px;opacity:0;animation:fadeUp .5s var(--ease-out) .2s forwards}
+.hero-title{font-family:var(--heading);font-size:clamp(52px,11vw,140px);font-weight:700;color:var(--white);line-height:.9;letter-spacing:-2px;text-transform:uppercase;margin-bottom:24px;opacity:0;animation:heroTitleIn .8s var(--ease-out) .35s forwards}
+@keyframes heroTitleIn{from{opacity:0;transform:translateY(30px) scale(.95);filter:blur(8px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+.hero-sub{font-family:var(--font);font-size:16px;font-weight:400;color:var(--text);line-height:1.6;max-width:500px;margin:0 auto 40px;letter-spacing:.5px;opacity:0;animation:fadeUp .5s var(--ease-out) .5s forwards}
+
+.hero-kpis{display:flex;justify-content:center;gap:48px;margin-bottom:40px;opacity:0;animation:fadeUp .6s var(--ease-out) .65s forwards}
+.hero-kpi{text-align:center}
+.hero-kpi-val{font-family:var(--heading);font-size:42px;font-weight:700;color:var(--white);line-height:1;letter-spacing:1px;text-shadow:0 0 30px rgba(250,235,142,.2)}
+.hero-kpi-lbl{font-family:var(--heading);font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:2px;margin-top:6px}
+
+.hero-cta{opacity:0;animation:fadeUp .5s var(--ease-out) .8s forwards}
+.btn-cta{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;font-family:var(--heading);font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--black);background:var(--yellow);border:none;border-radius:var(--radius);cursor:pointer;transition:all .3s var(--ease-spring);box-shadow:0 0 10px rgba(0,0,0,.15),0 0 40px rgba(250,235,142,.1)}
+.btn-cta:hover{background:var(--green);transform:translateY(-3px) scale(1.02);box-shadow:0 12px 32px rgba(0,0,0,.4),0 0 60px rgba(97,206,112,.15)}
+.btn-cta:active{transform:translateY(0) scale(.98)}
+.btn-cta svg{width:18px;height:18px;transition:transform .3s var(--ease-spring)}.btn-cta:hover svg{transform:translateX(4px)}
+
+.hero-campaigns{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;opacity:0;animation:fadeUp .6s var(--ease-out) .8s forwards;margin-top:10px}
+.hero-camp-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);cursor:pointer;transition:all .3s var(--ease-spring);min-width:200px;text-align:center;position:relative;overflow:hidden;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hero-camp-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(250,235,142,.05),transparent 60%);opacity:0;transition:opacity .3s}
+.hero-camp-card:hover{border-color:var(--yellow);transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.hero-camp-card:hover::before{opacity:1}
+.hero-camp-card.coming-soon{opacity:.5;cursor:default;pointer-events:none}
+.hero-camp-card.coming-soon:hover{transform:none;box-shadow:none;border-color:rgba(255,255,255,.1)}
+.hero-camp-icon{font-size:28px;line-height:1}
+.hero-camp-name{font-family:var(--heading);font-size:14px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:1px}
+.hero-camp-sub{font-size:11px;color:var(--text);line-height:1.3;max-width:220px}
+.hero-camp-badge{font-family:var(--heading);font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;letter-spacing:1px;text-transform:uppercase}
+.hero-camp-badge.live{background:var(--green);color:var(--white);animation:badgePulse 2s infinite}
+.hero-camp-badge.soon{background:rgba(255,255,255,.08);color:var(--text)}
+
+.hero-credit{position:absolute;bottom:14px;right:40px;z-index:2;font-size:10px;color:rgba(255,255,255,.12);opacity:0;animation:fadeUp .4s var(--ease-out) 1s forwards}
+.hero-credit a{color:rgba(255,255,255,.2);text-decoration:none}
+
+/* ═══ APP ═══ */
+#app{display:none;min-height:100vh}
+#app.active{display:block}
+
+/* ═══ TOPBAR ═══ */
+.topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:10px 32px;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-logo{height:28px;width:auto}
+.topbar-sep{width:1px;height:16px;background:rgba(255,255,255,.1)}
+.topbar-brand{font-family:var(--heading);font-size:14px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-date{font-size:11px;color:var(--text);font-weight:500;letter-spacing:.5px;font-family:var(--heading)}
+.topbar-live{display:flex;align-items:center;gap:6px;font-family:var(--heading);font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1px}
+.topbar-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.topbar-back{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-family:var(--heading);font-size:10px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:1px;text-decoration:none;border:1px solid rgba(255,255,255,.1);border-radius:var(--radius);transition:all .25s var(--ease)}
+.topbar-back:hover{color:var(--yellow);border-color:var(--yellow);background:rgba(250,235,142,.06)}
+.topbar-back svg{width:12px;height:12px;fill:currentColor;transition:transform .25s var(--ease-spring)}
+.topbar-back:hover svg{transform:translateX(-3px)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ═══ CAMPAIGN TABS ═══ */
+.campaign-tabs{display:flex;align-items:stretch;background:var(--dark);border-bottom:1px solid rgba(255,255,255,.06);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.campaign-tabs::-webkit-scrollbar{height:0}
+.camp-tab{flex:1;min-width:0;padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--heading);font-size:13px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:1px;cursor:pointer;border:none;background:transparent;transition:all .3s var(--ease);position:relative;white-space:nowrap}
+.camp-tab::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:3px;background:var(--yellow);border-radius:3px 3px 0 0;transform:scaleX(0);transition:transform .3s var(--ease-spring)}
+.camp-tab:hover{color:var(--white);background:rgba(255,255,255,.03)}
+.camp-tab.active{color:var(--yellow)}
+.camp-tab.active::after{transform:scaleX(1)}
+.camp-tab-icon{font-size:16px;line-height:1}
+.camp-tab-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--yellow);color:var(--black);letter-spacing:0}
+.camp-tab-badge.live-badge{background:var(--green);color:var(--white);animation:badgePulse 2s infinite}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(97,206,112,.4)}50%{box-shadow:0 0 0 6px rgba(97,206,112,0)}}
+
+/* ═══ FILTERS ═══ */
+.filters{display:flex;align-items:center;gap:8px;padding:12px 32px;background:var(--black);border-bottom:1px solid rgba(255,255,255,.06)}
+.filter-btn{padding:7px 18px;font-family:var(--heading);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text);background:transparent;border:2px solid rgba(255,255,255,.08);border-radius:var(--radius);cursor:pointer;transition:all .25s var(--ease-spring)}
+.filter-btn:hover{border-color:var(--yellow);color:var(--yellow);transform:scale(1.03)}
+.filter-btn:active{transform:scale(.97)}
+.filter-btn.active{background:var(--yellow);color:var(--black);border-color:var(--yellow)}
+.filter-sep{width:1px;height:20px;background:rgba(255,255,255,.06);margin:0 4px}
+.filter-date{padding:6px 12px;font-family:var(--font);font-size:12px;font-weight:500;color:var(--white);background:var(--surface);border:2px solid rgba(255,255,255,.08);border-radius:var(--radius);cursor:pointer;color-scheme:dark;transition:all .2s}
+.filter-date:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px var(--yellow-dim)}
+
+/* ═══ SECTIONS ═══ */
+.section{padding:40px 32px 24px;position:relative;overflow:clip}
+.sec-black{background:var(--black)}
+.sec-surface{background:var(--surface)}
+
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.section-num{font-family:var(--heading);font-size:14px;font-weight:700;color:var(--black);background:var(--yellow);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:0;box-shadow:0 0 20px rgba(250,235,142,.15)}
+.section-title{font-family:var(--heading);font-size:clamp(22px,3vw,32px);font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:1px}
+.section-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,.08),transparent)}
+.section-sub{font-family:var(--heading);font-size:13px;font-weight:400;color:var(--text);text-transform:uppercase;letter-spacing:2px;margin:-16px 0 20px 52px}
+
+/* ═══ BANNER ═══ */
+.banner{position:relative;margin:0 32px;border-radius:var(--radius-lg);overflow:clip;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:48px 24px}
+.banner-1{background:var(--black);border:3px solid rgba(255,255,255,.1)}
+.banner-1::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(250,235,142,.04),transparent 60%),radial-gradient(ellipse at 70% 50%,rgba(97,206,112,.03),transparent 60%);pointer-events:none}
+.banner-2{background:var(--yellow)}
+.banner-2 .banner-text,.banner-2 .banner-sub{color:var(--black)}
+.banner-logo{width:min(220px,50vw);height:auto;margin-bottom:10px}
+.banner-text{font-family:var(--heading);font-size:clamp(22px,4vw,42px);font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:1px;line-height:1;opacity:0;position:relative;z-index:1}
+.banner-text.typed{animation:typedReveal .7s var(--ease-out) forwards}
+@keyframes typedReveal{from{opacity:0;transform:translateY(10px) scale(.97);filter:blur(4px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+.banner-sub{font-family:var(--heading);font-size:14px;font-weight:400;color:var(--text);text-transform:uppercase;letter-spacing:2px;opacity:0;position:relative;z-index:1}
+.banner-sub.typed{animation:typedReveal .5s var(--ease-out) .15s forwards}
+
+/* ═══ PIZZA STRIP ═══ */
+.pizza-strip{overflow:hidden;padding:14px 0;background:var(--surface);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);position:relative}
+.pizza-strip::before,.pizza-strip::after{content:'';position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none}
+.pizza-strip::before{left:0;background:linear-gradient(to right,var(--surface),transparent)}
+.pizza-strip::after{right:0;background:linear-gradient(to left,var(--surface),transparent)}
+.strip-track{display:flex;gap:48px;align-items:center;animation:stripScroll 35s linear infinite;width:max-content}
+@keyframes stripScroll{to{transform:translateX(-50%)}}
+.strip-item{flex-shrink:0;height:55px;opacity:.2;transition:opacity .4s,transform .4s var(--ease-spring)}
+.strip-item:hover{opacity:.5;transform:scale(1.1) rotate(-3deg)}
+.strip-item img{height:100%;width:auto;object-fit:contain}
+
+/* ═══ KPI GRID ═══ */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:24px}
+.kpi{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:20px;transition:all .3s var(--ease-spring);position:relative;overflow:hidden;cursor:default}
+.kpi:hover{border-color:rgba(250,235,142,.2);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.kpi-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--yellow),var(--green));transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease-out)}
+.kpi:hover .kpi-bar{transform:scaleX(1)}
+.kpi-shimmer{position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(250,235,142,.03),transparent);transition:left .6s}
+.kpi:hover .kpi-shimmer{left:100%}
+.kpi-label{font-family:var(--heading);font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.kpi-value{font-family:var(--heading);font-size:28px;font-weight:700;color:var(--white);line-height:1;letter-spacing:.5px}
+.kpi-accent .kpi-value{color:var(--yellow);text-shadow:0 0 20px rgba(250,235,142,.15)}
+.kpi{opacity:0;transform:translateY(24px);transition:opacity .5s var(--ease-out),transform .5s var(--ease-out),border-color .25s,box-shadow .25s}
+.kpi.in{opacity:1;transform:translateY(0)}
+
+/* ═══ CHARTS ═══ */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.chart-card{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:all .3s}
+.chart-card:hover{border-color:rgba(255,255,255,.1);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.chart-card-title{font-family:var(--heading);font-size:14px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.chart-wrap{position:relative;height:240px}
+.chart-card{opacity:0;transition:all .6s var(--ease-out)}
+.chart-card.from-left{transform:translateX(-30px)}
+.chart-card.from-right{transform:translateX(30px)}
+.chart-card.in{opacity:1;transform:translateX(0)}
+
+/* ═══ LEADS / PROSPECTS ═══ */
+.leads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-bottom:24px}
+.lead-card{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius-lg);padding:20px;position:relative;overflow:hidden;transition:all .3s var(--ease-spring);opacity:0;transform:translateY(16px) scale(.98)}
+.lead-card.in{opacity:1;transform:translateY(0) scale(1)}
+.lead-card:hover{border-color:rgba(250,235,142,.15);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.lead-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--yellow),var(--green));opacity:0;transition:opacity .3s}
+.lead-card:hover::before{opacity:1}
+.lead-card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.lead-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--yellow),var(--green));display:flex;align-items:center;justify-content:center;font-family:var(--heading);font-size:16px;font-weight:700;color:var(--black);flex-shrink:0}
+.lead-name{font-family:var(--heading);font-size:16px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:.5px;line-height:1.2}
+.lead-date{font-size:11px;color:var(--text);margin-top:2px;font-family:var(--heading)}
+.lead-fields{display:flex;flex-direction:column;gap:8px}
+.lead-field{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.4}
+.lead-field-icon{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--yellow);opacity:.6}
+.lead-field-label{color:var(--text);min-width:55px;flex-shrink:0}
+.lead-field-value{color:rgba(255,255,255,.8);word-break:break-word}
+.lead-field-value a{color:var(--yellow);text-decoration:none}
+.lead-field-value a:hover{text-decoration:underline}
+.lead-responses{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)}
+.lead-response{margin-bottom:8px}
+.lead-response-q{font-family:var(--heading);font-size:10px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;opacity:.7}
+.lead-response-a{font-size:12px;color:rgba(255,255,255,.7);line-height:1.4;font-family:var(--font)}
+.leads-empty{text-align:center;padding:40px;color:var(--text);font-family:var(--heading);font-size:14px;text-transform:uppercase;letter-spacing:2px}
+
+/* ═══ EMPTY STATE ═══ */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;border:2px dashed rgba(255,255,255,.06);border-radius:var(--radius-lg);margin-bottom:24px;background:rgba(255,255,255,.01)}
+.empty-state-icon{font-size:40px;margin-bottom:14px;opacity:.3}
+.empty-state-title{font-family:var(--heading);font-size:18px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.empty-state-sub{font-size:13px;color:var(--text);max-width:360px;line-height:1.5}
+.empty-state-pulse{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-family:var(--heading);font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1px}
+.empty-state-pulse::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.leads-count{font-family:var(--heading);font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.leads-count span{color:var(--yellow)}
+
+/* ═══ TABLE ═══ */
+.table-card{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);overflow:hidden;margin-bottom:24px}
+.table-card-header{padding:14px 20px;border-bottom:2px solid var(--yellow);position:relative}
+.table-card-title{font-family:var(--heading);font-size:14px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:1px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:rgba(255,255,255,.03)}
+th{padding:10px 14px;text-align:left;font-family:var(--heading);font-weight:700;color:var(--yellow);text-transform:uppercase;font-size:10px;letter-spacing:1px;white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.7);white-space:nowrap;font-family:var(--heading)}
+tr:hover td{background:rgba(250,235,142,.02)}
+.table-row-anim{opacity:0;transform:translateY(4px);transition:opacity .3s var(--ease-out),transform .3s var(--ease-out)}
+.table-row-anim.in{opacity:1;transform:translateY(0)}
+
+/* ═══ GRADIENT DIVIDER ═══ */
+.grad-divider{height:3px;background:linear-gradient(90deg,transparent,var(--beige),transparent);opacity:.15}
+.sec-spacer{height:2px;background:rgba(255,255,255,.04)}
+
+/* ═══ FOOTER ═══ */
+.site-footer{background:var(--black);color:rgba(255,255,255,.3);padding:48px 40px 24px;border-top:2px solid var(--yellow)}
+.footer-top{display:flex;justify-content:space-between;gap:40px;margin-bottom:32px;flex-wrap:wrap}
+.footer-brand{max-width:280px}
+.footer-brand-logo{width:min(180px,40vw);height:auto}
+.footer-brand p{font-size:13px;line-height:1.6;color:rgba(255,255,255,.25);margin-top:12px;letter-spacing:.5px}
+.footer-col h4{font-family:var(--heading);font-size:12px;font-weight:700;color:var(--yellow);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.footer-col a{display:block;font-size:13px;color:rgba(255,255,255,.3);text-decoration:none;padding:2px 0;transition:color .2s;letter-spacing:.5px}
+.footer-col a:hover{color:var(--yellow)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.04);padding-top:16px;display:flex;justify-content:space-between;font-size:11px;letter-spacing:.5px}
+.footer-bottom a{color:rgba(255,255,255,.2);text-decoration:none}
+
+/* ═══ REVEAL ═══ */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s var(--ease-out),transform .6s var(--ease-out)}
+.reveal.in{opacity:1;transform:translateY(0)}
+.reveal-scale{opacity:0;transform:scale(.95);transition:opacity .5s var(--ease-out),transform .5s var(--ease-out)}
+.reveal-scale.in{opacity:1;transform:scale(1)}
+
+/* ═══ SEC BG PIZZA ═══ */
+.sec-bg-pizza{position:absolute;pointer-events:none;opacity:.03;z-index:0}
+.sec-bg-pizza img{width:100%;height:100%;object-fit:contain}
+.sec-bg-pizza.right{right:-30px;top:50%;transform:translateY(-50%);width:200px;height:200px}
+.sec-bg-pizza.left{left:-30px;top:50%;transform:translateY(-50%);width:180px;height:180px}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.scroll-progress,.marquee,.pizza-strip,.hero-bg-pizza{display:none}}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:1000px){
+  .hero-kpis{flex-wrap:wrap;gap:24px}
+  .chart-row{grid-template-columns:1fr}
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .footer-top{flex-direction:column;gap:24px}
+  .banner{padding:36px 20px}
+  .leads-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  body{overflow-x:hidden;-webkit-overflow-scrolling:touch}
+  #app{max-width:100vw}
+  #content,.section,.site-footer{max-width:100vw;overflow-x:clip}
+  .btn-cta,.filter-btn,.filter-date,.camp-tab,a,button{touch-action:manipulation}
+  .filter-date{font-size:16px}
+  .hero-bg-pizza{display:none}
+  .hp-1,.hp-3{display:block;width:100px;height:100px}
+  .hp-1{top:5%;left:2%}.hp-3{top:3%;right:0;width:120px;height:120px}
+
+  .hero-nav{padding:14px 16px}
+  .hero-nav-logo{height:52px}
+  .hero-nav-tag{font-size:10px;padding:6px 12px}
+  .hero-body{padding:100px 16px 40px}
+  .hero-logo-main{width:min(300px,75vw);margin-bottom:18px}
+  .hero-kicker{font-size:11px;letter-spacing:3px}
+  .hero-title{font-size:44px;letter-spacing:-1px}
+  .hero-sub{font-size:14px;margin-bottom:28px}
+  .hero-kpis{gap:0;justify-content:space-between;width:100%}
+  .hero-kpi{flex:1;text-align:center;min-width:0}
+  .hero-kpi-val{font-size:28px}
+  .hero-kpi-lbl{font-size:9px;letter-spacing:1px}
+  .hero-campaigns{gap:10px;padding:0 4px}
+  .hero-camp-card{min-width:0;flex:1;padding:16px 14px;min-height:44px}
+  .hero-camp-icon{font-size:22px}
+  .hero-camp-name{font-size:12px}
+  .hero-camp-sub{font-size:10px}
+  .hero-camp-badge{font-size:9px}
+  .hero-credit{right:16px;bottom:10px}
+
+  .topbar{padding:10px 14px}
+  .topbar-left{gap:8px;min-width:0;overflow:hidden}
+  .topbar-logo{height:22px;width:auto;flex-shrink:0}
+  .topbar-sep{height:14px;flex-shrink:0}
+  .topbar-brand{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .topbar-right{gap:5px;flex-shrink:0}
+  .topbar-back{padding:5px 8px;font-size:9px;letter-spacing:0;gap:4px}
+  .topbar-back svg{width:10px;height:10px}
+  .topbar-date{font-size:10px;white-space:nowrap}
+  .topbar-live{font-size:9px}
+
+  .campaign-tabs{gap:0}
+  .camp-tab{padding:10px 14px;font-size:11px;min-height:44px}
+  .camp-tab-icon{font-size:14px}
+  .camp-tab-badge{font-size:9px;padding:2px 6px}
+
+  .filters{padding:10px 14px;gap:5px;flex-wrap:wrap}
+  .filter-btn{padding:5px 12px;font-size:11px;min-height:44px;display:inline-flex;align-items:center}
+  .filter-sep{display:none}
+  .filter-date{padding:5px 8px;flex:1;min-width:0;min-height:44px}
+
+  .section{padding:28px 14px 16px}
+  .section-header{gap:8px;margin-bottom:16px}
+  .section-num{width:30px;height:30px;font-size:12px}
+  .section-title{font-size:18px}
+  .section-sub{font-size:11px;margin-left:38px;margin-bottom:14px}
+
+  .banner{margin:0 14px;padding:28px 16px;border-radius:var(--radius)}
+  .banner-text{font-size:20px}
+  .banner-sub{font-size:11px;letter-spacing:1px}
+
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .kpi-grid .kpi:last-child:nth-child(odd){grid-column:1/-1}
+  .kpi{padding:14px}
+  .kpi-label{font-size:10px}
+  .kpi-value{font-size:22px}
+
+  .chart-card{padding:14px}
+  .chart-card-title{font-size:12px}
+  .chart-wrap{height:180px}
+
+  .leads-grid{grid-template-columns:1fr}
+  .lead-card{padding:16px}
+
+  .table-card-header{padding:12px 14px}
+  .table-card-title{font-size:12px}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{font-size:10px;min-width:560px}
+  th{padding:8px 8px;font-size:9px}
+  td{padding:8px 8px}
+  th:first-child,td:first-child{position:sticky;left:0;z-index:2;min-width:80px;background:var(--surface)}
+  thead th:first-child{background:rgba(255,255,255,.03)}
+
+  .marquee-item{font-size:11px;padding:0 16px;letter-spacing:1px}
+  .strip-item{height:40px}
+  .sec-bg-pizza{display:none}
+
+  .empty-state{padding:36px 16px;margin:0 -4px 20px}
+  .empty-state-icon{font-size:34px;margin-bottom:10px}
+  .empty-state-title{font-size:16px;letter-spacing:.5px}
+  .empty-state-sub{font-size:12px;max-width:280px}
+  .empty-state-pulse{font-size:10px;margin-top:10px}
+
+  .grad-divider{height:3px;margin:0 14px}
+  .sec-spacer{height:24px}
+
+  .site-footer{padding:28px 16px 16px}
+  .footer-top{flex-direction:column;gap:16px}
+  .footer-brand{max-width:100%}
+  .footer-brand-logo{width:min(140px,35vw)}
+  .footer-col a{min-height:44px;display:flex;align-items:center}
+  .footer-bottom{flex-direction:column;gap:4px;font-size:10px;text-align:center}
+}
+@media(max-width:380px){
+  .hero-logo-main{width:min(240px,70vw);margin-bottom:14px}
+  .hero-title{font-size:36px}
+  .hero-kpi-val{font-size:24px}
+  .kpi-value{font-size:20px}
+  .kpi-label{font-size:9px}
+  .chart-wrap{height:160px}
+  table{font-size:9px;min-width:520px}
+  .filter-btn{padding:4px 10px;font-size:10px}
+  .filter-date{width:100%;flex:1 1 100%}
+  .banner{padding:24px 12px}
+  .banner-text{font-size:17px}
+  .camp-tab{font-size:10px;padding:8px 10px}
+  .topbar-back{padding:5px 6px;font-size:0;min-width:28px;justify-content:center;gap:0}
+  .topbar-back svg{width:14px;height:14px}
+  .empty-state{padding:32px 16px}
+  .empty-state-icon{font-size:32px}
+  .empty-state-title{font-size:15px}
+  .empty-state-sub{font-size:12px}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- LOADER -->
+<div class="loader" id="loader">
+  <img class="loader-pizza" src="https://fivepizzaoriginal.com/wp-content/uploads/2023/02/CHORIZO-2.png" alt="">
+  <img class="loader-logo" src="https://fivepizzaoriginal.com/wp-content/uploads/2022/07/logo-typo-blanc-f-noir0-1024x517.png" alt="Five Pizza Original">
+  <div class="loader-bar"><span></span></div>
+  <div class="loader-label">Chargement du dashboard</div>
+</div>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-bg">
+    <div class="hero-bg-fallback"></div>
+    <div class="hero-bg-pizza hp-1"><img src="https://fivepizzaoriginal.com/wp-content/uploads/2023/02/CHORIZO-2.png" alt="" loading="lazy"></div>
+    <div class="hero-bg-pizza hp-2"><img src="https://fivepizzaoriginal.com/wp-content/uploads/2023/02/VEGGIE-ROQUETTE-1.png" alt="" loading="lazy"></div>
+    <div class="hero-bg-pizza hp-3"><img src="https://fivepizzaoriginal.com/wp-content/uploads/2023/02/VEGGIE-SPICY-1.png" alt="" loading="lazy"></div>
+    <div class="hero-bg-pizza hp-4"><img src="https://fivepizzaoriginal.com/wp-content/uploads/2023/11/rollz-buffalo.png" alt="" loading="lazy"></div>
+    <div class="hero-bg-pizza hp-5"><img src="https://fivepizzaoriginal.com/wp-content/uploads/2023/11/rollz-VEGE.png" alt="" loading="lazy"></div>
+  </div>
+
+  <nav class="hero-nav">
+    <span class="hero-nav-tag">Dashboard Marketing</span>
+  </nav>
+
+  <div class="hero-body">
+    <img class="hero-logo-main" src="https://fivepizzaoriginal.com/wp-content/uploads/2022/07/logo-typo-blanc-f-noir0-1024x517.png" alt="Five Pizza Original">
+    <div class="hero-kicker">Campagnes Meta Ads</div>
+    <h1 class="hero-title">Par vous,<br>Pour tous</h1>
+    <p class="hero-sub">Suivi en temps r&eacute;el des performances marketing Five Pizza Original &mdash; Salon de la Street Food &amp; recrutement de franchis&eacute;s.</p>
+    <div class="hero-kpis">
+      <div class="hero-kpi"><div class="hero-kpi-val" id="h-leads">&mdash;</div><div class="hero-kpi-lbl">Leads</div></div>
+      <div class="hero-kpi"><div class="hero-kpi-val" id="h-cpl">&mdash;</div><div class="hero-kpi-lbl">Co&ucirc;t / Lead</div></div>
+      <div class="hero-kpi"><div class="hero-kpi-val" id="h-budget">&mdash;</div><div class="hero-kpi-lbl">Budget</div></div>
+    </div>
+    <div class="hero-campaigns" id="hero-campaigns"></div>
+  </div>
+
+  <div class="hero-credit">Propuls&eacute; par <a href="https://meta-advertising.io">Meta-Advertising</a></div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee" id="marquee" style="display:none">
+  <div class="marquee-track" id="marquee-track"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <img class="topbar-logo" src="https://fivepizzaoriginal.com/wp-content/uploads/2022/07/logo-typo-blanc-f-noir0-1024x517.png" alt="Five Pizza Original">
+    </div>
+    <div class="topbar-right">
+      <a class="topbar-back" href="#" onclick="backToHero();return false"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>Accueil</a>
+      <span class="topbar-date" id="topbar-date"></span>
+      <span class="topbar-live" id="topbar-live" title="Dernière mise à jour">Live</span>
+    </div>
+  </div>
+
+  <div class="campaign-tabs" id="campaign-tabs"></div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="setPreset('all',this)">Tout</button>
+    <button class="filter-btn" onclick="setPreset('30',this)">30J</button>
+    <button class="filter-btn" onclick="setPreset('14',this)">14J</button>
+    <button class="filter-btn" onclick="setPreset('7',this)">7J</button>
+    <div class="filter-sep"></div>
+    <input type="date" class="filter-date" id="date-start" onchange="applyCustom()">
+    <input type="date" class="filter-date" id="date-end" onchange="applyCustom()">
+  </div>
+
+  <div id="content"></div>
+
+  <footer class="site-footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img class="footer-brand-logo" src="https://fivepizzaoriginal.com/wp-content/uploads/2022/07/logo-typo-blanc-f-noir0-1024x517.png" alt="">
+        <p>R&eacute;seau de pizzerias customisables pr&eacute;sent dans plus de 60 villes en France. Par vous, Pour tous.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Dashboard</h4>
+        <a href="#" onclick="setPreset('all',document.querySelector('.filter-btn'));window.scrollTo(0,0);return false">Vue d'ensemble</a>
+        <a href="https://fivepizzaoriginal.com/en/devenir-franchise/" target="_blank" rel="noopener">Devenir franchis&eacute;</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="https://fivepizzaoriginal.com" target="_blank" rel="noopener">fivepizzaoriginal.com</a>
+        <a>60+ restaurants en France</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Dashboard propuls&eacute; par <a href="https://meta-advertising.io">Meta-Advertising</a></span>
+      <span>&copy; 2026 Five Pizza Original</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CONFIGURATION — GIDs des campagnes
+   ═══════════════════════════════════════════════════ */
+/* ═══ SOURCES DE DONNÉES ═══
+   ⚠️ NE JAMAIS modifier les colonnes du fichier Leads (Zapier écrit par position).
+   On peut créer des onglets de calcul à côté sans problème.
+
+   Meta Ads : fichier "2026_Dashboard Franchise Board/Le DUO/Body House recrutement/…"
+     → onglet FivePizza_Meta Ads, alimenté par The Sheep
+     → Colonnes : Date, Campaign name, Campaign ID, Impressions, Reach, Link clicks, CTR, CPC, Cost (EUR), Frequency, leads Meta, coût par lead
+
+   Leads : fichier "FPO - Leads Meta Ads (Zapier)"
+     → onglet Leads (gid=0), 1 ligne par candidat via Zapier
+     → Colonnes A-S : Date de création, Parcours, Formulaire, Campagne, Ensemble de publicités, Publicité,
+       Nom, Prénom, Email, Téléphone, Situation, Délai du projet, Apport personnel, Zone souhaitée,
+       Plateforme, Lead ID, Statut rappel, Date rappel, Commentaire
+*/
+/* Pour que le fetch fonctionne, chaque spreadsheet doit être publié :
+   Google Sheets → Fichier → Partager → Publier sur le Web → onglet concerné → CSV
+   Cela génère une URL pub?gid=…&output=csv accessible sans login.
+   En attendant la publication, le dashboard affiche des données de démo. */
+var COLUMN_ALIASES={
+'Nom de la campagne':'Campaign name',
+'Nom de l\'ensemble de publicités':'Ad set name',
+'Nom de la publicité':'Ad name',
+'Nom du groupe d\'annonces':'Ad group name',
+'Coût (EUR)':'Cost (EUR)',
+'Portée':'Reach',
+'Clics (tous)':'Clicks (all)',
+'CTR (tous)':'CTR (all)',
+'Fréquence':'Frequency',
+'CPM (coût pour 1000 impressions)':'CPM',
+'Prospects sur Facebook':'Facebook leads',
+'Cost per on-Facebook lead':'Cost per lead',
+'J\'aime la page':'Page likes',
+'Commentaires sur les publications':'Post comments',
+'Réactions aux publications':'Post reactions',
+'Partages de publications':'Post shares',
+'Enregistrements de publications':'Post saves',
+'Coût par conversion':'Cost per conversion',
+'Clics':'Clicks',
+'Conversion type name':'Conversion type',
+'Total conversion value':'Conversion value',
+'URL de la miniature de la création':'Ad creative thumbnail URL',
+'URL de l\'image de la création':'Ad creative image URL'
+};
+function normalizeRow(row){
+var out={};
+for(var k in row){
+if(!row.hasOwnProperty(k))continue;
+var nk=COLUMN_ALIASES[k]||k;
+out[nk]=row[k];
+}
+return out;
+}
+function normalizeRows(rows){
+if(!rows||!rows.length)return rows;
+var sample=rows[0],needsNorm=false;
+for(var k in sample){if(COLUMN_ALIASES[k]){needsNorm=true;break;}}
+if(!needsNorm)return rows;
+return rows.map(normalizeRow);
+}
+var _missingCols={};
+function safeCol(row,col){
+  if(row && col in row) return row[col];
+  if(!_missingCols[col]){_missingCols[col]=true;console.warn('⚠️ Colonne manquante: '+col)}
+  return '';
+}
+function showMissingWarning(){
+  var cols=Object.keys(_missingCols);
+  if(!cols.length)return;
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;padding:8px 16px;background:#f59e0b;color:#000;font:13px/1.4 sans-serif;text-align:center;z-index:99999;';
+  d.textContent='⚠️ '+cols.length+' colonne(s) manquante(s) dans les donn\u00e9es : '+cols.join(', ');
+  document.body.appendChild(d);
+  setTimeout(function(){d.remove()},15000);
+}
+
+
+var META_SHEET='https://docs.google.com/spreadsheets/d/e/2PACX-1vTfTJz3BtJFeoTDSH00mfpv4BleUm6pWmcQ_-ZQ9HePp1m8TX70rJK9mjwsAkAGLUA3gD9cZWw6qXpb/pub';
+var LEADS_SHEET='https://docs.google.com/spreadsheets/d/e/2PACX-1vSYr79mDM2JAGbBdtHkg4cI5YjIW45UoupeUaU--JsMKjWTw6xK6LcfVxcqLtgOl8Z3CQ1TzJ1jgd8S/pub';
+var GA4_SHEET='https://docs.google.com/spreadsheets/d/e/2PACX-1vTfTJz3BtJFeoTDSH00mfpv4BleUm6pWmcQ_-ZQ9HePp1m8TX70rJK9mjwsAkAGLUA3gD9cZWw6qXpb/pub';
+
+var CAMPAIGNS=[
+  {
+    id:'salon',
+    name:'Salon de la Street Food',
+    subtitle:'7ème édition — Paris Nord Villepinte — 7-9 nov. 2026',
+    icon:'🍕',
+    type:'event',
+    meta_gid:'1755394612',
+    meta_sheet:META_SHEET,
+    ga4_gid:'GID_SALON_GA4',
+    ga4_sheet:GA4_SHEET,
+    leads_gid:'0',
+    leads_sheet:LEADS_SHEET,
+    marquee:'SALON DE LA STREET FOOD 2026 ★ 7ème ÉDITION ★ PARIS NORD VILLEPINTE ★ 7-9 NOVEMBRE'
+  },
+  {
+    id:'franchise',
+    name:'Recrutement Franchisés',
+    subtitle:'Campagne continue — LeadGen France',
+    icon:'🏢',
+    type:'ongoing',
+    meta_gid:'GID_FRANCHISE_META',
+    meta_sheet:META_SHEET,
+    ga4_gid:'GID_FRANCHISE_GA4',
+    ga4_sheet:GA4_SHEET,
+    leads_gid:'GID_FRANCHISE_LEADS',
+    leads_sheet:LEADS_SHEET,
+    marquee:'RECRUTEMENT FRANCHISÉS ★ +60 RESTAURANTS EN FRANCE ★ PAR VOUS, POUR TOUS',
+    status:'coming-soon'
+  }
+];
+
+/* ═══ STATE ═══ */
+var campData={};
+CAMPAIGNS.forEach(function(c){campData[c.id]={meta:[],metaRaw:[],ga4:[],ga4Channels:{},leads:[]};});
+var activeCamp=CAMPAIGNS[0].id;
+var filterStart=null,filterEnd=null,activePreset='all';
+var chartInstances=[];
+
+/* ═══ UTILS ═══ */
+function pN(v){if(!v)return 0;return parseFloat(v.toString().replace(/\./g,'').replace(',','.'))||0;}
+function fmt(n){return Math.round(n).toLocaleString('fr-FR');}
+function fmtD(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtPct(n){return n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' %';}
+function dateFR(d){if(!d)return '—';var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function csvUrl(sheet,gid){
+  var bust='&_t='+Date.now();
+  if(sheet.indexOf('/pub')!==-1)return sheet+'?gid='+gid+'&single=true&output=csv'+bust;
+  return sheet+'?format=csv&gid='+gid+bust;
+}
+function isDemo(gid){return !gid||gid.indexOf('GID_')===0;}
+
+/* ═══ SCROLL PROGRESS ═══ */
+function updateScrollProgress(){var s=window.scrollY,h=document.documentElement.scrollHeight-window.innerHeight;var bar=document.getElementById('scroll-progress');if(bar)bar.style.width=(h>0?(s/h)*100:0)+'%';}
+window.addEventListener('scroll',updateScrollProgress,{passive:true});
+
+/* ═══ PARALLAX (hero pizzas on scroll) ═══ */
+function initParallax(){
+  window.addEventListener('scroll',function(){
+    var s=window.scrollY;
+    document.querySelectorAll('.hero-bg-pizza').forEach(function(el,i){
+      var speed=0.03+i*0.01;
+      el.style.transform='translate(0,'+(-s*speed)+'px)';
+    });
+  },{passive:true});
+}
+
+/* ═══ HERO CAMPAIGN CARDS ═══ */
+function buildHeroCampaigns(){
+  var h='';
+  CAMPAIGNS.forEach(function(c){
+    var isSoon=c.status==='coming-soon';
+    var badgeClass=isSoon?'soon':'live';
+    var badgeText=isSoon?'À venir':'En cours';
+    h+='<div class="hero-camp-card'+(isSoon?' coming-soon':'')+'" '+(isSoon?'':'onclick="enterDash(\''+c.id+'\')"')+'>';
+    h+='<span class="hero-camp-icon">'+c.icon+'</span>';
+    h+='<span class="hero-camp-name">'+c.name+'</span>';
+    h+='<span class="hero-camp-sub">'+c.subtitle+'</span>';
+    h+='<span class="hero-camp-badge '+badgeClass+'">'+badgeText+'</span>';
+    h+='</div>';
+  });
+  document.getElementById('hero-campaigns').innerHTML=h;
+}
+
+/* ═══ BACK TO HERO ═══ */
+function backToHero(){
+  document.getElementById('hero').classList.remove('gone');
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('marquee').style.display='none';
+  window.scrollTo(0,0);
+}
+
+/* ═══ ENTER DASHBOARD ═══ */
+function enterDash(campId){
+  if(campId)activeCamp=campId;
+  document.getElementById('hero').classList.add('gone');
+  document.getElementById('app').classList.add('active');
+  document.getElementById('marquee').style.display='block';
+  buildTabs();
+  updateMarquee();
+  render();
+  setTimeout(initReveal,100);
+  loadData();
+}
+
+/* ═══ CAMPAIGN TABS ═══ */
+function buildTabs(){
+  var h='';
+  CAMPAIGNS.forEach(function(c){
+    var badge=c.type==='event'?'<span class="camp-tab-badge live-badge">LIVE</span>':'';
+    h+='<button class="camp-tab'+(c.id===activeCamp?' active':'')+'" onclick="switchCamp(\''+c.id+'\')">';
+    h+='<span class="camp-tab-icon">'+c.icon+'</span> '+c.name+' '+badge+'</button>';
+  });
+  document.getElementById('campaign-tabs').innerHTML=h;
+}
+
+function switchCamp(id){
+  activeCamp=id;
+  buildTabs();
+  updateMarquee();
+  filterStart=null;filterEnd=null;activePreset='all';
+  document.querySelectorAll('.filter-btn').forEach(function(b,i){b.classList.toggle('active',i===0);});
+  document.getElementById('date-start').value='';
+  document.getElementById('date-end').value='';
+  render();
+  setTimeout(initReveal,50);
+}
+
+/* ═══ MARQUEE ═══ */
+function updateMarquee(){
+  var c=CAMPAIGNS.find(function(x){return x.id===activeCamp;});
+  if(!c)return;
+  var star='<svg viewBox="0 0 10 10"><polygon points="5,0 6.2,3.5 10,3.5 7,5.7 8,9.5 5,7.2 2,9.5 3,5.7 0,3.5 3.8,3.5"/></svg>';
+  var txt=c.marquee;
+  var items=txt.split('★').map(function(s){return '<span class="marquee-item">'+star+' '+s.trim()+'</span>';}).join('');
+  var doubled=items+items+items+items;
+  document.getElementById('marquee-track').innerHTML=doubled;
+}
+
+/* ═══ FILTERS ═══ */
+function setPreset(p,el){
+  activePreset=p;document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  if(el)el.classList.add('active');
+  var cd=campData[activeCamp];
+  if(p==='all'){filterStart=null;filterEnd=null;}
+  else{var maxD=getMaxDate(cd);if(maxD){var end=new Date(maxD),start=new Date(end);start.setDate(start.getDate()-parseInt(p));filterStart=start.toISOString().slice(0,10);filterEnd=end.toISOString().slice(0,10);}}
+  document.getElementById('date-start').value=filterStart||'';document.getElementById('date-end').value=filterEnd||'';render();
+}
+function applyCustom(){var s=document.getElementById('date-start').value,e=document.getElementById('date-end').value;if(s)filterStart=s;if(e)filterEnd=e;activePreset='custom';document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});render();}
+function getMinDate(cd){return cd&&cd.meta&&cd.meta.length?cd.meta[0].date:'';}
+function getMaxDate(cd){return cd&&cd.meta&&cd.meta.length?cd.meta[cd.meta.length-1].date:'';}
+function filterRows(data){if(!data)return[];return data.filter(function(r){if(filterStart&&r.date<filterStart)return false;if(filterEnd&&r.date>filterEnd)return false;return true;});}
+
+/* ═══ DEMO DATA ═══ */
+function generateDemoMeta(type){
+  var rows=[];var d=type==='event'?new Date(2026,10,7):new Date(2026,9,1);
+  var days=type==='event'?3:35;
+  var camps=type==='event'?['FivePizza_SSF_LeadGen_Jour1','FivePizza_SSF_LeadGen_Jour2','FivePizza_SSF_LeadGen_Jour3','FivePizza_SSF_Notoriete','FivePizza_SSF_Trafic','FivePizza_SSF_Video','FivePizza_SSF_Retargeting']:['FivePizza_META_Franchise_LeadGen'];
+  for(var i=0;i<days;i++){var dd=new Date(d);dd.setDate(dd.getDate()+i);var ds=dd.toISOString().slice(0,10);
+    camps.forEach(function(cn){
+      rows.push({date:ds,campaign:cn,impressions:800+Math.round(Math.random()*1200),reach:Math.round((800+Math.random()*1200)*.78),clicks:Math.round((800+Math.random()*1200)*.035),budget:15+Math.round(Math.random()*25*100)/100,leads:Math.random()>.45?Math.ceil(Math.random()*3):0});
+    });
+  }return rows;
+}
+function generateDemoGA4(type){
+  var rows=[];var d=type==='event'?new Date(2026,10,7):new Date(2026,10,1);
+  var days=type==='event'?3:7;
+  var ch=['Paid Social','Organic Search','Direct','Referral','Organic Social'];
+  for(var i=0;i<days;i++){var dd=new Date(d);dd.setDate(dd.getDate()+i);var ds=dd.toISOString().slice(0,10);var sess=50+Math.round(Math.random()*80);rows.push({date:ds,sessions:sess,users:Math.round(sess*.8),newUsers:Math.round(sess*.5),engagementRate:.35+Math.random()*.3,avgDuration:60+Math.random()*180,eventCount:sess*3+Math.round(Math.random()*80)});}
+  var co={};ch.forEach(function(c){co[c]=10+Math.round(Math.random()*60);});return{rows:rows,channels:co};
+}
+function generateDemoLeads(type){
+  var names=[['Mehdi','Boucher','Paris','mehdi.b@email.com','06 12 34 56 78'],['Fatima','El Amrani','Lyon','fatima.ea@email.com','07 23 45 67 89'],['Thomas','Dupont','Marseille','t.dupont@email.com','06 34 56 78 90'],['Sarah','Benali','Toulouse','sarah.b@email.com','07 45 67 89 01'],['Karim','Oussalem','Lille','karim.o@email.com','06 56 78 90 12'],['Claire','Martin','Bordeaux','c.martin@email.com','07 67 89 01 23'],['Youssef','Tazi','Nantes','y.tazi@email.com','06 78 90 12 34'],['Amina','Khalil','Strasbourg','amina.k@email.com','07 89 01 23 45']];
+  var qs=type==='event'?[{q:'Intérêt principal',a:['Franchise','Investissement','Partenariat','Découverte']},{q:'Budget estimé',a:['< 50K €','50-100K €','100-200K €','> 200K €']},{q:'Zone géographique souhaitée',a:['Île-de-France','Région Sud','Grand Est','Ouest','Nord']}]:[{q:'Expérience en restauration',a:['Oui, +5 ans','Oui, 1-5 ans','Non, reconversion','En formation']},{q:'Budget d\'investissement',a:['< 80K €','80-150K €','150-250K €','> 250K €']},{q:'Ville d\'implantation visée',a:['Paris','Lyon','Marseille','Toulouse','Bordeaux','Lille','Autre']}];
+  var d=type==='event'?new Date(2026,10,7):new Date(2026,9,15);
+  var leads=[];
+  var count=type==='event'?6:8;
+  for(var i=0;i<count;i++){
+    var n=names[i%names.length];
+    var dd=new Date(d);dd.setDate(dd.getDate()+Math.floor(Math.random()*(type==='event'?3:30)));
+    var resp=qs.map(function(q){return{question:q.q,answer:q.a[Math.floor(Math.random()*q.a.length)]};});
+    leads.push({date:dd.toISOString().slice(0,10),firstName:n[0],lastName:n[1],city:n[2],email:n[3],phone:n[4],responses:resp});
+  }
+  return leads.sort(function(a,b){return b.date.localeCompare(a.date);});
+}
+
+/* ═══ LOAD DATA ═══ */
+function loadData(){
+  var totalToLoad=CAMPAIGNS.length;
+  var loaded=0;
+  function checkDone(){loaded++;if(loaded>=totalToLoad){updateHero();buildHeroCampaigns();document.getElementById('loader').classList.add('done');var liveEl=document.getElementById('topbar-live');if(liveEl){var now=new Date();liveEl.title='Mis à jour à '+now.getHours()+'h'+String(now.getMinutes()).padStart(2,'0');}if(document.getElementById('app').classList.contains('active')){render();setTimeout(initReveal,50);}showMissingWarning();}}
+
+  CAMPAIGNS.forEach(function(camp){
+    var tmp={meta:[],metaRaw:[],ga4:[],ga4Channels:{},leads:[]};
+
+    var subLoaded=0;var subTotal=3;
+    function subDone(){subLoaded++;if(subLoaded>=subTotal){campData[camp.id]=tmp;checkDone();}}
+
+    // ── Meta Ads (deux blocs côte à côte : A-L = Compte 1, N-Y = Compte 2, M = vide) ──
+    if(isDemo(camp.meta_gid)){
+      subDone();
+    } else {
+      fetch(csvUrl(camp.meta_sheet,camp.meta_gid)).then(function(r){if(!r.ok)throw new Error(r.status);return r.text();}).then(function(text){
+        if(text.indexOf('<!DOCTYPE')!==-1){subDone();return;}
+        var raw=parseMetaCsv(text);
+        tmp.metaRaw=raw;tmp.meta=aggregateByDate(raw);subDone();
+      }).catch(function(){subDone();});
+    }
+
+    // ── GA4 ──
+    if(isDemo(camp.ga4_gid)){
+      subDone();
+    } else {
+      fetch(csvUrl(camp.ga4_sheet,camp.ga4_gid)).then(function(r){if(!r.ok)throw new Error(r.status);return r.text();}).then(function(text){
+        if(text.indexOf('<!DOCTYPE')!==-1){subDone();return;}
+        var res=Papa.parse(text,{header:true});res.data=normalizeRows(res.data);var raw=res.data.filter(function(r){return r.Date&&r.Date.trim();});
+        if(!raw.length){subDone();return;}
+        var byDate={},ct={};raw.forEach(function(r){var dt=r['Date'],s=pN(r['Sessions']),u=pN(r['Total users']),nu=pN(r['New users']),er=pN(r['Engagement rate']),ad=pN(r['Average session duration']),ev=pN(r['Event count']),ch=r['Session default channel grouping']||'Autre';if(!byDate[dt])byDate[dt]={date:dt,sessions:0,users:0,newUsers:0,ew:0,dw:0,eventCount:0};var d=byDate[dt];d.sessions+=s;d.users+=u;d.newUsers+=nu;d.ew+=er*s;d.dw+=ad*s;d.eventCount+=ev;if(!ct[ch])ct[ch]=0;ct[ch]+=s;});
+        tmp.ga4=Object.values(byDate).map(function(d){return{date:d.date,sessions:d.sessions,users:d.users,newUsers:d.newUsers,engagementRate:d.sessions>0?d.ew/d.sessions:0,avgDuration:d.sessions>0?d.dw/d.sessions:0,eventCount:d.eventCount};}).sort(function(a,b){return a.date.localeCompare(b.date);});
+        tmp.ga4Channels=ct;subDone();
+      }).catch(function(){subDone();});
+    }
+
+    // ── Leads (Zapier) ──
+    if(isDemo(camp.leads_gid)){
+      subDone();
+    } else {
+      fetch(csvUrl(camp.leads_sheet,camp.leads_gid)).then(function(r){if(!r.ok)throw new Error(r.status);return r.text();}).then(function(text){
+        if(text.indexOf('<!DOCTYPE')!==-1){subDone();return;}
+        var res=Papa.parse(text,{header:true});res.data=normalizeRows(res.data);
+        tmp.leads=parseLeadsZapier(res.data);subDone();
+      }).catch(function(){subDone();});
+    }
+  });
+}
+
+/* Parse Leads Zapier — colonnes A-S :
+   Date de création, Parcours, Formulaire, Campagne, Ensemble de publicités, Publicité,
+   Nom, Prénom, Email, Téléphone, Situation, Délai du projet, Apport personnel,
+   Zone souhaitée, Plateforme, Lead ID, Statut rappel, Date rappel, Commentaire
+   ⚠️ NE JAMAIS modifier les colonnes de ce fichier (Zapier écrit par position). */
+function parseLeadsZapier(raw){
+  return raw.filter(function(r){return r['Nom']||r['Prénom']||r['Email'];}).map(function(r){
+    var responses=[];
+    if(r['Situation']&&r['Situation'].trim())responses.push({question:'Situation',answer:r['Situation'].trim()});
+    if(r['Délai du projet']&&r['Délai du projet'].trim())responses.push({question:'Délai du projet',answer:r['Délai du projet'].trim()});
+    if(r['Apport personnel']&&r['Apport personnel'].trim())responses.push({question:'Apport personnel',answer:r['Apport personnel'].trim()});
+    if(r['Zone souhaitée']&&r['Zone souhaitée'].trim())responses.push({question:'Zone souhaitée',answer:r['Zone souhaitée'].trim()});
+    if(r['Parcours']&&r['Parcours'].trim())responses.push({question:'Parcours',answer:r['Parcours'].trim()});
+    if(r['Campagne']&&r['Campagne'].trim())responses.push({question:'Campagne',answer:r['Campagne'].trim()});
+    if(r['Commentaire']&&r['Commentaire'].trim())responses.push({question:'Commentaire',answer:r['Commentaire'].trim()});
+    return{
+      date:r['Date de création']||'',
+      firstName:r['Prénom']||'',
+      lastName:r['Nom']||'',
+      phone:r['Téléphone']||'',
+      email:r['Email']||'',
+      city:r['Zone souhaitée']||'',
+      campaign:r['Campagne']||'',
+      adset:r['Ensemble de publicités']||'',
+      platform:r['Plateforme']||'',
+      leadId:r['Lead ID']||'',
+      statutRappel:r['Statut rappel']||'',
+      dateRappel:r['Date rappel']||'',
+      responses:responses
+    };
+  }).sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+}
+
+/* Parse CSV Meta Ads — colonnes A-L, une ligne par jour.
+   Ignore lignes vides et "Error: No data found". */
+function parseMetaCsv(text){
+  var res=Papa.parse(text,{header:true});res.data=normalizeRows(res.data);
+  if(!res.data||!res.data.length)return[];
+  return res.data.filter(function(r){
+    var d=(r['Date']||'').trim();
+    return d&&d.toLowerCase().indexOf('error')===-1&&d.toLowerCase().indexOf('no data')===-1;
+  }).map(function(r){
+    return{date:r['Date'].trim(),campaign:(r['Campaign name']||'').trim(),impressions:pN(r['Impressions']),reach:pN(r['Reach']),clicks:pN(r['Link clicks']),budget:pN(r['Cost (EUR)']),leads:pN(r['On-Facebook leads'])};
+  });
+}
+
+function aggregateByDate(raw){
+  var byDate={};raw.forEach(function(r){if(!byDate[r.date])byDate[r.date]={date:r.date,impressions:0,reach:0,clicks:0,budget:0,leads:0};var d=byDate[r.date];d.impressions+=r.impressions;d.reach+=r.reach;d.clicks+=r.clicks;d.budget+=r.budget;d.leads+=r.leads;});
+  return Object.values(byDate).sort(function(a,b){return a.date.localeCompare(b.date);});
+}
+
+/* ═══ HERO ═══ */
+function animateVal(el,target,suffix,dec){var dur=900,t0=performance.now();suffix=suffix||'';dec=dec||0;(function step(now){var p=Math.min((now-t0)/dur,1);p=1-Math.pow(1-p,3);var v=p*target;el.textContent=dec>0?v.toLocaleString('fr-FR',{minimumFractionDigits:dec,maximumFractionDigits:dec})+suffix:Math.round(v).toLocaleString('fr-FR')+suffix;if(p<1)requestAnimationFrame(step);})(performance.now());}
+
+function updateHero(){
+  var totalLeads=0,totalBudget=0;
+  CAMPAIGNS.forEach(function(c){
+    var cd=campData[c.id];
+    if(cd){
+      if(cd.meta)cd.meta.forEach(function(r){totalBudget+=r.budget;});
+      var metaLeads=0;if(cd.meta)cd.meta.forEach(function(r){metaLeads+=r.leads;});
+      var zapLeads=cd.leads?cd.leads.length:0;
+      totalLeads+=Math.max(metaLeads,zapLeads);
+    }
+  });
+  animateVal(document.getElementById('h-leads'),totalLeads,'',0);
+  animateVal(document.getElementById('h-cpl'),totalLeads>0?totalBudget/totalLeads:0,' €',2);
+  animateVal(document.getElementById('h-budget'),totalBudget,' €',2);
+}
+
+/* ═══ RENDER ═══ */
+function render(){
+  var cd=campData[activeCamp];if(!cd)return;
+  var camp=CAMPAIGNS.find(function(x){return x.id===activeCamp;});
+  var data=filterRows(cd.meta);
+  var rawFiltered=filterRows(cd.metaRaw);
+  var ga4F=filterRows(cd.ga4);
+  var fc=cd.ga4Channels||{};
+  var leads=cd.leads||[];
+
+  var t={budget:0,impressions:0,reach:0,clicks:0,leads:0};
+  data.forEach(function(r){for(var k in t)t[k]+=r[k]||0;});
+  // Nombre réel de leads = max entre Meta Ads et prospects Zapier
+  var realLeads=Math.max(t.leads,leads.length);
+  var g={sessions:0,users:0,newUsers:0,ew:0,dw:0,eventCount:0};
+  ga4F.forEach(function(r){g.sessions+=r.sessions;g.users+=r.users;g.newUsers+=r.newUsers;g.ew+=r.engagementRate*r.sessions;g.dw+=r.avgDuration*r.sessions;g.eventCount+=r.eventCount;});
+  var ger=g.sessions>0?g.ew/g.sessions:0,gad=g.sessions>0?g.dw/g.sessions:0;
+  var cpl=realLeads>0?t.budget/realLeads:0,cpc=t.clicks>0?t.budget/t.clicks:0,cpm=t.impressions>0?t.budget/t.impressions*1000:0,ctr=t.impressions>0?t.clicks/t.impressions*100:0,freq=t.reach>0?t.impressions/t.reach:0;
+  document.getElementById('topbar-date').textContent=dateFR(filterStart||getMinDate(cd))+' — '+dateFR(filterEnd||getMaxDate(cd));
+
+  var ct=document.getElementById('content');
+  var h='';
+  var secNum=1;
+
+  var hasMetaData=data.length>0&&t.impressions>0;
+
+  // ── SECTION 1 : Diffusion ──
+  h+='<div class="section sec-black reveal">';
+  h+='<div class="sec-bg-pizza right"><img src="https://fivepizzaoriginal.com/wp-content/uploads/2023/02/CHORIZO-2.png" alt=""></div>';
+  h+='<div class="section-header"><div class="section-num">0'+(secNum++)+'</div><div class="section-title">Diffusion Meta Ads</div><div class="section-line"></div></div>';
+  h+='<div class="section-sub">'+camp.subtitle+'</div>';
+  if(hasMetaData){
+    h+='<div class="kpi-grid">';
+    h+=kpi('Budget',fmtD(t.budget)+' €');h+=kpi('Impressions',fmt(t.impressions));h+=kpi('Portée',fmt(t.reach));h+=kpi('Fréquence',fmtD(freq));
+    h+=kpi('CPM',fmtD(cpm)+' €');h+=kpi('Clics',fmt(t.clicks));h+=kpi('CTR',fmtPct(ctr));h+=kpi('CPC',fmtD(cpc)+' €');
+    h+='</div>';
+  } else {
+    h+=emptyState('📡','Campagne en cours de diffusion','Les premières données appara&icirc;tront automatiquement d&egrave;s les premi&egrave;res impressions.');
+  }
+  h+='</div>';
+
+  // ── PIZZA STRIP ──
+  h+=pizzaStrip();
+
+  // ── SECTION 2 : Leads ──
+  h+='<div class="section sec-black reveal">';
+  h+='<div class="sec-bg-pizza left"><img src="https://fivepizzaoriginal.com/wp-content/uploads/2023/02/VEGGIE-SPICY-1.png" alt=""></div>';
+  h+='<div class="section-header"><div class="section-num">0'+(secNum++)+'</div><div class="section-title">Leads Meta Ads</div><div class="section-line"></div></div>';
+  h+='<div class="section-sub">vos futurs franchisés</div>';
+  if(hasMetaData){
+    h+='<div class="kpi-grid">';
+    h+=kpi('Leads',fmt(realLeads),'accent');h+=kpi('Coût par lead',realLeads>0?fmtD(cpl)+' €':'—','accent');
+    h+=kpi('Budget investi',fmtD(t.budget)+' €');h+=kpi('Taux de conversion',t.clicks>0?fmtPct(realLeads/t.clicks*100):'—');
+    h+='</div>';
+    h+='<div class="chart-row">';
+    h+='<div class="chart-card from-left"><div class="chart-card-title">Leads par jour</div><div class="chart-wrap"><canvas id="c-leads"></canvas></div></div>';
+    h+='<div class="chart-card from-right"><div class="chart-card-title">Coût par lead</div><div class="chart-wrap"><canvas id="c-cpl"></canvas></div></div>';
+    h+='</div>';
+  } else {
+    h+=emptyState('🎯','En attente des premiers leads','Les leads appara&icirc;tront ici d&egrave;s r&eacute;ception des premiers formulaires Meta.');
+  }
+  h+='</div>';
+
+  // ── BANNER ──
+  h+='<div class="banner banner-1 reveal-scale">';
+  h+='<img class="banner-logo" src="https://fivepizzaoriginal.com/wp-content/uploads/2022/07/logo-typo-blanc-f-noir0-1024x517.png" alt="">';
+  h+='<div class="banner-text" data-typed>'+camp.name+'</div>';
+  h+='<div class="banner-sub" data-typed>'+camp.subtitle+'</div>';
+  h+='</div>';
+
+  // ── GRADIENT DIVIDER ──
+  h+='<div class="grad-divider"></div>';
+
+  // ── SECTION 3 : Prospects ──
+  h+='<div class="section sec-surface reveal">';
+  h+='<div class="section-header"><div class="section-num">0'+(secNum++)+'</div><div class="section-title">Prospects</div><div class="section-line"></div></div>';
+  h+='<div class="section-sub">détails des leads générés</div>';
+  h+='<div class="leads-count">'+leads.length+' prospect'+(leads.length>1?'s':'')+' — <span>'+camp.name+'</span></div>';
+  if(leads.length===0){
+    h+=emptyState('👤','En attente des premiers prospects','Les fiches candidats appara&icirc;tront automatiquement d&egrave;s que Zapier transmettra les leads.');
+  } else {
+    h+='<div class="leads-grid">';
+    leads.forEach(function(l,idx){
+      var initials=((l.firstName||'?')[0]+(l.lastName||'?')[0]).toUpperCase();
+      h+='<div class="lead-card" style="transition-delay:'+(idx*60)+'ms">';
+      h+='<div class="lead-card-header"><div class="lead-avatar">'+initials+'</div><div><div class="lead-name">'+esc(l.firstName)+' '+esc(l.lastName)+'</div><div class="lead-date">'+dateFR(l.date)+'</div></div></div>';
+      h+='<div class="lead-fields">';
+      if(l.phone)h+=leadField('phone','☎','Tél.',l.phone);
+      if(l.email)h+=leadField('email','✉','Email','<a href="mailto:'+esc(l.email)+'">'+esc(l.email)+'</a>');
+      if(l.city)h+=leadField('city','📍','Ville',l.city);
+      h+='</div>';
+      if(l.responses&&l.responses.length){
+        h+='<div class="lead-responses">';
+        l.responses.forEach(function(r){
+          h+='<div class="lead-response"><div class="lead-response-q">'+esc(r.question)+'</div><div class="lead-response-a">'+esc(r.answer)+'</div></div>';
+        });
+        h+='</div>';
+      }
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';
+
+  // ── GRADIENT DIVIDER ──
+  h+='<div class="grad-divider"></div>';
+
+  // ── SECTION 4 : GA4 ──
+  h+='<div class="section sec-black reveal">';
+  h+='<div class="sec-bg-pizza right"><img src="https://fivepizzaoriginal.com/wp-content/uploads/2023/11/rollz-buffalo.png" alt=""></div>';
+  h+='<div class="section-header"><div class="section-num">0'+(secNum++)+'</div><div class="section-title">Trafic site web</div><div class="section-line"></div></div>';
+  h+='<div class="section-sub">votre vitrine digitale — GA4</div>';
+  var hasGA4=ga4F.length>0&&g.sessions>0;
+  if(hasGA4){
+    h+='<div class="kpi-grid">';
+    h+=kpi('Sessions',fmt(g.sessions));h+=kpi('Utilisateurs',fmt(g.users));h+=kpi('Nouveaux utilisateurs',fmt(g.newUsers));
+    h+=kpi("Taux d'engagement",fmtPct(ger*100));h+=kpi('Durée moy. session',Math.floor(gad/60)+'m '+Math.round(gad%60)+'s');h+=kpi('Événements',fmt(g.eventCount));
+    h+='</div>';
+    h+='<div class="chart-row">';
+    h+='<div class="chart-card from-left"><div class="chart-card-title">Sessions par jour</div><div class="chart-wrap"><canvas id="c-ga4s"></canvas></div></div>';
+    h+='<div class="chart-card from-right"><div class="chart-card-title">Répartition par canal</div><div class="chart-wrap"><canvas id="c-ga4c"></canvas></div></div>';
+    h+='</div>';
+  } else {
+    h+=emptyState('🌐','En attente des données GA4','Les statistiques de trafic appara&icirc;tront une fois la source GA4 configur&eacute;e.');
+  }
+  h+='</div>';
+
+  // ── PIZZA STRIP ──
+  h+=pizzaStrip();
+
+  // ── BANNER 2 ──
+  if(hasMetaData){
+    h+='<div class="banner banner-2 reveal-scale">';
+    h+='<div class="banner-text" data-typed>'+fmt(realLeads)+' candidats franchisés</div>';
+    h+='<div class="banner-sub" data-typed>'+data.length+' jours de campagne — CPL moyen '+(realLeads>0?fmtD(cpl):'-')+' €</div>';
+    h+='</div>';
+  }
+
+  h+='<div class="sec-spacer"></div>';
+
+  // ── SECTION 5 : Tableau journalier ──
+  h+='<div class="section sec-black reveal" style="padding-bottom:32px">';
+  h+='<div class="section-header"><div class="section-num">0'+(secNum++)+'</div><div class="section-title">Données journalières</div><div class="section-line"></div></div>';
+
+  if(!hasMetaData){
+    h+=emptyState('📊','Tableau en attente','Les donn&eacute;es journali&egrave;res s\'afficheront d&egrave;s les premi&egrave;res remontées Meta Ads.');
+  } else {
+    // Tableau par campagne (raw = non agrégé)
+    var byCamp={};rawFiltered.forEach(function(r){if(!byCamp[r.campaign])byCamp[r.campaign]=[];byCamp[r.campaign].push(r);});
+    var campNames=Object.keys(byCamp).sort();
+
+    if(campNames.length>1){
+      h+='<div class="table-card">';
+      h+='<div class="table-card-header"><div class="table-card-title">Performance par campagne</div></div>';
+      h+='<div class="table-wrap"><table><thead><tr>';
+      h+='<th>Campagne</th><th>Budget</th><th>Impr.</th><th>Clics</th><th>CTR</th><th>Leads</th><th>CPL</th>';
+      h+='</tr></thead><tbody>';
+      campNames.forEach(function(cn,idx){
+        var rows=byCamp[cn];var ct2={budget:0,impressions:0,clicks:0,leads:0};
+        rows.forEach(function(r){ct2.budget+=r.budget;ct2.impressions+=r.impressions;ct2.clicks+=r.clicks;ct2.leads+=r.leads;});
+        var ac=idx<15?'table-row-anim':'';var ad=idx<15?'style="transition-delay:'+idx*50+'ms"':'';
+        h+='<tr class="'+ac+'" '+ad+'><td><strong>'+esc(cn)+'</strong></td>';
+        h+='<td>'+fmtD(ct2.budget)+' €</td><td>'+fmt(ct2.impressions)+'</td><td>'+fmt(ct2.clicks)+'</td>';
+        h+='<td>'+(ct2.impressions>0?fmtPct(ct2.clicks/ct2.impressions*100):'—')+'</td>';
+        h+='<td style="color:var(--yellow)"><strong>'+fmt(ct2.leads)+'</strong></td>';
+        h+='<td>'+(ct2.leads>0?fmtD(ct2.budget/ct2.leads)+' €':'—')+'</td></tr>';
+      });
+      h+='</tbody></table></div></div>';
+    }
+
+    h+='<div class="table-card">';
+    h+='<div class="table-card-header"><div class="table-card-title">Détail par jour — Meta Ads</div></div>';
+    h+='<div class="table-wrap"><table><thead><tr>';
+    h+='<th>Date</th><th>Budget</th><th>Impr.</th><th>Portée</th><th>Clics</th><th>CTR</th><th>CPC</th><th>Leads</th><th>CPL</th>';
+    h+='</tr></thead><tbody>';
+    data.slice().reverse().forEach(function(r,idx){
+      var ac=idx<15?'table-row-anim':'';var ad=idx<15?'style="transition-delay:'+idx*50+'ms"':'';
+      h+='<tr class="'+ac+'" '+ad+'><td><strong>'+dateFR(r.date)+'</strong></td>';
+      h+='<td>'+fmtD(r.budget)+' €</td><td>'+fmt(r.impressions)+'</td><td>'+fmt(r.reach)+'</td><td>'+fmt(r.clicks)+'</td>';
+      h+='<td>'+(r.impressions>0?fmtPct(r.clicks/r.impressions*100):'—')+'</td>';
+      h+='<td>'+(r.clicks>0?fmtD(r.budget/r.clicks)+' €':'—')+'</td>';
+      h+='<td style="color:var(--yellow)"><strong>'+fmt(r.leads)+'</strong></td>';
+      h+='<td>'+(r.leads>0?fmtD(r.budget/r.leads)+' €':'—')+'</td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  h+='</div>';
+
+  ct.innerHTML=h;
+  buildCharts(data,ga4F,fc);
+  setTimeout(initReveal,50);
+}
+
+function esc(s){if(!s)return '';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function emptyState(icon,title,sub){return '<div class="empty-state"><div class="empty-state-icon">'+icon+'</div><div class="empty-state-title">'+title+'</div><div class="empty-state-sub">'+sub+'</div><div class="empty-state-pulse">Actualisation automatique</div></div>';}
+
+function kpi(label,value,cls){return '<div class="kpi'+(cls?' kpi-'+cls:'')+'"><div class="kpi-shimmer"></div><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div><div class="kpi-bar"></div></div>';}
+
+function leadField(type,icon,label,value){return '<div class="lead-field"><span class="lead-field-icon">'+icon+'</span><span class="lead-field-label">'+label+'</span><span class="lead-field-value">'+value+'</span></div>';}
+
+function pizzaStrip(){
+  var imgs=['CHORIZO-2.png','VEGGIE-ROQUETTE-1.png','VEGGIE-SPICY-1.png','Petit-Kiff.png','Super-Kiff.png','Chicken-Cheese.jpg','4fromages-copie.jpg','Carnivore-copie.jpg'];
+  var base2022='https://fivepizzaoriginal.com/wp-content/uploads/2022/07/',base2023='https://fivepizzaoriginal.com/wp-content/uploads/2023/02/';
+  var items='';
+  for(var r=0;r<3;r++){imgs.forEach(function(f){
+    var url=f.indexOf('CHORIZO')!==-1||f.indexOf('VEGGIE')!==-1?base2023+f:base2022+f;
+    items+='<div class="strip-item"><img src="'+url+'" alt="" loading="lazy"></div>';
+  });}
+  return '<div class="pizza-strip"><div class="strip-track">'+items+'</div></div>';
+}
+
+/* ═══ CHARTS ═══ */
+function buildCharts(data,ga4,channels){
+  chartInstances.forEach(function(c){c.destroy();});chartInstances=[];
+  var labels=data.map(function(r){return r.date.slice(5).replace('-','/');});
+  var font={size:10,family:"'Oswald','Open Sans',sans-serif"};
+  var grid='rgba(255,255,255,.04)';var tick='#7A7A7A';
+  var base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:font,color:tick}},y:{grid:{color:grid},ticks:{font:font,color:tick}}}};
+
+  var c1=document.getElementById('c-leads');
+  if(c1)chartInstances.push(new Chart(c1,{type:'bar',data:{labels:labels,datasets:[{data:data.map(function(r){return r.leads;}),backgroundColor:'#FAEB8E',hoverBackgroundColor:'#E5D66A',borderRadius:3,borderSkipped:false}]},options:JSON.parse(JSON.stringify(base))}));
+
+  var c2=document.getElementById('c-cpl');
+  if(c2)chartInstances.push(new Chart(c2,{type:'line',data:{labels:labels,datasets:[{data:data.map(function(r){return r.leads>0?Math.round(r.budget/r.leads*100)/100:null;}),borderColor:'#61CE70',backgroundColor:'rgba(97,206,112,.06)',fill:true,tension:.35,pointRadius:4,pointBackgroundColor:'#61CE70',pointHoverRadius:6,spanGaps:false}]},options:JSON.parse(JSON.stringify(base))}));
+
+  var gl=ga4.map(function(r){return r.date.slice(5).replace('-','/');});
+  var cs=document.getElementById('c-ga4s');
+  if(cs)chartInstances.push(new Chart(cs,{type:'line',data:{labels:gl,datasets:[{data:ga4.map(function(r){return r.sessions;}),borderColor:'#6EC1E4',backgroundColor:'rgba(110,193,228,.06)',fill:true,tension:.35,pointRadius:5,pointBackgroundColor:'#6EC1E4',pointHoverRadius:7,borderWidth:2.5}]},options:JSON.parse(JSON.stringify(base))}));
+
+  var cc=['#FAEB8E','#61CE70','#6EC1E4','#C9C0BB','#FFFFFF','#FFBC7D','#54595F','#7A7A7A'];
+  var ck=channels?Object.keys(channels).sort(function(a,b){return(channels[b]||0)-(channels[a]||0);}):[];
+  var cv=ck.map(function(k){return channels[k];});
+  var cb=ck.map(function(_,i){return cc[i%cc.length];});
+  var cd2=document.getElementById('c-ga4c');
+  var lp=window.innerWidth<=600?'bottom':'right';
+  if(cd2&&ck.length)chartInstances.push(new Chart(cd2,{type:'doughnut',data:{labels:ck,datasets:[{data:cv,backgroundColor:cb,borderWidth:2,borderColor:'#111',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:lp,labels:{font:font,color:tick,usePointStyle:true,pointStyle:'circle',padding:window.innerWidth<=600?6:10,boxWidth:window.innerWidth<=600?8:10}}}}}));
+}
+
+/* ═══ REVEAL ═══ */
+function initReveal(){
+  if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal,.reveal-scale,.kpi,.chart-card,.lead-card,.table-row-anim').forEach(function(el){el.classList.add('in');});return;}
+  var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(!e.isIntersecting)return;e.target.classList.add('in');io.unobserve(e.target);});},{threshold:.1,rootMargin:'0px 0px -4% 0px'});
+  document.querySelectorAll('.reveal,.reveal-scale').forEach(function(el){el.classList.remove('in');io.observe(el);});
+
+  document.querySelectorAll('.kpi-grid').forEach(function(grid){var kpis=grid.querySelectorAll('.kpi');var gio=new IntersectionObserver(function(entries){entries.forEach(function(e){if(!e.isIntersecting)return;kpis.forEach(function(k,i){setTimeout(function(){k.classList.add('in');animateKpiValue(k);},i*80);});gio.unobserve(e.target);});},{threshold:.15});gio.observe(grid);});
+
+  document.querySelectorAll('.chart-row').forEach(function(row){var cards=row.querySelectorAll('.chart-card');var rio=new IntersectionObserver(function(entries){entries.forEach(function(e){if(!e.isIntersecting)return;cards.forEach(function(c,i){setTimeout(function(){c.classList.add('in');},i*120);});rio.unobserve(e.target);});},{threshold:.15});rio.observe(row);});
+
+  document.querySelectorAll('.leads-grid').forEach(function(grid){var cards=grid.querySelectorAll('.lead-card');var lio=new IntersectionObserver(function(entries){entries.forEach(function(e){if(!e.isIntersecting)return;cards.forEach(function(c,i){setTimeout(function(){c.classList.add('in');},i*60);});lio.unobserve(e.target);});},{threshold:.1});lio.observe(grid);});
+
+  document.querySelectorAll('[data-typed]').forEach(function(el){var tio=new IntersectionObserver(function(entries){entries.forEach(function(e){if(!e.isIntersecting)return;e.target.classList.add('typed');tio.unobserve(e.target);});},{threshold:.3});tio.observe(el);});
+
+  document.querySelectorAll('.table-row-anim').forEach(function(row){var trio=new IntersectionObserver(function(entries){entries.forEach(function(e){if(!e.isIntersecting)return;e.target.classList.add('in');trio.unobserve(e.target);});},{threshold:.1});trio.observe(row);});
+}
+
+function animateKpiValue(kpiEl){var valEl=kpiEl.querySelector('.kpi-value');if(!valEl)return;var raw=valEl.textContent.trim();var num=parseFloat(raw.replace(/\s/g,'').replace(',','.'));if(isNaN(num)||num===0)return;var hasDec=raw.indexOf(',')!==-1;var suffix='';if(raw.indexOf('€')!==-1)suffix=' €';if(raw.indexOf('%')!==-1)suffix=' %';var dur=700,t0=performance.now();(function step(now){var p=Math.min((now-t0)/dur,1);p=1-Math.pow(1-p,3);var v=p*num;valEl.textContent=hasDec?v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+suffix:Math.round(v).toLocaleString('fr-FR')+suffix;if(p<1)requestAnimationFrame(step);})(performance.now());}
+
+/* ═══ INIT ═══ */
+loadData();
+initParallax();
+</script>
+</body>
+</html>

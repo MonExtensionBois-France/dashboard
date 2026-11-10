@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bouillon Batignolles — Dashboard Marketing Franchise</title>
+<link rel="icon" href="https://bouillon-batignolles.com/wp-content/uploads/2025/07/logo_nobaseline.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarpanch:wght@400;600;700;800;900&family=Scope+One&family=Kaushan+Script&family=Montserrat:wght@400;500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --red:#ED1C24;--red-dark:#C8102E;--red-deep:#8B0000;
+  --gold:#FFCE00;--gold-muted:#D4A843;--gold-dark:#B8941F;
+  --navy:#1b1e34;--navy-light:#2a2e4a;--navy-deep:#12142a;
+  --cream:#fbf8f2;--cream-dark:#f0e8d8;
+  --dark:#0e0f1a;--dark-card:#161828;--dark-glass:rgba(22,24,40,.7);
+  --text-main:#f5f2ec;--text-sec:#a09888;--text-muted:#706658;
+  --border:rgba(255,206,0,.1);--border-light:rgba(255,206,0,.06);
+  --font-head:'Sarpanch',sans-serif;
+  --font-serif:'Scope One',serif;
+  --font-script:'Kaushan Script',cursive;
+  --font-body:'Montserrat',sans-serif;
+  --font-ui:'Barlow',sans-serif;
+  --radius:16px;--radius-md:12px;--radius-sm:8px;
+  --ease:cubic-bezier(.22,1,.36,1)
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--text-main);font-family:var(--font-body);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;opacity:.025;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")}
+a{color:inherit;text-decoration:none}
+
+/* ══ LOADER (cinematic) ══ */
+.loader{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,var(--navy-deep) 0%,var(--navy) 50%,var(--dark) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:all .8s var(--ease)}
+.loader.done{opacity:0;transform:scale(1.05);pointer-events:none}
+.loader-logo{height:60px;opacity:0;animation:ldLogo .8s var(--ease) .2s forwards}
+@keyframes ldLogo{from{opacity:0;transform:translateY(15px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+.loader-ring{width:52px;height:52px;position:relative;opacity:0;animation:ldRingIn .5s var(--ease) .5s forwards}
+.loader-ring::before,.loader-ring::after{content:'';position:absolute;inset:0;border-radius:50%;border:2.5px solid transparent}
+.loader-ring::before{border-top-color:var(--gold);animation:ldSpin 1s linear infinite}
+.loader-ring::after{border-bottom-color:rgba(237,28,36,.3);animation:ldSpin 1.5s linear reverse infinite}
+@keyframes ldSpin{to{transform:rotate(360deg)}}
+@keyframes ldRingIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.loader-text{font-family:var(--font-head);font-size:10px;font-weight:700;color:rgba(255,206,0,.35);letter-spacing:4px;text-transform:uppercase;opacity:0;animation:ldText .5s var(--ease) .7s forwards}
+@keyframes ldText{from{opacity:0;letter-spacing:8px}to{opacity:1;letter-spacing:4px}}
+.loader-bar{width:200px;height:2px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;opacity:0;animation:ldText .4s var(--ease) .8s forwards}
+.loader-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:3px;animation:ldBar 1.6s var(--ease) .8s forwards;box-shadow:0 0 12px rgba(255,206,0,.3)}
+@keyframes ldBar{to{width:100%}}
+
+/* ══ NAV ══ */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(14,15,26,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:64px}
+.nav-left{display:flex;align-items:center;gap:16px}
+.nav-logo{height:44px;opacity:0;animation:navIn .6s var(--ease) 2.4s both}
+.nav-sep{width:1px;height:28px;background:var(--border);opacity:0;animation:navIn .5s var(--ease) 2.5s both}
+.nav-label{font-family:var(--font-script);font-size:14px;color:var(--gold);opacity:0;animation:navIn .5s var(--ease) 2.6s both}
+.nav-center{display:flex;gap:28px;opacity:0;animation:navIn .5s var(--ease) 2.7s both}
+.nav-link{font-family:var(--font-ui);font-size:12px;font-weight:500;color:var(--text-sec);letter-spacing:.5px;transition:color .3s}
+.nav-link:hover{color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.nav-live{font-family:var(--font-ui);font-size:11px;font-weight:600;color:var(--gold);background:rgba(255,206,0,.06);border:1px solid rgba(255,206,0,.12);padding:6px 14px;border-radius:20px;display:flex;align-items:center;gap:6px;opacity:0;animation:navIn .5s var(--ease) 2.8s both}
+.nav-live .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:livePulse 2s ease infinite}
+@keyframes navIn{to{opacity:1}}
+@keyframes livePulse{0%,100%{opacity:.4;box-shadow:0 0 0 0 rgba(255,206,0,.4)}50%{opacity:1;box-shadow:0 0 0 5px rgba(255,206,0,0)}}
+
+/* ══ HERO ══ */
+.hero{position:relative;min-height:100vh;overflow:hidden;background:var(--dark)}
+.hero::before{content:'';position:absolute;inset:0;background:url('https://bouillon-batignolles.com/wp-content/uploads/2025/07/bouillon-batignolles-1369-scaled.jpg') center/cover;opacity:.12;filter:sepia(.3) contrast(1.1) brightness(.9)}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 25% 35%,rgba(237,28,36,.06) 0%,transparent 55%),radial-gradient(ellipse at 75% 55%,rgba(255,206,0,.04) 0%,transparent 45%),linear-gradient(180deg,transparent 0%,var(--dark) 100%)}
+.hero-inner{position:relative;z-index:2;max-width:1400px;margin:0 auto;padding:130px 32px 80px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);background:rgba(255,206,0,.06);border:1px solid rgba(255,206,0,.1);padding:8px 18px;border-radius:24px;margin-bottom:20px;opacity:0;animation:heroSlide .7s var(--ease) 2.5s both}
+.hero-h1{font-family:var(--font-head);font-size:50px;font-weight:900;line-height:1.05;letter-spacing:-1px;margin-bottom:16px;text-transform:uppercase;opacity:0;animation:heroSlide .7s var(--ease) 2.7s both}
+.hero-h1 .gold{color:var(--gold)}
+.hero-h1 .red{color:var(--red)}
+.hero-tagline{font-family:var(--font-script);font-size:22px;color:var(--gold-muted);margin-bottom:20px;opacity:0;animation:heroSlide .7s var(--ease) 2.85s both}
+.hero-desc{font-family:var(--font-body);font-size:14px;color:var(--text-sec);line-height:1.8;max-width:480px;margin-bottom:28px;opacity:0;animation:heroSlide .7s var(--ease) 2.9s both}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;opacity:0;animation:heroSlide .7s var(--ease) 3s both}
+@keyframes heroSlide{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);color:#fff;font-family:var(--font-ui);font-size:13px;font-weight:700;border-radius:12px;border:none;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 8px 24px rgba(237,28,36,.25);letter-spacing:.3px}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(237,28,36,.35)}
+.btn-primary svg{width:16px;height:16px}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:var(--dark-glass);color:var(--text-main);font-family:var(--font-ui);font-size:13px;font-weight:600;border-radius:12px;border:1px solid var(--border);cursor:pointer;transition:all .3s var(--ease);backdrop-filter:blur(8px)}
+.btn-secondary:hover{border-color:var(--gold);background:rgba(255,206,0,.06)}
+.btn-secondary svg{width:16px;height:16px}
+
+/* ══ MAP ══ */
+.hero-map{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:var(--dark-card);opacity:0;animation:heroSlide .8s var(--ease) 3.1s both}
+.hero-map .leaflet-map{height:420px;border-radius:20px}
+.leaflet-control-attribution{display:none!important}
+.leaflet-control-zoom{border:none!important;box-shadow:0 4px 16px rgba(0,0,0,.4)!important}
+.leaflet-control-zoom a{background:rgba(22,24,40,.92)!important;color:var(--gold)!important;border:1px solid var(--border)!important;backdrop-filter:blur(8px)}
+.map-tag{position:absolute;bottom:16px;left:16px;z-index:500;font-family:var(--font-ui);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);background:rgba(14,15,26,.88);backdrop-filter:blur(12px);padding:8px 14px;border-radius:8px;border:1px solid var(--border)}
+
+/* ══ VINTAGE CLOCK ══ */
+.hero-clock{position:absolute;bottom:40px;left:40px;width:110px;height:110px;z-index:1;opacity:.2}
+.clock-face{position:absolute;inset:0;border:1.5px solid rgba(255,206,0,.15);border-radius:50%}
+.clock-face:nth-child(2){inset:12px}
+.clock-face:nth-child(3){inset:24px}
+.clock-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.clock-hour{width:2px;height:22px;background:var(--gold);border-radius:1px;transform-origin:bottom center;animation:clockHour 43200s linear infinite;position:absolute;bottom:50%}
+.clock-minute{width:1.5px;height:30px;background:rgba(255,206,0,.6);border-radius:1px;transform-origin:bottom center;animation:clockMinute 3600s linear infinite;position:absolute;bottom:50%}
+.clock-center{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.clock-tick{position:absolute;width:1px;height:6px;background:rgba(255,206,0,.2);top:4px;left:50%;transform-origin:0 51px}
+@keyframes clockHour{to{transform:rotate(360deg)}}
+@keyframes clockMinute{to{transform:rotate(360deg)}}
+
+/* ══ BUBBLE CANVAS ══ */
+.bubble-canvas{position:absolute;inset:0;z-index:1;pointer-events:none}
+
+/* ══ STATS BAR ══ */
+.stats{position:relative;z-index:3;margin-top:-40px;padding:0 32px}
+.stats-inner{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(22,24,40,.88);backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.stat-cell{padding:28px 24px;text-align:center;border-right:1px solid var(--border);opacity:0;animation:statIn .6s var(--ease) both}
+.stat-cell:nth-child(1){animation-delay:3.3s}.stat-cell:nth-child(2){animation-delay:3.45s}.stat-cell:nth-child(3){animation-delay:3.6s}.stat-cell:nth-child(4){animation-delay:3.75s}
+.stat-cell:last-child{border-right:none}
+@keyframes statIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.stat-icon{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px}
+.stat-icon svg{width:16px!important;height:16px!important}
+.stat-icon.red{background:rgba(237,28,36,.1);color:var(--red)}
+.stat-icon.gold{background:rgba(255,206,0,.08);color:var(--gold)}
+.stat-icon.cream{background:rgba(245,242,236,.06);color:var(--cream)}
+.stat-num{font-family:var(--font-head);font-size:32px;font-weight:900;letter-spacing:-1px;margin-bottom:2px}
+.stat-label{font-family:var(--font-ui);font-size:11px;font-weight:500;color:var(--text-muted);letter-spacing:.3px}
+
+/* ══ GATEWAY CARDS ══ */
+.gateway{max-width:1320px;margin:0 auto;padding:48px 32px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.gw-card{position:relative;border-radius:var(--radius);padding:32px 28px;overflow:hidden;display:block;transition:all .4s var(--ease);text-decoration:none;min-height:200px}
+.gw-card::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.06}
+.gw-card:hover{transform:translateY(-6px)}
+.gw-franchise{background:linear-gradient(135deg,var(--red-deep) 0%,var(--red-dark) 60%,var(--red) 100%);box-shadow:0 8px 32px rgba(237,28,36,.2)}
+.gw-franchise:hover{box-shadow:0 20px 56px rgba(237,28,36,.3)}
+.gw-franchise::before{background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40h80M40 0v80M0 0l80 80M80 0L0 80' stroke='%23fff' stroke-width='.4' fill='none'/%3E%3C/svg%3E") center/80px}
+.gw-budget{background:linear-gradient(135deg,var(--gold-dark) 0%,var(--gold-muted) 60%,var(--gold) 100%);box-shadow:0 8px 32px rgba(255,206,0,.15)}
+.gw-budget:hover{box-shadow:0 20px 56px rgba(255,206,0,.25)}
+.gw-budget::before{background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='25' fill='none' stroke='%23fff' stroke-width='.4'/%3E%3Ccircle cx='30' cy='30' r='15' fill='none' stroke='%23fff' stroke-width='.4'/%3E%3Ccircle cx='30' cy='30' r='5' fill='none' stroke='%23fff' stroke-width='.4'/%3E%3C/svg%3E") center/60px}
+.gw-candidates{background:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 60%,var(--navy-light) 100%);box-shadow:0 8px 32px rgba(27,30,52,.4);border:1px solid rgba(255,206,0,.08)}
+.gw-candidates:hover{box-shadow:0 20px 56px rgba(27,30,52,.5)}
+.gw-candidates::before{background:url("data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 50 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='5' y='5' width='40' height='40' rx='4' fill='none' stroke='%23fff' stroke-width='.3'/%3E%3Crect x='15' y='15' width='20' height='20' rx='2' fill='none' stroke='%23fff' stroke-width='.3'/%3E%3C/svg%3E") center/50px}
+.gw-icon{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.gw-icon svg{width:22px;height:22px;stroke:#fff;stroke-width:2;fill:none}
+.gw-title{font-family:var(--font-head);font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.gw-desc{font-family:var(--font-body);font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:16px}
+.gw-stats{display:flex;gap:20px}
+.gw-stat-num{font-family:var(--font-head);font-size:22px;font-weight:700;color:#fff;letter-spacing:-1px}
+.gw-stat-label{font-family:var(--font-ui);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.gw-card{opacity:0}.gw-franchise{animation:gwAnim .7s var(--ease) 3.5s both}.gw-budget{animation:gwAnim .7s var(--ease) 3.65s both}.gw-candidates{animation:gwAnim .7s var(--ease) 3.8s both}
+@keyframes gwAnim{from{opacity:0;transform:translateY(30px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ══ SERVICE PILLS ══ */
+.services-strip{max-width:1320px;margin:0 auto;padding:40px 32px 0}
+.services-inner{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.service-pill{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:24px;background:var(--dark-glass);border:1px solid var(--border);backdrop-filter:blur(8px);transition:all .3s var(--ease)}
+.service-pill:hover{border-color:rgba(255,206,0,.2);background:rgba(255,206,0,.04);transform:translateY(-2px)}
+.service-pill-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.service-pill-icon svg{width:14px!important;height:14px!important;stroke-width:2}
+.service-pill-icon.cuisine{background:rgba(237,28,36,.1);color:var(--red)}
+.service-pill-icon.decor{background:rgba(255,206,0,.08);color:var(--gold)}
+.service-pill-icon.formation{background:rgba(16,185,129,.08);color:#10B981}
+.service-pill-icon.approvi{background:rgba(99,102,241,.08);color:#6366F1}
+.service-pill span{font-family:var(--font-ui);font-size:12px;font-weight:500;color:var(--text-sec)}
+
+/* ══ PHOTO STRIP ══ */
+.photo-strip{max-width:1320px;margin:0 auto;padding:40px 32px 0}
+.photo-strip-inner{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px;height:220px}
+.photo-cell{position:relative;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border)}
+.photo-cell img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease),filter .4s}
+.photo-cell:hover img{transform:scale(1.06);filter:brightness(1.1)}
+.photo-cell::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(14,15,26,.7) 100%);pointer-events:none}
+.photo-cell-label{position:absolute;bottom:14px;left:16px;z-index:2;font-family:var(--font-script);font-size:15px;color:var(--gold);text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.photo-cell-tag{position:absolute;top:12px;right:12px;z-index:2;font-family:var(--font-ui);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:rgba(237,28,36,.7);backdrop-filter:blur(8px);padding:5px 10px;border-radius:6px}
+.photo-cell.featured{grid-row:span 1}
+@media(max-width:768px){.photo-strip-inner{grid-template-columns:1fr;height:auto}.photo-cell{height:160px}}
+
+/* ══ SECTION HEADER ══ */
+.section-header{max-width:1320px;margin:0 auto;padding:64px 32px 0;text-align:center}
+.section-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+.section-tag svg{width:16px;height:16px;stroke:var(--red);stroke-width:2;fill:none}
+.section-title{font-family:var(--font-head);font-size:36px;font-weight:900;letter-spacing:-1px;margin-bottom:10px;text-transform:uppercase}
+.section-title .gold{color:var(--gold)}.section-title .red{color:var(--red)}
+.section-desc{font-family:var(--font-serif);font-size:15px;color:var(--text-sec);max-width:600px;margin:0 auto;line-height:1.7;font-style:italic}
+.reveal{opacity:0;transform:translateY(30px);transition:all .7s var(--ease)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.section-header .section-tag,.section-header .section-title,.section-header .section-desc{opacity:0;transform:translateY(20px);transition:all .6s var(--ease)}
+.section-header.visible .section-tag{opacity:1;transform:translateY(0);transition-delay:.05s}
+.section-header.visible .section-title{opacity:1;transform:translateY(0);transition-delay:.15s}
+.section-header.visible .section-desc{opacity:1;transform:translateY(0);transition-delay:.25s}
+
+/* ══ PERIOD SELECTOR ══ */
+.period-bar{max-width:1320px;margin:0 auto;padding:20px 32px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.period-label{font-family:var(--font-ui);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);white-space:nowrap}
+.period-btns{display:flex;gap:6px;flex-wrap:wrap}
+.period-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border-light);background:var(--dark-glass);color:var(--text-sec);font-family:var(--font-ui);font-size:12px;font-weight:500;cursor:pointer;transition:all .25s var(--ease);backdrop-filter:blur(8px)}
+.period-btn:hover{border-color:var(--red);color:var(--red);background:rgba(237,28,36,.05)}
+.period-btn.active{background:linear-gradient(135deg,var(--red) 0%,var(--red-dark) 100%);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(237,28,36,.25)}
+.period-sep{width:1px;height:24px;background:var(--border-light);margin:0 4px}
+.period-dates{display:flex;align-items:center;gap:8px}
+.period-input{padding:7px 12px;border-radius:10px;border:1px solid var(--border-light);background:var(--dark-glass);color:var(--text-main);font-family:var(--font-ui);font-size:12px;outline:none;transition:border-color .2s;width:130px}
+.period-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,206,0,.08)}
+.period-dates span{color:var(--text-muted);font-size:11px}
+.period-range-tag{font-family:var(--font-ui);font-size:11px;color:var(--text-muted);padding:5px 12px;background:rgba(255,206,0,.05);border-radius:12px;white-space:nowrap}
+
+/* ══ DASH PANELS ══ */
+.dash-wrap{max-width:1320px;margin:0 auto;padding:24px 32px 0}
+.dash-panel{display:none}.dash-panel.active{display:block}
+.filter-btn{padding:8px 20px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-sec);font-family:var(--font-ui);font-size:12px;font-weight:500;cursor:pointer;transition:all .25s}
+.filter-btn:hover{border-color:var(--gold);color:var(--gold)}
+.filter-btn.active{background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:var(--navy);border-color:transparent;font-weight:700}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.kpi-card{background:var(--dark-glass);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 22px;transition:all .3s var(--ease);position:relative;overflow:hidden}
+.kpi-card::after{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:0 2px 2px 0}
+.kpi-card:hover{border-color:rgba(255,206,0,.18);transform:translateY(-2px)}
+.kpi-label{font-family:var(--font-ui);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.kpi-value{font-family:var(--font-head);font-size:28px;font-weight:900;letter-spacing:-1px}
+.kpi-sub{font-family:var(--font-ui);font-size:10px;color:var(--text-muted);margin-top:4px}
+.c-red .kpi-value{color:var(--red)}.c-red::after{background:var(--red)}
+.c-gold .kpi-value{color:var(--gold)}.c-gold::after{background:var(--gold)}
+.c-cream .kpi-value{color:var(--cream)}.c-cream::after{background:var(--cream)}
+.c-green .kpi-value{color:#10B981}.c-green::after{background:#10B981}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.chart-card{background:var(--dark-glass);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius-md);padding:24px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text-main);text-transform:uppercase;letter-spacing:.5px}
+.chart-legend{display:flex;gap:14px}
+.chart-legend-item{display:flex;align-items:center;gap:6px;font-family:var(--font-ui);font-size:11px;color:var(--text-sec)}
+.chart-legend-dot{width:8px;height:8px;border-radius:50%}
+.chart-wrap{height:240px;position:relative}
+
+/* ══ PORTAL ══ */
+.portal{position:fixed;inset:0;z-index:200;background:var(--dark);transform:translateY(100%);transition:transform .5s var(--ease);overflow-y:auto}
+.portal.open{transform:translateY(0)}
+.portal-nav{position:sticky;top:0;z-index:10;background:rgba(14,15,26,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px}
+.portal-nav-left{display:flex;align-items:center;gap:14px}
+.portal-nav-logo{height:36px}
+.portal-nav-title{display:flex;align-items:center;gap:10px;font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+.portal-nav-title .sep{width:1px;height:24px;background:var(--border)}
+.portal-back{display:flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,206,0,.04);border:1px solid var(--border);border-radius:10px;color:var(--text-sec);font-family:var(--font-ui);font-size:12px;font-weight:500;cursor:pointer;transition:all .3s}
+.portal-back:hover{border-color:var(--gold);color:var(--gold)}
+.portal-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.portal-body{max-width:1320px;margin:0 auto;padding:32px 32px 60px}
+.portal-hero{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px}
+.portal-hero-left h2{font-family:var(--font-head);font-size:28px;font-weight:900;margin-bottom:4px;text-transform:uppercase}
+.portal-hero-left p{font-family:var(--font-serif);font-size:14px;color:var(--text-sec);font-style:italic}
+.portal-live{display:flex;align-items:center;gap:6px;font-family:var(--font-ui);font-size:12px;font-weight:500;color:var(--gold);background:rgba(255,206,0,.04);padding:6px 14px;border-radius:20px;border:1px solid rgba(255,206,0,.08)}
+.portal-live .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:livePulse 2s ease infinite}
+.cand-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.cand-stat-card{background:var(--dark-glass);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px 18px;display:flex;align-items:center;gap:14px}
+.cand-stat-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cand-stat-icon svg{width:18px;height:18px;stroke-width:2;fill:none}
+.cand-stat-icon.red{background:rgba(237,28,36,.1);color:var(--red)}
+.cand-stat-icon.gold{background:rgba(255,206,0,.08);color:var(--gold)}
+.cand-stat-icon.green{background:rgba(16,185,129,.08);color:#10B981}
+.cand-stat-val{font-family:var(--font-head);font-size:26px;font-weight:900;letter-spacing:-1px}
+.cand-stat-label{font-family:var(--font-ui);font-size:11px;color:var(--text-muted)}
+.cand-toolbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.search-box{flex:1;min-width:240px;display:flex;align-items:center;gap:10px;background:var(--dark-glass);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 16px;transition:border-color .3s}
+.search-box:focus-within{border-color:var(--gold)}
+.search-box svg{width:16px;height:16px;stroke:var(--text-muted);stroke-width:2;fill:none;flex-shrink:0}
+.search-box input{flex:1;background:none;border:none;color:var(--text-main);font-family:var(--font-body);font-size:13px;outline:none}
+.search-box input::placeholder{color:var(--text-muted)}
+.cand-list{display:flex;flex-direction:column;gap:8px}
+.cand-row{display:flex;align-items:center;gap:16px;padding:16px 20px;background:var(--dark-glass);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .25s}
+.cand-row:hover{border-color:rgba(255,206,0,.15);background:rgba(255,206,0,.03);transform:translateX(4px)}
+.cand-avatar{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--red),var(--gold));display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.cand-info{flex:1;min-width:0}
+.cand-name{font-family:var(--font-body);font-weight:600;font-size:14px;margin-bottom:2px}
+.cand-meta{font-family:var(--font-ui);font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cand-badges{display:flex;gap:6px;flex-wrap:wrap}
+.cand-badge{font-family:var(--font-ui);font-size:10px;font-weight:600;letter-spacing:.5px;padding:4px 10px;border-radius:10px;border:1px solid var(--border);color:var(--text-sec);white-space:nowrap}
+.cand-arrow{color:var(--text-muted);transition:color .3s}
+.cand-row:hover .cand-arrow{color:var(--gold)}
+.cand-arrow svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.cand-loading{text-align:center;padding:40px;color:var(--text-muted);font-family:var(--font-ui);font-size:13px}
+.cand-loading .spin{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ MODAL ══ */
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--dark-card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:36px;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);transition:all .2s}
+.modal-close:hover{border-color:var(--red);color:var(--red)}
+.modal-close svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.modal-avatar{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--red),var(--gold));display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:20px;font-weight:700;color:#fff;margin-bottom:16px}
+.modal-name{font-family:var(--font-head);font-size:22px;font-weight:900;margin-bottom:4px;text-transform:uppercase}
+.modal-location{font-family:var(--font-serif);font-size:13px;color:var(--text-sec);margin-bottom:20px;font-style:italic}
+.modal-section{margin-bottom:20px}
+.modal-section-title{font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.modal-field{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.modal-field:last-child{border-bottom:none}
+.modal-field-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,206,0,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-field-icon svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2}
+.modal-field-text{font-family:var(--font-body);font-size:13px;color:var(--text-main)}
+.modal-field-label{font-family:var(--font-ui);font-size:10px;color:var(--text-muted);margin-bottom:1px}
+.modal-qa{padding:12px 16px;background:rgba(255,206,0,.03);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:8px}
+.modal-qa-q{font-family:var(--font-ui);font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px}
+.modal-qa-a{font-family:var(--font-body);font-size:13px;color:var(--text-main);font-weight:500}
+
+/* ══ FOOTER ══ */
+.footer{max-width:1320px;margin:60px auto 0;padding:32px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.footer-left{display:flex;align-items:center;gap:12px}
+.footer-logo{height:28px;opacity:.4}
+.footer-text{font-family:var(--font-ui);font-size:11px;color:var(--text-muted)}
+.footer-text a{color:var(--gold);text-decoration:underline}
+.footer-right{font-family:var(--font-ui);font-size:10px;color:var(--text-muted);letter-spacing:.5px}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:32px;padding:100px 24px 60px}
+  .hero-h1{font-size:38px}
+  .hero-map{max-width:420px}
+  .hero-clock{display:none}
+  .stats-inner{grid-template-columns:repeat(2,1fr)}
+  .stat-cell:nth-child(2){border-right:none}
+  .stat-cell:nth-child(1),.stat-cell:nth-child(2){border-bottom:1px solid var(--border)}
+  .gateway{grid-template-columns:1fr;gap:14px;padding:40px 24px 0}
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .chart-grid{grid-template-columns:1fr}
+  .cand-stats{grid-template-columns:repeat(2,1fr)}
+  .dash-wrap{padding:24px 24px 0}
+}
+@media(max-width:768px){
+  .nav-center{display:none}.nav-inner{padding:0 16px;height:56px}.nav-logo{height:36px}.nav-sep,.nav-label{display:none}.nav-live{font-size:10px;padding:5px 10px}
+  .hero{min-height:auto}.hero-inner{padding:80px 16px 40px;gap:24px}.hero-h1{font-size:26px}.hero-badge{font-size:9px;padding:5px 12px}.hero-tagline{font-size:17px}.hero-desc{font-size:13px;margin-bottom:20px}.hero-map{max-width:100%}.hero-map .leaflet-map{height:240px}.hero-actions{flex-direction:column;gap:10px}.btn-primary,.btn-secondary{width:100%;justify-content:center;padding:12px 20px;font-size:13px}.hero-clock{display:none}
+  .stats{margin-top:-20px;padding:0 16px}.stats-inner{grid-template-columns:repeat(2,1fr)}.stat-cell{padding:20px 16px}.stat-num{font-size:26px}
+  .gateway{padding:24px 16px 0;gap:12px}.gw-card{min-height:auto;padding:24px 20px}.gw-title{font-size:16px}.gw-stat-num{font-size:18px}.gw-stat-label{font-size:8px}
+  .services-strip{padding:24px 16px 0}.services-inner{gap:8px;justify-content:flex-start}.service-pill{padding:7px 12px}.service-pill-icon{width:28px;height:28px}.service-pill span{font-size:11px}
+  .ad-strip{padding:24px 16px 0}.ad-box{height:60px}.ad-label{font-size:13px}.ad-diamond,.ad-fan{display:none}
+  .period-bar{padding:16px 16px 0;gap:8px}.period-label{font-size:10px}.period-btn{padding:6px 12px;font-size:11px}.period-sep{display:none}.period-dates{width:100%;margin-top:4px}.period-input{width:110px;font-size:11px;padding:6px 10px}
+  .section-header{padding:40px 16px 0}.section-tag{font-size:10px}.section-title{font-size:22px}.section-desc{font-size:13px}.dash-wrap{padding:16px 16px 0}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px}.kpi-card{padding:16px 18px}.kpi-value{font-size:24px}.kpi-label{font-size:10px}.chart-card{padding:16px}.chart-wrap{height:200px}.chart-title{font-size:12px}.chart-legend{display:none}
+  .portal-nav{padding:0 16px;height:52px}.portal-nav-logo{height:28px}.portal-nav-title{font-size:11px}.portal-back{padding:6px 12px;font-size:12px}.portal-body{padding:20px 16px 40px}.portal-hero{flex-direction:column;align-items:flex-start;gap:12px}.portal-hero-left h2{font-size:20px}.cand-stats{grid-template-columns:repeat(2,1fr);gap:10px}.cand-stat-card{padding:16px 14px}.cand-stat-val{font-size:22px}.cand-badges{display:none}
+  .footer{flex-direction:column;gap:12px;text-align:center;padding:24px 16px}
+}
+@media(max-width:380px){.kpi-grid{grid-template-columns:1fr 1fr;gap:8px}.kpi-value{font-size:20px}.cand-stats{grid-template-columns:1fr 1fr;gap:8px}.cand-stat-val{font-size:18px}.hero-h1{font-size:22px}}
+</style>
+</head>
+<body>
+
+<!-- ══ LOADER ══ -->
+<div class="loader" id="loader">
+  <img src="https://bouillon-batignolles.com/wp-content/uploads/2025/07/logo_standard.png" alt="Bouillon Batignolles" class="loader-logo">
+  <div class="loader-ring"></div>
+  <div class="loader-text">Chargement du tableau de bord</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- ══ NAV ══ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <img src="https://bouillon-batignolles.com/wp-content/uploads/2025/07/logo_nobaseline.png" alt="Bouillon Batignolles" class="nav-logo">
+      <div class="nav-sep"></div>
+      <div class="nav-label">Espace Franchise</div>
+    </div>
+    <div class="nav-center">
+      <a href="#perf" class="nav-link">Performances</a>
+      <a href="javascript:openPortal()" class="nav-link">Candidats</a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-live"><span class="dot"></span> Live Data</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <canvas class="bubble-canvas" id="bubbleCanvas"></canvas>
+  <div class="hero-clock">
+    <div class="clock-face"></div><div class="clock-face"></div><div class="clock-face"></div>
+    <div class="clock-inner">
+      <div class="clock-hour" style="transform:rotate(45deg)"></div>
+      <div class="clock-minute" style="transform:rotate(180deg)"></div>
+      <div class="clock-center"></div>
+    </div>
+    <div class="clock-tick" style="transform:rotate(0deg)"></div>
+    <div class="clock-tick" style="transform:rotate(30deg)"></div>
+    <div class="clock-tick" style="transform:rotate(60deg)"></div>
+    <div class="clock-tick" style="transform:rotate(90deg)"></div>
+    <div class="clock-tick" style="transform:rotate(120deg)"></div>
+    <div class="clock-tick" style="transform:rotate(150deg)"></div>
+    <div class="clock-tick" style="transform:rotate(180deg)"></div>
+    <div class="clock-tick" style="transform:rotate(210deg)"></div>
+    <div class="clock-tick" style="transform:rotate(240deg)"></div>
+    <div class="clock-tick" style="transform:rotate(270deg)"></div>
+    <div class="clock-tick" style="transform:rotate(300deg)"></div>
+    <div class="clock-tick" style="transform:rotate(330deg)"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block"></span> Dashboard Marketing Franchise</div>
+      <h1 class="hero-h1">Recrutement<br><span class="red">Franchisés</span> <span class="gold">Bouillon</span></h1>
+      <div class="hero-tagline">Beau, bon et pas cher</div>
+      <p class="hero-desc">Suivi en temps réel des campagnes Meta Ads de recrutement de franchisés pour le réseau Bouillon Batignolles — brasserie parisienne 1900.</p>
+      <div class="hero-actions">
+        <a href="#perf" class="btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Voir les performances</a>
+        <button class="btn-secondary" onclick="openPortal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg> Portail Candidats</button>
+      </div>
+    </div>
+    <div class="hero-map">
+      <div class="leaflet-map" id="map"></div>
+      <div class="map-tag">6 restaurants · Grand Est & Luxembourg</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ STATS BAR ══ -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat-cell"><div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg></div><div class="stat-num">6</div><div class="stat-label">Restaurants ouverts</div></div>
+    <div class="stat-cell"><div class="stat-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div class="stat-num">1900</div><div class="stat-label">Ambiance Belle Époque</div></div>
+    <div class="stat-cell"><div class="stat-icon cream"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><div class="stat-num">150K€</div><div class="stat-label">Investissement à partir de</div></div>
+    <div class="stat-cell"><div class="stat-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="stat-num">329K€</div><div class="stat-label">EBITDA cible Y3</div></div>
+  </div>
+</div>
+
+<!-- ══ GATEWAY CARDS ══ -->
+<div class="gateway">
+  <a href="#perf" class="gw-card gw-franchise" onclick="showPanel('overview')">
+    <div class="gw-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+    <div class="gw-title">Campagnes Meta</div>
+    <div class="gw-desc">Performance globale des campagnes de recrutement franchisés.</div>
+    <div class="gw-stats"><div class="gw-stat"><div class="gw-stat-num" id="gwLeads">—</div><div class="gw-stat-label">Leads</div></div><div class="gw-stat"><div class="gw-stat-num" id="gwCPL">—</div><div class="gw-stat-label">CPL</div></div></div>
+  </a>
+  <a href="#perf" class="gw-card gw-budget">
+    <div class="gw-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <div class="gw-title">Budget & ROI</div>
+    <div class="gw-desc">Suivi des dépenses et du coût par lead en temps réel.</div>
+    <div class="gw-stats"><div class="gw-stat"><div class="gw-stat-num" id="gwSpend">—</div><div class="gw-stat-label">Dépensé</div></div><div class="gw-stat"><div class="gw-stat-num" id="gwClicks">—</div><div class="gw-stat-label">Clics</div></div></div>
+  </a>
+  <a href="javascript:openPortal()" class="gw-card gw-candidates">
+    <div class="gw-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M17 14a4 4 0 014 4v3"/><circle cx="17" cy="7" r="3"/></svg></div>
+    <div class="gw-title">Portail Candidats</div>
+    <div class="gw-desc">Candidats franchisés issus des campagnes Meta Ads.</div>
+    <div class="gw-stats"><div class="gw-stat"><div class="gw-stat-num" id="gwCandTotal">—</div><div class="gw-stat-label">Candidats</div></div><div class="gw-stat"><div class="gw-stat-num" id="gwCandWeek">—</div><div class="gw-stat-label">Cette sem.</div></div></div>
+  </a>
+</div>
+
+<!-- ══ SERVICE PILLS ══ -->
+<div class="services-strip reveal">
+  <div class="services-inner">
+    <div class="service-pill"><div class="service-pill-icon cuisine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3m0 0v7"/></svg></div><span>Cuisine traditionnelle</span></div>
+    <div class="service-pill"><div class="service-pill-icon decor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><span>Décor Belle Époque</span></div>
+    <div class="service-pill"><div class="service-pill-icon formation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div><span>École de vente</span></div>
+    <div class="service-pill"><div class="service-pill-icon approvi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><span>Approvisionnement centralisé</span></div>
+  </div>
+</div>
+
+<!-- ══ PHOTO STRIP ══ -->
+<div class="photo-strip reveal">
+  <div class="photo-strip-inner">
+    <div class="photo-cell featured">
+      <img src="https://bouillon-batignolles.com/wp-content/uploads/2025/07/bouillon-batignolles-1369-scaled.jpg" alt="Intérieur Bouillon Batignolles" loading="lazy">
+      <div class="photo-cell-label">L'ambiance Belle Époque</div>
+      <div class="photo-cell-tag">Décor signature</div>
+    </div>
+    <div class="photo-cell">
+      <img src="https://bouillon-batignolles.com/wp-content/uploads/2025/07/2025-06-13-bouillon-batignolles-waves-photo-culinaire-1768.jpg" alt="Plat Bouillon Batignolles" loading="lazy">
+      <div class="photo-cell-label">Beau, bon et pas cher</div>
+    </div>
+    <div class="photo-cell">
+      <img src="enseigne-bouillon.jpg" alt="Enseigne lumineuse Bouillon Batignolles" loading="lazy">
+      <div class="photo-cell-label">L'enseigne signature</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PERFORMANCES SECTION ══ -->
+<div class="section-header reveal" id="perf">
+  <div class="section-tag"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Performances Meta Ads</div>
+  <h2 class="section-title">Campagnes de <span class="red">recrutement</span> franchisés</h2>
+  <p class="section-desc">Suivi des performances des campagnes Meta Ads pour le recrutement de nouveaux franchisés Bouillon Batignolles.</p>
+</div>
+
+<!-- Period selector -->
+<div class="period-bar reveal">
+  <div class="period-label">Période</div>
+  <div class="period-btns">
+    <button class="period-btn" onclick="setPeriod('7d')">7 jours</button>
+    <button class="period-btn" onclick="setPeriod('30d')">30 jours</button>
+    <button class="period-btn" onclick="setPeriod('month')">Ce mois</button>
+    <button class="period-btn" onclick="setPeriod('lastmonth')">Mois dernier</button>
+    <button class="period-btn active" onclick="setPeriod('all')">Tout</button>
+  </div>
+  <div class="period-sep"></div>
+  <div class="period-dates">
+    <input type="date" class="period-input" id="periodFrom" onchange="setPeriod('custom')">
+    <span>&rarr;</span>
+    <input type="date" class="period-input" id="periodTo" onchange="setPeriod('custom')">
+  </div>
+  <div class="period-range-tag" id="periodTag"></div>
+</div>
+
+<!-- Tab buttons -->
+<div class="dash-wrap"><div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap" class="reveal">
+  <button class="filter-btn active" onclick="showPanel('overview')" id="tabOverview">Vue d'ensemble</button>
+</div></div>
+
+<!-- PANEL: Overview -->
+<div class="dash-panel active" id="panel-overview"><div class="dash-wrap">
+  <div class="kpi-grid reveal">
+    <div class="kpi-card c-red"><div class="kpi-label">Dépenses</div><div class="kpi-value">€0</div><div class="kpi-sub">—</div></div>
+    <div class="kpi-card c-gold"><div class="kpi-label">Impressions</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+    <div class="kpi-card c-green"><div class="kpi-label">Clics</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+    <div class="kpi-card c-cream"><div class="kpi-label">CTR</div><div class="kpi-value">0%</div><div class="kpi-sub">—</div></div>
+    <div class="kpi-card c-red"><div class="kpi-label">Leads</div><div class="kpi-value">0</div><div class="kpi-sub">—</div></div>
+    <div class="kpi-card c-gold"><div class="kpi-label">CPL moyen</div><div class="kpi-value">€0</div><div class="kpi-sub">—</div></div>
+  </div>
+  <div class="chart-grid reveal">
+    <div class="chart-card"><div class="chart-header"><div class="chart-title">Dépenses & Leads</div><div class="chart-legend"><div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--red)"></span>Dépenses</div><div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--gold)"></span>Leads</div></div></div><div class="chart-wrap"><canvas id="chartOverview1"></canvas></div></div>
+    <div class="chart-card"><div class="chart-header"><div class="chart-title">CTR & CPL</div><div class="chart-legend"><div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--red)"></span>CTR</div><div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--gold)"></span>CPL</div></div></div><div class="chart-wrap"><canvas id="chartOverview2"></canvas></div></div>
+  </div>
+</div></div>
+
+<!-- ══ PORTAIL CANDIDATS ══ -->
+<div class="portal" id="candidatePortal">
+  <div class="portal-nav"><div class="portal-nav-left"><img src="https://bouillon-batignolles.com/wp-content/uploads/2025/07/logo_nobaseline.png" alt="Bouillon Batignolles" class="portal-nav-logo"><div class="portal-nav-title"><span class="sep"></span><span>Portail Candidats</span></div></div><button class="portal-back" onclick="closePortal()"><svg viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>Retour</button></div>
+  <div class="portal-body">
+    <div class="portal-hero"><div class="portal-hero-left"><h2>Suivi des candidats</h2><p>Tous les prospects issus des campagnes Meta Ads</p></div><div class="portal-hero-right"><div class="portal-live"><span class="dot"></span> Synchronisé en direct</div></div></div>
+    <div class="cand-stats">
+      <div class="cand-stat-card"><div class="cand-stat-icon red"><svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="7" r="3"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg></div><div><div class="cand-stat-val" id="candTotal">—</div><div class="cand-stat-label">Total candidats</div></div></div>
+      <div class="cand-stat-card"><div class="cand-stat-icon gold"><svg viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div><div class="cand-stat-val" id="candWeek">—</div><div class="cand-stat-label">Cette semaine</div></div></div>
+      <div class="cand-stat-card"><div class="cand-stat-icon red"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div><div class="cand-stat-val" id="candLeads">—</div><div class="cand-stat-label">Leads Meta</div></div></div>
+      <div class="cand-stat-card"><div class="cand-stat-icon green"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><div><div class="cand-stat-val" id="candCPL">—</div><div class="cand-stat-label">CPL moyen</div></div></div>
+    </div>
+    <div class="cand-toolbar"><div class="search-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" placeholder="Rechercher un candidat par nom, ville, email..." id="searchInput"></div><div class="filter-group"><button class="filter-btn active" data-filter="all">Tous</button></div></div>
+    <div class="cand-list" id="candList"><div class="cand-loading"><span class="spin"></span> Chargement des candidats...</div></div>
+  </div>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalContent"><button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div id="modalBody"></div></div></div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer"><div class="footer-left"><img src="https://bouillon-batignolles.com/wp-content/uploads/2025/07/logo_nobaseline.png" alt="Bouillon Batignolles" class="footer-logo"><div class="footer-text">Dashboard marketing — Propulsé par <a href="https://meta-advertising.io" target="_blank">Meta-Advertising</a></div></div><div class="footer-right">Données actualisées en temps réel</div></footer>
+
+<script>
+/* ══ LOADER ══ */
+window.addEventListener('load',function(){setTimeout(function(){document.getElementById('loader').classList.add('done')},2200)});
+
+/* ══ MAP — zoomed on Grand Est ══ */
+var map=L.map('map',{scrollWheelZoom:false,zoomControl:true,attributionControl:false}).setView([49.15,6.3],8);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16}).addTo(map);
+var pin=L.divIcon({className:'',html:'<div style="width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#ED1C24,#FFCE00);border:2.5px solid rgba(255,255,255,.9);box-shadow:0 0 0 4px rgba(237,28,36,.2),0 2px 8px rgba(0,0,0,.3);animation:mapPulse 3s ease infinite"></div><style>@keyframes mapPulse{0%,100%{box-shadow:0 0 0 4px rgba(237,28,36,.2),0 2px 8px rgba(0,0,0,.3)}50%{box-shadow:0 0 0 8px rgba(237,28,36,.05),0 2px 12px rgba(0,0,0,.4)}}</style>',iconSize:[16,16],iconAnchor:[8,8]});
+var LOCATIONS=[
+  {name:'Metz Centre',lat:49.1193,lng:6.1757},
+  {name:'Thionville',lat:49.3588,lng:6.1686},
+  {name:'Nancy Centre',lat:48.6921,lng:6.1844},
+  {name:'Creutzwald',lat:49.2086,lng:6.6947},
+  {name:'Moulins-lès-Metz (CC Waves)',lat:49.0958,lng:6.1178},
+  {name:'Luxembourg',lat:49.6117,lng:6.1319}
+];
+LOCATIONS.forEach(function(l){L.marker([l.lat,l.lng],{icon:pin}).addTo(map).bindPopup('<div style="font-family:Sarpanch,sans-serif;font-size:13px;font-weight:700;color:#1b1e34;text-transform:uppercase">'+l.name+'</div><div style="font-family:Scope One,serif;font-size:11px;color:#666;margin-top:2px;font-style:italic">Bouillon Batignolles</div>')});
+
+/* ══ CHAMPAGNE BUBBLES ══ */
+(function(){
+  var c=document.getElementById('bubbleCanvas'),ctx=c.getContext('2d');
+  function resize(){c.width=c.offsetWidth;c.height=c.offsetHeight}
+  resize();window.addEventListener('resize',resize);
+  var bubbles=[];
+  for(var i=0;i<50;i++)bubbles.push({x:Math.random()*c.width,y:c.height+Math.random()*200,r:1+Math.random()*3,speed:.2+Math.random()*.6,wobble:Math.random()*Math.PI*2,wobbleSpeed:.01+Math.random()*.02});
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    bubbles.forEach(function(b){
+      b.y-=b.speed;b.wobble+=b.wobbleSpeed;
+      var x=b.x+Math.sin(b.wobble)*15;
+      if(b.y<-10){b.y=c.height+10;b.x=Math.random()*c.width}
+      var alpha=(1-b.y/c.height)*.15;
+      ctx.beginPath();ctx.arc(x,b.y,b.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,206,0,'+alpha+')';ctx.fill();
+      ctx.beginPath();ctx.arc(x-b.r*.3,b.y-b.r*.3,b.r*.3,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,'+alpha*.5+')';ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══ REVEAL ON SCROLL ══ */
+var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.15});
+document.querySelectorAll('.reveal,.section-header').forEach(function(el){obs.observe(el)});
+
+/* ══ PANEL SWITCHING ══ */
+function showPanel(id){
+  document.querySelectorAll('.dash-panel').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.dash-wrap .filter-btn').forEach(function(b){b.classList.remove('active')});
+  var tab=document.getElementById('tab'+id.charAt(0).toUpperCase()+id.slice(1));
+  if(tab)tab.classList.add('active');
+}
+
+/* ══ PORTAL ══ */
+function openPortal(){document.getElementById('candidatePortal').classList.add('open');document.body.style.overflow='hidden'}
+function closePortal(){document.getElementById('candidatePortal').classList.remove('open');document.body.style.overflow=''}
+
+/* ══ MODAL ══ */
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
+function gv(c,k){return c[k]||(k.endsWith(' ')?c[k.trim()]:c[k+' '])||''}
+function openModal(idx){
+  var c=CANDIDATES[idx];if(!c)return;
+  var nom=gv(c,'Nom'),prenom=gv(c,'Prénom');
+  var initials=((prenom||'?')[0]+(nom||'?')[0]).toUpperCase();
+  var html='<div class="modal-avatar">'+initials+'</div>';
+  html+='<div class="modal-name">'+(prenom+' '+nom).trim()+'</div>';
+  html+='<div class="modal-location">'+(gv(c,'Ville')||'—')+' ('+(gv(c,'Code postal')||'—')+')</div>';
+  html+='<div class="modal-section"><div class="modal-section-title">Coordonnées</div>';
+  html+='<div class="modal-field"><div class="modal-field-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></div><div><div class="modal-field-label">Email</div><div class="modal-field-text">'+(gv(c,'Email')||gv(c,'E-mail')||'—')+'</div></div></div>';
+  html+='<div class="modal-field"><div class="modal-field-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div><div class="modal-field-label">Téléphone</div><div class="modal-field-text">'+(gv(c,'Téléphone')||'—')+'</div></div></div></div>';
+  var questions=[{key:"Quelle est votre activité aujourd'hui ?",label:'Activité actuelle'},{key:'Êtes-vous propriétaire ou locataire de votre local ?',label:'Propriétaire / Locataire'},{key:"Quel chiffre d'affaires annuel réalise le restaurant concerné par votre projet ?",label:"CA annuel"},{key:'Délais',label:'Délais envisagés'},{key:'Quel est le nom et la ville du restaurant concerné ?',label:'Restaurant concerné'}];
+  var hasQ=false;questions.forEach(function(q){if(gv(c,q.key))hasQ=true});
+  if(hasQ){html+='<div class="modal-section"><div class="modal-section-title">Réponses au formulaire</div>';questions.forEach(function(q){var v=gv(c,q.key);if(v)html+='<div class="modal-qa"><div class="modal-qa-q">'+q.label+'</div><div class="modal-qa-a">'+v+'</div></div>'});html+='</div>'}
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+/* ══ META ADS DATA ══ */
+var META_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQZZqBeck80LcNEZUPOx-EjBHY_xnR1yGINcHIllM-P7lBh_rT1zdZTLxp6nyOE06ppyCagPog6Dxx1/pub?gid=2145326715&single=true&output=csv';
+Chart.defaults.font.family="'Barlow',sans-serif";Chart.defaults.color='#706658';
+function parseNum(v){if(!v)return 0;return parseFloat(v.replace(/"/g,'').replace(/,/g,'.').replace(/\s/g,''))||0}
+
+var COLUMN_ALIASES={
+'Nom de la campagne':'Campaign name',
+'Nom de l\'ensemble de publicités':'Ad set name',
+'Nom de la publicité':'Ad name',
+'Nom du groupe d\'annonces':'Ad group name',
+'Coût (EUR)':'Cost (EUR)',
+'Portée':'Reach',
+'Clics (tous)':'Clicks (all)',
+'CTR (tous)':'CTR (all)',
+'Fréquence':'Frequency',
+'CPM (coût pour 1000 impressions)':'CPM',
+'Prospects sur Facebook':'Facebook leads',
+'Cost per on-Facebook lead':'Cost per lead',
+'J\'aime la page':'Page likes',
+'Commentaires sur les publications':'Post comments',
+'Réactions aux publications':'Post reactions',
+'Partages de publications':'Post shares',
+'Enregistrements de publications':'Post saves',
+'Coût par conversion':'Cost per conversion',
+'Clics':'Clicks',
+'Conversion type name':'Conversion type',
+'Total conversion value':'Conversion value',
+'URL de la miniature de la création':'Ad creative thumbnail URL',
+'URL de l\'image de la création':'Ad creative image URL'
+};
+function normalizeRow(row){
+var out={};
+for(var k in row){
+if(!row.hasOwnProperty(k))continue;
+var nk=COLUMN_ALIASES[k]||k;
+out[nk]=row[k];
+}
+return out;
+}
+function normalizeRows(rows){
+if(!rows||!rows.length)return rows;
+var sample=rows[0],needsNorm=false;
+for(var k in sample){if(COLUMN_ALIASES[k]){needsNorm=true;break;}}
+if(!needsNorm)return rows;
+return rows.map(normalizeRow);
+}
+var _missingCols={};
+function safeCol(row,col){
+  if(row && col in row) return row[col];
+  if(!_missingCols[col]){_missingCols[col]=true;console.warn('⚠️ Colonne manquante: '+col)}
+  return '';
+}
+function showMissingWarning(){
+  var cols=Object.keys(_missingCols);
+  if(!cols.length)return;
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;padding:8px 16px;background:#f59e0b;color:#000;font:13px/1.4 sans-serif;text-align:center;z-index:99999;';
+  d.textContent='⚠️ '+cols.length+' colonne(s) manquante(s) dans les donn\u00e9es : '+cols.join(', ');
+  document.body.appendChild(d);
+  setTimeout(function(){d.remove()},15000);
+}
+
+
+function fmtNum(n){return n.toLocaleString('fr-FR',{maximumFractionDigits:0})}
+function fmtDec(n,d){return n.toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function fmtDate(d){var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
+var RAW_ALL=[],chartInstances={},currentPeriod='all';
+
+function loadMetaData(){
+  if(!META_URL)return;
+  fetch(META_URL+'&_t='+Date.now()).then(function(r){return r.text()}).then(function(csv){
+    var rows=normalizeRows(parseCSV(csv));if(!rows.length)return;RAW_ALL=[];
+    rows.forEach(function(r){RAW_ALL.push({date:r['Date']||'',spend:parseNum(r['Cost (EUR)']),impressions:parseNum(r['Impressions']),reach:parseNum(r['Reach']),clicks:parseNum(r['Clicks (all)']),ctr:parseNum(r['CTR']||r['CTR (link click-through rate)']||''),leads:parseNum(r['On-Facebook leads']),cpl:parseNum(r['Cost per on-Facebook lead']),engagements:parseNum(r['Page engagements'])})});
+    var allDates=RAW_ALL.map(function(r){return r.date}).filter(Boolean).sort();
+    if(allDates.length){document.getElementById('periodFrom').value=allDates[0];document.getElementById('periodTo').value=allDates[allDates.length-1]}
+    renderMetaData();showMissingWarning();
+  }).catch(function(err){console.log('Meta data fetch error:',err)});
+}
+function getDateRange(mode){var today=new Date(),to=today.toISOString().slice(0,10),from;if(mode==='7d'){from=new Date(today);from.setDate(from.getDate()-6);from=from.toISOString().slice(0,10)}else if(mode==='30d'){from=new Date(today);from.setDate(from.getDate()-29);from=from.toISOString().slice(0,10)}else if(mode==='month'){from=to.slice(0,8)+'01'}else if(mode==='lastmonth'){var d=new Date(today.getFullYear(),today.getMonth()-1,1);from=d.toISOString().slice(0,10);var e=new Date(today.getFullYear(),today.getMonth(),0);to=e.toISOString().slice(0,10)}else if(mode==='custom'){from=document.getElementById('periodFrom').value;to=document.getElementById('periodTo').value}else{return null}return{from:from,to:to}}
+function filterByPeriod(arr,range){if(!range)return arr;return arr.filter(function(r){return r.date>=range.from&&r.date<=range.to})}
+function setPeriod(mode){currentPeriod=mode;var btns=document.querySelectorAll('.period-btn');btns.forEach(function(b){b.classList.remove('active')});if(mode!=='custom'){var labels={'7d':0,'30d':1,'month':2,'lastmonth':3,'all':4};if(labels[mode]!==undefined&&btns[labels[mode]])btns[labels[mode]].classList.add('active')}var range=getDateRange(mode);if(range){document.getElementById('periodFrom').value=range.from;document.getElementById('periodTo').value=range.to}renderMetaData()}
+function renderMetaData(){
+  var range=currentPeriod==='all'?null:getDateRange(currentPeriod);var all=filterByPeriod(RAW_ALL,range);
+  var tag=document.getElementById('periodTag');
+  if(range&&tag){tag.textContent=fmtDate(range.from)+' → '+fmtDate(range.to)+' · '+all.length+' entrées'}else if(tag){tag.textContent=all.length?'Toutes les données · '+all.length+' entrées':'En attente de données'}
+  function sum(arr,k){var t=0;arr.forEach(function(r){t+=r[k]});return t}
+  var ts=sum(all,'spend'),ti=sum(all,'impressions'),tc=sum(all,'clicks'),tl=sum(all,'leads'),tCtr=ti?tc/ti*100:0,tCpl=tl?ts/tl:0;
+  var cards=document.querySelectorAll('#panel-overview .kpi-value');
+  if(cards.length>=6){cards[0].textContent='€'+fmtDec(ts,2);cards[1].textContent=fmtNum(ti);cards[2].textContent=fmtNum(tc);cards[3].textContent=fmtDec(tCtr,2)+'%';cards[4].textContent=fmtNum(tl);cards[5].textContent=tCpl?'€'+fmtDec(tCpl,2):'—'}
+  document.getElementById('gwLeads').textContent=fmtNum(tl);document.getElementById('gwCPL').textContent=tCpl?'€'+fmtDec(tCpl,2):'—';
+  document.getElementById('gwSpend').textContent='€'+fmtDec(ts,2);document.getElementById('gwClicks').textContent=fmtNum(tc);
+  function groupByDate(arr){var m={};arr.forEach(function(r){if(!m[r.date])m[r.date]={spend:0,clicks:0,impressions:0,leads:0};m[r.date].spend+=r.spend;m[r.date].clicks+=r.clicks;m[r.date].impressions+=r.impressions;m[r.date].leads+=r.leads});for(var d in m){var g=m[d];g.ctr=g.impressions?g.clicks/g.impressions*100:0;g.cpl=g.leads?g.spend/g.leads:0}return m}
+  var byDate=groupByDate(all),dates=Object.keys(byDate).sort(),labels=dates.map(function(d){var p=d.split('-');return p[2]+'/'+p[1]});
+  function vals(key){return dates.map(function(d){return byDate[d]?byDate[d][key]:0})}
+  mkChart('chartOverview1',labels,vals('spend'),vals('leads'),'Dépenses (€)','Leads','Dépenses (€)','Leads','#ED1C24','#FFCE00','bar','line');
+  mkChart('chartOverview2',labels,vals('ctr'),vals('cpl'),'CTR (%)','CPL (€)','CTR (%)','CPL (€)','#ED1C24','#FFCE00','line','line');
+}
+function mkOpts(yL,yR){return{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'#161828',titleColor:'#f5f2ec',bodyColor:'#a09888',borderColor:'rgba(255,206,0,.12)',borderWidth:1,cornerRadius:10,padding:12,titleFont:{weight:600,family:'Sarpanch'}}},scales:{x:{grid:{display:false},ticks:{font:{size:11,family:'Barlow'}}},y:{position:'left',title:{display:true,text:yL,font:{size:11,family:'Barlow'}},grid:{color:'rgba(255,206,0,.04)'},ticks:{font:{size:11,family:'Barlow'}}},y1:{position:'right',title:{display:true,text:yR||'',font:{size:11,family:'Barlow'}},grid:{display:false},ticks:{font:{size:11,family:'Barlow'}}}}}}
+function mkChart(id,labels,d1,d2,lA,lB,yL,yR,c1,c2,tA,tB){var el=document.getElementById(id);if(!el)return;if(chartInstances[id])chartInstances[id].destroy();chartInstances[id]=new Chart(el,{type:'bar',data:{labels:labels,datasets:[{label:lA,data:d1,type:tA||'bar',backgroundColor:c1+'33',borderColor:c1,borderWidth:2,borderRadius:6,yAxisID:'y',tension:.4,pointRadius:tA==='line'?3:0,fill:tA==='line'},{label:lB,data:d2,type:tB||'line',backgroundColor:c2+'22',borderColor:c2,borderWidth:2,yAxisID:'y1',tension:.4,pointRadius:3,fill:false}]},options:mkOpts(yL,yR)})}
+renderMetaData();
+
+/* ══ CANDIDATES ══ */
+var SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRhIa0vNSXCi5c6gFCepn8zS9Qd6cUEL9FK4X02CEJtRc6nfWCqadRncbJi_FV4kM9eVu-whE-MnL_I/pub?gid=1579352024&single=true&output=csv',DEMO_CANDIDATES=[],CANDIDATES=[];
+function parseCSV(text){var lines=text.split('\n').filter(function(l){return l.trim()});if(lines.length<2)return[];function splitRow(line){var result=[],cur='',inQ=false;for(var c=0;c<line.length;c++){var ch=line[c];if(ch==='"')inQ=!inQ;else if(ch===','&&!inQ){result.push(cur.trim());cur=''}else cur+=ch}result.push(cur.trim());return result}var headers=splitRow(lines[0]),rows=[];for(var i=1;i<lines.length;i++){var vals=splitRow(lines[i]),row={};for(var j=0;j<headers.length;j++)row[headers[j]]=j<vals.length?vals[j]:'';rows.push(row)}return rows}
+function loadCandidates(){
+  if(!SHEET_URL){updateCandUI();return}
+  fetch(SHEET_URL+'&_t='+Date.now()).then(function(r){return r.text()}).then(function(csv){
+    console.log('CSV candidats reçu, longueur:',csv.length);
+    var parsed=normalizeRows(parseCSV(csv));
+    console.log('Candidats parsés:',parsed.length,parsed.length?Object.keys(parsed[0]):[]);
+    if(parsed.length){
+      CANDIDATES=parsed.filter(function(c){
+        var nom=(c['Nom']||c['Nom ']||'').toLowerCase();
+        return nom.indexOf('test')===-1&&nom.indexOf('dummy')===-1&&nom!==''
+      });
+      console.log('Candidats après filtre:',CANDIDATES.length);
+    }else{CANDIDATES=DEMO_CANDIDATES}
+    updateCandUI();
+  }).catch(function(err){console.error('Erreur fetch candidats:',err);CANDIDATES=DEMO_CANDIDATES;updateCandUI()})
+}
+function sumField(arr,k){var t=0;arr.forEach(function(r){t+=r[k]});return t}
+function updateCandUI(){var total=CANDIDATES.length;document.getElementById('candTotal').textContent=total;document.getElementById('gwCandTotal').textContent=total;document.getElementById('candWeek').textContent=total;document.getElementById('gwCandWeek').textContent=total;var tl=sumField(RAW_ALL,'leads');document.getElementById('candLeads').textContent=tl;var cpl=tl?sumField(RAW_ALL,'spend')/tl:0;document.getElementById('candCPL').textContent=cpl?'€'+fmtDec(cpl,2):'—';renderCandidates('all','')}
+function renderCandidates(filter,search){var list=document.getElementById('candList');var filtered=CANDIDATES.filter(function(c){if(search){var s=search.toLowerCase(),match=false;for(var k in c){if(c[k]&&c[k].toLowerCase().indexOf(s)>=0){match=true;break}}if(!match)return false}return true});if(!filtered.length){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-muted)">Aucun candidat trouvé</div>';return}var html='';filtered.forEach(function(c){var idx=CANDIDATES.indexOf(c),nom=gv(c,'Nom'),prenom=gv(c,'Prénom'),initials=((prenom||'?')[0]+(nom||'?')[0]).toUpperCase(),name=(prenom+' '+nom).trim(),meta=[gv(c,'Ville'),gv(c,'Code postal')].filter(Boolean).join(' · ');html+='<div class="cand-row" onclick="openModal('+idx+')"><div class="cand-avatar">'+initials+'</div><div class="cand-info"><div class="cand-name">'+name+'</div><div class="cand-meta">'+meta+'</div></div><div class="cand-badges">';var activite=gv(c,"Quelle est votre activité aujourd'hui ?");if(activite)html+='<span class="cand-badge">'+activite+'</span>';var delais=gv(c,'Délais');if(delais)html+='<span class="cand-badge">'+delais+'</span>';html+='</div><div class="cand-arrow"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div></div>'});list.innerHTML=html}
+document.getElementById('searchInput').addEventListener('input',function(){renderCandidates('all',this.value)});
+loadMetaData();
+loadCandidates();
+</script>
+</body>
+</html>

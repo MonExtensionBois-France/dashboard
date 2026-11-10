@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vival — Dashboard Franchise</title>
+<link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/b/bd/Vival_by_Casino_logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --vival:#00837B;--vival-dk:#006B65;--vival-lt:#00A89E;
+  --coral:#E4425D;--coral-lt:#F06070;--coral-dk:#C03048;
+  --bg:#0a0d0d;--bg2:#0e1414;--bg3:#141c1c;--bg4:#1a2424;
+  --card:rgba(14,20,20,.7);--card2:rgba(14,20,20,.92);
+  --text:#F0EDEA;--text2:#9AAFAB;--text3:#5E7A76;
+  --border:rgba(0,131,123,.1);--border2:rgba(0,131,123,.2);
+  --title:'Nunito',system-ui,sans-serif;
+  --body:'DM Sans',system-ui,sans-serif;
+  --ui:'Barlow',system-ui,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--body);background:var(--bg);color:var(--text);overflow-x:hidden}
+::selection{background:var(--coral);color:#fff}
+a{text-decoration:none;color:inherit}button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,131,123,.25);border-radius:2px}
+
+.grain{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.015;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes loaderBar{to{width:100%}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes drawRing{from{stroke-dashoffset:var(--circumference)}to{stroke-dashoffset:var(--offset)}}
+@keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:none;opacity:1}}
+@keyframes tickerScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 4px rgba(228,66,93,.3))}50%{filter:drop-shadow(0 0 12px rgba(228,66,93,.5))}}
+@keyframes countPulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+
+.skeleton{background:linear-gradient(90deg,rgba(0,131,123,.05) 25%,rgba(0,131,123,.12) 50%,rgba(0,131,123,.05) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;display:inline-block;height:1.3em;width:80px}
+.reveal{opacity:0;transform:translateY(30px);transition:all .8s var(--ease)}.reveal.visible{opacity:1;transform:none}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}
+
+/* ═══ LOADER ═══ */
+.loader{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);transition:opacity .8s var(--ease),visibility .8s}
+.loader.done{opacity:0;visibility:hidden;pointer-events:none}
+.loader img{height:48px;margin-bottom:28px}
+.loader-bar-wrap{width:140px;height:2px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
+.loader-bar{height:100%;width:0;background:linear-gradient(90deg,var(--vival),var(--coral));animation:loaderBar 2s var(--ease) forwards}
+
+/* ═══ BACK BUTTON ═══ */
+.back-portal{display:flex;align-items:center;gap:8px;font-family:var(--ui);font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--text2);background:rgba(10,13,13,.5);border:1px solid var(--border);border-radius:999px;padding:8px 18px 8px 14px;transition:all .3s var(--ease);text-decoration:none;margin-right:auto}
+.back-portal:hover{color:#fff;background:var(--coral);border-color:var(--coral);box-shadow:0 4px 20px rgba(228,66,93,.3)}
+.back-portal svg{width:16px;height:16px;transition:transform .3s var(--ease)}
+.back-portal:hover svg{transform:translateX(-3px)}
+
+/* ═══ TOP NAV ═══ */
+.top-nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;padding:0 clamp(20px,4vw,48px);height:64px;transition:all .4s var(--ease)}
+.top-nav.scrolled{background:rgba(10,13,13,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.top-nav img{height:28px}
+.nav-links{display:flex;gap:4px;margin-left:auto}
+.nav-links a{font-family:var(--ui);font-size:12px;font-weight:600;color:var(--text3);padding:8px 16px;border-radius:999px;transition:all .3s var(--ease);position:relative}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--coral);background:rgba(228,66,93,.06)}
+
+/* ═══ HERO ═══ */
+.hero{position:relative;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;overflow:hidden}
+.hero-left{position:relative;z-index:2;padding:0 clamp(24px,5vw,80px)}
+.hero-right{position:relative;height:100vh;overflow:hidden}
+.hero-right img{width:100%;height:100%;object-fit:cover;filter:brightness(.5) saturate(.7)}
+.hero-right::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--bg) 0%,transparent 40%),linear-gradient(to top,var(--bg),transparent 30%)}
+.hero-label{display:inline-flex;align-items:center;gap:10px;font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--vival);margin-bottom:20px;animation:fadeUp .8s var(--ease) 2.2s backwards}
+.hero-label::before{content:'';width:28px;height:1px;background:var(--vival)}
+.hero-logo{height:clamp(60px,10vw,90px);margin-bottom:12px;animation:fadeUp .8s var(--ease) 2.3s backwards}
+.hero-tagline{font-family:var(--title);font-size:clamp(1.6rem,3.5vw,2.6rem);font-weight:900;line-height:1.15;animation:fadeUp .8s var(--ease) 2.4s backwards}
+.hero-tagline span{color:var(--coral)}
+.hero-sub{font-size:15px;color:var(--text3);line-height:1.7;margin-top:14px;max-width:420px;animation:fadeUp .8s var(--ease) 2.5s backwards}
+.hero-ctas{display:flex;gap:12px;margin-top:28px;animation:fadeUp .8s var(--ease) 2.6s backwards}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:999px;font-family:var(--ui);font-size:13px;font-weight:700;letter-spacing:.03em;transition:all .4s var(--ease)}
+.btn svg{width:15px;height:15px}
+.btn-accent{background:linear-gradient(135deg,var(--coral),var(--coral-dk));color:#fff;box-shadow:0 4px 24px rgba(228,66,93,.2)}
+.btn-accent:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(228,66,93,.3)}
+.btn-outline{color:var(--text2);border:1px solid var(--border2)}
+.btn-outline:hover{color:var(--coral);border-color:var(--coral)}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--text3);font-family:var(--ui);font-size:9px;letter-spacing:.15em;text-transform:uppercase;animation:fadeIn 1s var(--ease) 3s backwards}
+.hero-scroll-line{width:1px;height:36px;background:linear-gradient(to bottom,var(--coral),transparent);animation:float 2s ease-in-out infinite}
+
+/* ═══ LIVE TICKER ═══ */
+.ticker-wrap{overflow:hidden;background:linear-gradient(90deg,var(--bg2),rgba(0,131,123,.04),var(--bg2));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0}
+.ticker{display:flex;gap:48px;animation:tickerScroll 30s linear infinite;width:max-content}
+.ticker-item{display:flex;align-items:center;gap:10px;white-space:nowrap;font-family:var(--ui);font-size:12px;color:var(--text2)}
+.ticker-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ticker-dot.green{background:var(--vival);box-shadow:0 0 8px rgba(0,131,123,.4)}
+.ticker-dot.coral{background:var(--coral);box-shadow:0 0 8px rgba(228,66,93,.4)}
+.ticker-val{font-weight:800;color:var(--text);font-size:13px}
+
+/* ═══ SECTION ═══ */
+.section{max-width:1200px;margin:0 auto;padding:clamp(48px,8vh,96px) clamp(20px,4vw,64px)}
+.section-label{font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--vival);margin-bottom:10px}
+.section-label::before{content:'';display:inline-block;width:20px;height:1px;background:var(--vival);margin-right:12px;vertical-align:middle}
+.section-title{font-family:var(--title);font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:900;line-height:1.15}
+.section-title em{font-style:normal;color:var(--coral)}
+.section-sep{width:48px;height:2px;background:linear-gradient(90deg,var(--coral),var(--vival));margin-top:14px;margin-bottom:clamp(28px,4vh,48px);border-radius:1px}
+
+/* ═══ PERIOD ═══ */
+.period-wrap{display:flex;align-items:center;gap:6px;margin-bottom:24px;flex-wrap:wrap}
+.period-btn{font-family:var(--ui);font-size:12px;font-weight:600;padding:8px 16px;border-radius:999px;background:transparent;border:1px solid var(--border);color:var(--text3);transition:all .3s var(--ease)}
+.period-btn:hover{color:var(--text);border-color:var(--border2)}
+.period-btn.active{background:var(--coral);border-color:var(--coral);color:#fff;font-weight:700}
+.period-custom{display:flex;gap:6px;align-items:center;margin-left:auto}
+.period-custom input[type="date"]{font-family:var(--ui);font-size:12px;padding:7px 12px;border-radius:999px;background:var(--bg2);border:1px solid var(--border);color:var(--text);outline:none}
+.period-custom input:focus{border-color:var(--coral)}
+.period-tag{font-family:var(--ui);font-size:11px;color:var(--text3);margin-bottom:20px}
+
+/* ═══ KPI RINGS ═══ */
+.kpi-rings{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:40px}
+.kpi-ring-card{position:relative;padding:clamp(24px,3vw,36px);border-radius:16px;background:var(--card2);border:1px solid var(--border);overflow:hidden;transition:all .5s var(--ease)}
+.kpi-ring-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.3);border-color:var(--border2)}
+.kpi-ring-card.big{grid-column:span 3;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-items:center;padding:clamp(28px,3vw,44px)}
+.kpi-ring-cell{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
+.kpi-ring-svg{width:90px;height:90px;transform:rotate(-90deg)}
+.kpi-ring-svg.sm{width:60px;height:60px}
+.kpi-ring-bg{fill:none;stroke:rgba(255,255,255,.04);stroke-width:4}
+.kpi-ring-fill{fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 2s var(--ease)}
+.kpi-ring-fill.teal{stroke:var(--vival)}
+.kpi-ring-fill.coral{stroke:var(--coral)}
+.kpi-ring-val{font-family:var(--title);font-size:clamp(1.4rem,2.5vw,2rem);font-weight:900;line-height:1}
+.kpi-ring-label{font-family:var(--ui);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
+.kpi-ring-sub{font-family:var(--ui);font-size:11px;color:var(--text3)}
+
+/* ═══ GAUGE ═══ */
+.gauge-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:40px}
+.gauge-card{padding:clamp(24px,3vw,36px);border-radius:16px;background:var(--card2);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;transition:all .5s var(--ease)}
+.gauge-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.gauge-svg{width:180px;height:100px;margin-bottom:12px}
+.gauge-bg{fill:none;stroke:rgba(255,255,255,.04);stroke-width:8;stroke-linecap:round}
+.gauge-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 2s var(--ease)}
+.gauge-label{font-family:var(--ui);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-top:4px}
+.gauge-val{font-family:var(--title);font-size:28px;font-weight:900}
+
+/* ═══ CHARTS ═══ */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:40px}
+.chart-box{padding:clamp(20px,3vw,32px);border-radius:16px;background:var(--card2);border:1px solid var(--border);transition:all .5s var(--ease)}
+.chart-box:hover{border-color:var(--border2)}
+.chart-box h3{font-family:var(--body);font-size:13px;font-weight:700;color:var(--text2);margin-bottom:16px}
+.chart-wrap{height:240px;position:relative}
+
+/* ═══ HEATMAP ═══ */
+.heatmap-card{padding:clamp(24px,3vw,36px);border-radius:16px;background:var(--card2);border:1px solid var(--border);margin-bottom:40px}
+.heatmap-card h3{font-family:var(--body);font-size:13px;font-weight:700;color:var(--text2);margin-bottom:16px}
+.heatmap-grid{display:grid;grid-template-columns:repeat(auto-fill,14px);gap:3px}
+.heatmap-cell{width:14px;height:14px;border-radius:3px;background:rgba(255,255,255,.03);transition:all .3s var(--ease);cursor:default}
+.heatmap-cell:hover{transform:scale(1.6);z-index:2}
+.heatmap-cell.l1{background:rgba(0,131,123,.15)}.heatmap-cell.l2{background:rgba(0,131,123,.3)}
+.heatmap-cell.l3{background:rgba(0,131,123,.5)}.heatmap-cell.l4{background:rgba(228,66,93,.5)}
+.heatmap-cell.l5{background:rgba(228,66,93,.75)}
+.heatmap-legend{display:flex;align-items:center;gap:6px;margin-top:12px;font-family:var(--ui);font-size:10px;color:var(--text3)}
+.heatmap-legend span{width:12px;height:12px;border-radius:2px}
+
+/* ═══ CAMPAIGNS ═══ */
+.camp-scroll{display:flex;gap:16px;overflow-x:auto;padding-bottom:16px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.camp-scroll::-webkit-scrollbar{height:3px}.camp-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.camp-item{min-width:300px;max-width:340px;flex-shrink:0;scroll-snap-align:start;padding:24px;border-radius:16px;background:var(--card2);border:1px solid var(--border);position:relative;overflow:hidden;transition:all .5s var(--ease)}
+.camp-item:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.3);border-color:var(--border2)}
+.camp-item::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--vival),var(--coral));opacity:0;transition:opacity .4s}
+.camp-item:hover::before{opacity:1}
+.camp-rank{position:absolute;top:16px;right:16px;font-family:var(--title);font-size:32px;font-weight:900;color:rgba(255,255,255,.04);line-height:1}
+.camp-name{font-family:var(--body);font-size:14px;font-weight:700;margin-bottom:12px;padding-right:40px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.camp-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.04);margin-bottom:16px;overflow:hidden}
+.camp-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--vival),var(--coral));transition:width 1.5s var(--ease)}
+.camp-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.camp-metric-label{font-family:var(--ui);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.camp-metric-val{font-family:var(--title);font-size:17px;font-weight:800;margin-top:2px}
+
+/* ═══ MAP ═══ */
+.map-section{position:relative;margin:0 clamp(20px,4vw,64px);border-radius:20px;overflow:hidden;border:1px solid var(--border);height:clamp(300px,40vh,440px)}
+#mainMap{height:100%;width:100%;background:var(--bg2)}
+.map-float{position:absolute;top:20px;left:20px;z-index:500;background:rgba(10,13,13,.85);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:14px;padding:18px 22px}
+.map-float-title{font-family:var(--title);font-size:16px;font-weight:800}
+.map-float-sub{font-family:var(--ui);font-size:11px;color:var(--text3);margin-top:2px}
+.map-float-live{display:flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--ui);font-size:10px;color:var(--vival)}
+.map-float-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--vival);animation:pulse 2s infinite}
+
+/* ═══ CANDIDATES ═══ */
+.cand-section-glow{position:relative}
+.cand-section-glow::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(0,131,123,.06) 0%,rgba(228,66,93,.03) 40%,transparent 70%);pointer-events:none;z-index:0}
+.cand-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;position:relative;z-index:1}
+.cand-stat{padding:24px 20px;border-radius:16px;background:linear-gradient(135deg,var(--card2),rgba(14,20,20,.95));border:1px solid var(--border);text-align:center;transition:all .5s var(--ease);position:relative;overflow:hidden}
+.cand-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--vival),var(--coral));opacity:0;transition:opacity .4s}
+.cand-stat:hover{transform:translateY(-5px);box-shadow:0 16px 48px rgba(0,0,0,.3);border-color:var(--border2)}
+.cand-stat:hover::before{opacity:1}
+.cand-stat-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:18px}
+.cand-stat-icon.teal{background:rgba(0,131,123,.1);color:var(--vival)}
+.cand-stat-icon.coral{background:rgba(228,66,93,.1);color:var(--coral)}
+.cand-stat-icon.amber{background:rgba(244,169,0,.1);color:#F4A900}
+.cand-stat-icon.purple{background:rgba(139,92,246,.1);color:#8B5CF6}
+.cand-stat-val{font-family:var(--title);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:900;line-height:1}
+.cand-stat-label{font-family:var(--ui);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-top:6px}
+.cand-stat-sub{font-family:var(--ui);font-size:11px;color:var(--text3);margin-top:4px}
+
+.cand-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;position:relative;z-index:1}
+.cand-search{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:999px;padding:10px 22px;flex:1;min-width:220px;transition:border-color .3s}
+.cand-search:focus-within{border-color:var(--coral);box-shadow:0 0 20px rgba(228,66,93,.08)}
+.cand-search svg{width:15px;height:15px;color:var(--text3);flex-shrink:0}
+.cand-search input{flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--text);font-family:var(--body)}
+.cand-search input::placeholder{color:var(--text3)}
+.cand-filters{display:flex;gap:6px;flex-wrap:wrap}
+.cand-filter-btn{font-family:var(--ui);font-size:11px;font-weight:600;padding:8px 16px;border-radius:999px;background:transparent;border:1px solid var(--border);color:var(--text3);transition:all .3s var(--ease);cursor:pointer;white-space:nowrap}
+.cand-filter-btn:hover{color:var(--text);border-color:var(--border2)}
+.cand-filter-btn.active{background:var(--coral);border-color:var(--coral);color:#fff;font-weight:700}
+.cand-filter-count{font-size:10px;opacity:.7;margin-left:4px}
+
+.cand-table-wrap{overflow-x:auto;border-radius:16px;border:1px solid var(--border);position:relative;z-index:1;background:var(--card2)}
+.cand-table{width:100%;border-collapse:collapse;font-size:13px}
+.cand-table th{font-family:var(--ui);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);text-align:left;padding:14px 16px;background:var(--bg3);cursor:pointer;user-select:none;transition:color .3s;white-space:nowrap;position:sticky;top:0;z-index:2}
+.cand-table th:hover{color:var(--coral)}
+.cand-table th .sort-arrow{opacity:.3;margin-left:4px;transition:opacity .3s}
+.cand-table th.sorted .sort-arrow{opacity:1;color:var(--coral)}
+.cand-table td{padding:12px 16px;border-top:1px solid var(--border);transition:background .2s;white-space:nowrap}
+.cand-table tr{cursor:pointer;transition:background .2s}
+.cand-table tr:hover td{background:rgba(0,131,123,.04)}
+.cand-table .td-avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--vival),var(--vival-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;font-family:var(--title)}
+.cand-table .td-name{font-weight:700}
+.cand-table .td-phone{font-family:var(--ui);font-size:12px;color:var(--text2)}
+.cand-table .td-commune{font-size:12px;color:var(--text2)}
+.cand-table .td-apport{font-family:var(--ui);font-size:12px;font-weight:600}
+.cand-table .td-exp{font-size:12px;color:var(--text2)}
+
+.td-status-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--ui);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 14px;border-radius:999px}
+.td-status-badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.td-status-badge.st-nouveau{color:#00A89E;background:rgba(0,168,158,.08)}.td-status-badge.st-nouveau::before{background:#00A89E}
+.td-status-badge.st-contacte{color:#F4A900;background:rgba(244,169,0,.08)}.td-status-badge.st-contacte::before{background:#F4A900}
+.td-status-badge.st-qualifie{color:#2ECC71;background:rgba(46,204,113,.1)}.td-status-badge.st-qualifie::before{background:#2ECC71}
+.td-status-badge.st-non-qualifie{color:#E4425D;background:rgba(228,66,93,.08)}.td-status-badge.st-non-qualifie::before{background:#E4425D}
+.td-status-badge.st-rdv{color:#8B5CF6;background:rgba(139,92,246,.08)}.td-status-badge.st-rdv::before{background:#8B5CF6}
+.td-status-badge.st-autre{color:var(--text3);background:rgba(255,255,255,.04)}.td-status-badge.st-autre::before{background:var(--text3)}
+
+.td-qual-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:8px;font-size:12px}
+.td-qual-badge.qual-oui{background:rgba(46,204,113,.12);color:#2ECC71}
+.td-qual-badge.qual-non{background:rgba(228,66,93,.1);color:#E4425D}
+.td-qual-badge.qual-na{background:rgba(255,255,255,.03);color:var(--text3)}
+
+.cand-empty{text-align:center;padding:48px;color:var(--text3)}
+
+/* ═══ MODAL ═══ */
+.modal-overlay{position:fixed;inset:0;z-index:6000;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .3s var(--ease)}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal{position:relative;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;max-width:560px;width:92%;max-height:85vh;overflow-y:auto;transform:translateY(20px) scale(.97);transition:transform .4s var(--ease)}
+.modal-overlay.open .modal{transform:none}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--vival),var(--coral));border-radius:20px 20px 0 0}
+.modal-head{display:flex;align-items:center;gap:14px;padding:24px 24px 0}
+.modal-head-avatar{width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,var(--vival),var(--vival-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;font-family:var(--title);flex-shrink:0}
+.modal-head-info{flex:1}
+.modal-head-name{font-family:var(--title);font-size:18px;font-weight:800}
+.modal-head-loc{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text3);margin-top:2px}
+.modal-head-loc svg{width:12px;height:12px;color:var(--coral)}
+.modal-close{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;transition:background .2s}
+.modal-close:hover{background:rgba(255,255,255,.1)}
+.modal-close svg{width:15px;height:15px;color:var(--text2)}
+.modal-body{padding:20px 24px 24px}
+.modal-sect{margin-bottom:20px}.modal-sect:last-child{margin-bottom:0}
+.modal-sect-title{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.modal-sect-title svg{width:13px;height:13px;color:var(--coral)}
+.modal-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modal-info-item{background:var(--bg3);border-radius:10px;padding:10px 12px}
+.modal-info-label{font-family:var(--ui);font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.modal-info-val{font-size:13px;font-weight:600}
+.modal-resp{background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:6px}.modal-resp:last-child{margin-bottom:0}
+.modal-resp-q{font-family:var(--ui);font-size:9px;font-weight:600;color:var(--text3);margin-bottom:4px}
+.modal-resp-a{font-size:13px;line-height:1.6}
+
+/* ═══ FOOTER ═══ */
+.footer{text-align:center;padding:clamp(40px,6vh,72px) 20px;border-top:1px solid var(--border)}
+.footer img{height:32px;opacity:.3;margin-bottom:10px}
+.footer-text{font-family:var(--ui);font-size:11px;color:var(--text3)}
+.footer-text a{color:var(--coral);transition:color .3s}
+.footer-text a:hover{color:var(--coral-lt)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .hero-left{padding:clamp(100px,15vh,140px) clamp(20px,5vw,48px) clamp(48px,8vh,80px)}
+  .hero-right{display:none}
+  .kpi-rings{grid-template-columns:1fr 1fr}
+  .kpi-ring-card.big{grid-column:span 2;grid-template-columns:repeat(2,1fr)}
+  .gauge-row,.charts-row{grid-template-columns:1fr}
+  .cand-stats{grid-template-columns:repeat(2,1fr)}
+  .cand-toolbar{flex-direction:column;align-items:stretch}
+  .cand-search{min-width:auto}
+  .cand-table{min-width:800px}
+}
+@media(max-width:600px){
+  .hero-left{padding:clamp(80px,12vh,100px) 16px clamp(32px,5vh,48px)}
+  .kpi-rings{grid-template-columns:1fr}
+  .kpi-ring-card.big{grid-column:span 1;grid-template-columns:1fr 1fr}
+  .cand-stats{grid-template-columns:1fr 1fr}
+  .cand-table-wrap{font-size:12px}
+  .modal-info-grid{grid-template-columns:1fr}
+  .cand-filters{gap:4px;flex-wrap:wrap}
+  .cand-filter-btn{padding:6px 12px;font-size:10px}
+  .cand-section-banner{flex-direction:column;text-align:center}
+  .camp-scroll{gap:12px}
+}
+.leaflet-control-attribution{display:none!important}
+.leaflet-control-zoom a{background:var(--bg2)!important;color:var(--text)!important;border-color:var(--border)!important}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- LOADER -->
+<div class="loader" id="pageLoader">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/b/bd/Vival_by_Casino_logo.png" alt="Vival">
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+</div>
+
+<!-- TOP NAV -->
+<nav class="top-nav" id="topNav">
+  <a href="https://portail-casino.vercel.app" class="back-portal">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+    Portail
+  </a>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/b/bd/Vival_by_Casino_logo.png" alt="Vival">
+  <div class="nav-links">
+    <a href="#home" class="active" data-section="home">Accueil</a>
+    <a href="#performances" data-section="performances">Performances</a>
+    <a href="#campagnes" data-section="campagnes">Campagnes</a>
+    <a href="#candidats" data-section="candidats">Candidats</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-left">
+    <div class="hero-label">Dashboard franchise</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/bd/Vival_by_Casino_logo.png" alt="Vival" class="hero-logo">
+    <h1 class="hero-tagline">Recrutement <span>franchisés</span></h1>
+    <p class="hero-sub">Suivez en temps réel les performances de vos campagnes Meta Ads et gérez vos candidats à la franchise Vival.</p>
+    <div class="hero-ctas">
+      <a href="#performances" class="btn btn-accent">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m18 9-5 5-3-3-4 4"/></svg>
+        Performances
+      </a>
+      <a href="#candidats" class="btn btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        Candidats
+      </a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&h=1200&fit=crop" alt="">
+  </div>
+  <div class="hero-scroll"><span>Scroll</span><div class="hero-scroll-line"></div></div>
+</section>
+
+<!-- LIVE TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker">
+    <div class="ticker-item"><span class="ticker-dot green"></span>Dépenses totales <span class="ticker-val" id="tkSpend">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot coral"></span>Leads générés <span class="ticker-val" id="tkLeads">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot green"></span>Coût par lead <span class="ticker-val" id="tkCPL">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot coral"></span>Clics totaux <span class="ticker-val" id="tkClicks">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot green"></span>CTR moyen <span class="ticker-val" id="tkCTR">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot coral"></span>Impressions <span class="ticker-val" id="tkImpr">—</span></div>
+    <!-- duplicate for seamless scroll -->
+    <div class="ticker-item"><span class="ticker-dot green"></span>Dépenses totales <span class="ticker-val" id="tkSpend2">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot coral"></span>Leads générés <span class="ticker-val" id="tkLeads2">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot green"></span>Coût par lead <span class="ticker-val" id="tkCPL2">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot coral"></span>Clics totaux <span class="ticker-val" id="tkClicks2">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot green"></span>CTR moyen <span class="ticker-val" id="tkCTR2">—</span></div>
+    <div class="ticker-item"><span class="ticker-dot coral"></span>Impressions <span class="ticker-val" id="tkImpr2">—</span></div>
+  </div>
+</div>
+
+<!-- PERFORMANCES -->
+<section class="section" id="performances">
+  <div class="section-label reveal">Meta Ads</div>
+  <div class="section-title reveal reveal-d1">Performances <em>campagnes</em></div>
+  <div class="section-sep reveal reveal-d2"></div>
+
+  <div class="period-wrap reveal">
+    <button class="period-btn" onclick="setPeriod('7d')">7j</button>
+    <button class="period-btn" onclick="setPeriod('30d')">30j</button>
+    <button class="period-btn" onclick="setPeriod('month')">Ce mois</button>
+    <button class="period-btn" onclick="setPeriod('lastmonth')">Mois dernier</button>
+    <button class="period-btn active" onclick="setPeriod('all')">Tout</button>
+    <div class="period-custom">
+      <input type="date" id="periodFrom" onchange="setPeriod('custom')">
+      <span style="color:var(--text3);font-size:11px">→</span>
+      <input type="date" id="periodTo" onchange="setPeriod('custom')">
+    </div>
+  </div>
+  <div class="period-tag" id="periodTag"></div>
+
+  <!-- KPI RINGS -->
+  <div class="kpi-rings">
+    <div class="kpi-ring-card big reveal">
+      <div class="kpi-ring-cell">
+        <svg class="kpi-ring-svg" viewBox="0 0 100 100"><circle class="kpi-ring-bg" cx="50" cy="50" r="44"/><circle class="kpi-ring-fill teal" id="ringSpend" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+        <div class="kpi-ring-val" id="kpiSpend">—</div>
+        <div class="kpi-ring-label">Dépenses</div>
+      </div>
+      <div class="kpi-ring-cell">
+        <svg class="kpi-ring-svg" viewBox="0 0 100 100"><circle class="kpi-ring-bg" cx="50" cy="50" r="44"/><circle class="kpi-ring-fill teal" id="ringImpr" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+        <div class="kpi-ring-val" id="kpiImpr">—</div>
+        <div class="kpi-ring-label">Impressions</div>
+      </div>
+      <div class="kpi-ring-cell">
+        <svg class="kpi-ring-svg" viewBox="0 0 100 100"><circle class="kpi-ring-bg" cx="50" cy="50" r="44"/><circle class="kpi-ring-fill coral" id="ringClicks" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+        <div class="kpi-ring-val" id="kpiClicks">—</div>
+        <div class="kpi-ring-label">Clics</div>
+      </div>
+      <div class="kpi-ring-cell">
+        <svg class="kpi-ring-svg" viewBox="0 0 100 100"><circle class="kpi-ring-bg" cx="50" cy="50" r="44"/><circle class="kpi-ring-fill coral" id="ringCTR" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="276.46"/></svg>
+        <div class="kpi-ring-val" id="kpiCTR">—</div>
+        <div class="kpi-ring-label">CTR</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAUGES -->
+  <div class="gauge-row">
+    <div class="gauge-card reveal">
+      <svg class="gauge-svg" viewBox="0 0 200 110">
+        <path class="gauge-bg" d="M20,100 A80,80 0 0,1 180,100"/>
+        <path class="gauge-fill" id="gaugeLeads" d="M20,100 A80,80 0 0,1 180,100" stroke="var(--coral)" stroke-dasharray="251.33" stroke-dashoffset="251.33"/>
+        <text x="100" y="85" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="var(--text)" id="gaugeLeadsVal">—</text>
+      </svg>
+      <div class="gauge-label">Leads générés</div>
+    </div>
+    <div class="gauge-card reveal reveal-d1">
+      <svg class="gauge-svg" viewBox="0 0 200 110">
+        <path class="gauge-bg" d="M20,100 A80,80 0 0,1 180,100"/>
+        <path class="gauge-fill" id="gaugeCPL" d="M20,100 A80,80 0 0,1 180,100" stroke="var(--vival)" stroke-dasharray="251.33" stroke-dashoffset="251.33"/>
+        <text x="100" y="85" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="var(--text)" id="gaugeCPLVal">—</text>
+      </svg>
+      <div class="gauge-label">Coût par lead</div>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="heatmap-card reveal">
+    <h3>Activité quotidienne — Leads</h3>
+    <div class="heatmap-grid" id="heatmap"></div>
+    <div class="heatmap-legend">Moins <span style="background:rgba(255,255,255,.03)"></span><span style="background:rgba(0,131,123,.15)"></span><span style="background:rgba(0,131,123,.3)"></span><span style="background:rgba(0,131,123,.5)"></span><span style="background:rgba(228,66,93,.5)"></span><span style="background:rgba(228,66,93,.75)"></span> Plus</div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-row">
+    <div class="chart-box reveal"><h3>Dépenses & Leads</h3><div class="chart-wrap"><canvas id="chartSpendLeads"></canvas></div></div>
+    <div class="chart-box reveal reveal-d1"><h3>CPL & CTR</h3><div class="chart-wrap"><canvas id="chartCplCtr"></canvas></div></div>
+  </div>
+</section>
+
+<!-- CAMPAIGNS -->
+<section class="section" id="campagnes">
+  <div class="section-label reveal">Détail</div>
+  <div class="section-title reveal reveal-d1">Vos <em>campagnes</em></div>
+  <div class="section-sep reveal reveal-d2"></div>
+  <div class="camp-scroll" id="campScroll"><div class="cand-empty">En attente de données.</div></div>
+</section>
+
+<!-- MAP -->
+<div class="section" style="max-width:none;padding-left:0;padding-right:0">
+  <div class="map-section reveal">
+    <div id="mainMap"></div>
+    <div class="map-float">
+      <div class="map-float-title">Réseau Vival</div>
+      <div class="map-float-sub">~1 800 magasins en France</div>
+      <div class="map-float-live">Données temps réel</div>
+    </div>
+  </div>
+</div>
+
+<!-- CANDIDATES -->
+<section class="section cand-section-glow" id="candidats">
+  <div class="section-label reveal">Recrutement</div>
+  <div class="section-title reveal reveal-d1">Portail <em>candidats</em></div>
+  <div class="section-sep reveal reveal-d2"></div>
+
+  <div class="cand-stats reveal">
+    <div class="cand-stat">
+      <div class="cand-stat-icon teal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="cand-stat-val" id="candTotal">—</div>
+      <div class="cand-stat-label">Total leads</div>
+    </div>
+    <div class="cand-stat">
+      <div class="cand-stat-icon coral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <div class="cand-stat-val" id="candQualified">—</div>
+      <div class="cand-stat-label">Qualifiés</div>
+    </div>
+    <div class="cand-stat">
+      <div class="cand-stat-icon amber"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="cand-stat-val" id="candPending">—</div>
+      <div class="cand-stat-label">En attente</div>
+    </div>
+    <div class="cand-stat">
+      <div class="cand-stat-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+      <div class="cand-stat-val" id="candRate">—</div>
+      <div class="cand-stat-label">Taux qualification</div>
+      <div class="cand-stat-sub" id="candRateSub"></div>
+    </div>
+  </div>
+
+  <div class="cand-toolbar reveal">
+    <div class="cand-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" placeholder="Rechercher par nom, commune, téléphone, email..." id="searchInput">
+    </div>
+    <div class="cand-filters" id="candFilters">
+      <button class="cand-filter-btn active" data-filter="all" onclick="filterCandStatus('all')">Tous</button>
+      <button class="cand-filter-btn" data-filter="nouveau" onclick="filterCandStatus('nouveau')">Nouveau</button>
+      <button class="cand-filter-btn" data-filter="contacte" onclick="filterCandStatus('contacte')">Contacté</button>
+      <button class="cand-filter-btn" data-filter="qualifie" onclick="filterCandStatus('qualifie')">Qualifié</button>
+      <button class="cand-filter-btn" data-filter="non-qualifie" onclick="filterCandStatus('non-qualifie')">Non qualifié</button>
+    </div>
+  </div>
+
+  <div class="cand-table-wrap reveal" id="candTableWrap" style="max-height:600px;overflow-y:auto">
+    <table class="cand-table" id="candTable">
+      <thead><tr>
+        <th style="width:50px"></th>
+        <th onclick="sortCand('date')">Date <span class="sort-arrow">↕</span></th>
+        <th onclick="sortCand('nom')">Nom complet <span class="sort-arrow">↕</span></th>
+        <th onclick="sortCand('commune')">Commune <span class="sort-arrow">↕</span></th>
+        <th onclick="sortCand('tel')">Téléphone <span class="sort-arrow">↕</span></th>
+        <th onclick="sortCand('apport')">Apport <span class="sort-arrow">↕</span></th>
+        <th onclick="sortCand('experience')">Expérience <span class="sort-arrow">↕</span></th>
+        <th>Statut</th>
+        <th>Qualifié</th>
+      </tr></thead>
+      <tbody id="candBody"><tr><td colspan="9" class="cand-empty">Chargement des candidats…</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-text">Propulsé par</div>
+  <a href="https://koven.agency" target="_blank" class="footer-logo"><img src="https://koven.agency/wp-content/uploads/2025/11/LOGO-1-Blanc.svg" alt="Koven Agency" style="height:28px;opacity:.6;transition:opacity .3s" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='.6'"></a>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-avatar" id="modalAvatar"></div>
+      <div class="modal-head-info"><div class="modal-head-name" id="modalName"></div><div class="modal-head-loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="modalLoc"></span></div></div>
+      <button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+/* LOADER */
+window.addEventListener('load',function(){setTimeout(function(){document.getElementById('pageLoader').classList.add('done')},2000)});
+
+/* REVEAL */
+var revObs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');revObs.unobserve(e.target)}})},{threshold:.08});
+document.querySelectorAll('.reveal').forEach(function(el){revObs.observe(el)});
+
+/* NAV */
+var topNav=document.getElementById('topNav');
+window.addEventListener('scroll',function(){topNav.classList.toggle('scrolled',window.scrollY>60)});
+var navLinks=document.querySelectorAll('.nav-links a');
+var navObs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting&&e.intersectionRatio>.25){navLinks.forEach(function(l){l.classList.remove('active')});var m=document.querySelector('.nav-links a[data-section="'+e.target.id+'"]');if(m)m.classList.add('active')}})},{threshold:.25,rootMargin:'-10% 0px -40% 0px'});
+document.querySelectorAll('section[id]').forEach(function(s){navObs.observe(s)});
+navLinks.forEach(function(l){l.addEventListener('click',function(e){e.preventDefault();var t=document.getElementById(this.dataset.section);if(t)t.scrollIntoView({behavior:'smooth'})})});
+
+/* MODAL */
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});
+
+/* UTILS */
+function parseNum(v){if(!v)return 0;return parseFloat(String(v).replace(/"/g,'').replace(/,/g,'.').replace(/\s/g,''))||0}
+function fmtNum(n){return n.toLocaleString('fr-FR',{maximumFractionDigits:0})}
+function fmtDec(n,d){return n.toLocaleString('fr-FR',{minimumFractionDigits:d||2,maximumFractionDigits:d||2})}
+function animateCounter(el,target,fmt){var dur=1800,st=null;function step(ts){if(!st)st=ts;var p=Math.min((ts-st)/dur,1);var e=1-Math.pow(1-p,3);el.textContent=fmt(e*target);if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)}
+
+/* RING ANIMATION */
+var CIRC=276.46;
+function setRing(id,pct){var el=document.getElementById(id);if(!el)return;var off=CIRC-(Math.min(pct,1)*CIRC);el.style.strokeDashoffset=off}
+
+/* GAUGE ANIMATION */
+var GAUGE_C=251.33;
+function setGauge(id,pct,valId,valStr){var el=document.getElementById(id);if(el)el.style.strokeDashoffset=GAUGE_C-(Math.min(pct,1)*GAUGE_C);var v=document.getElementById(valId);if(v)v.textContent=valStr}
+
+/* CSV */
+function splitRow(l){var r=[],c='',q=false;for(var i=0;i<l.length;i++){var ch=l[i];if(ch==='"')q=!q;else if(ch===','&&!q){r.push(c.trim());c=''}else c+=ch}r.push(c.trim());return r}
+function parseCSV(t){var lines=t.split('\n').filter(function(l){return l.trim()});if(lines.length<2)return[];var h=splitRow(lines[0]);var rows=[];for(var i=1;i<lines.length;i++){var v=splitRow(lines[i]);var row={};for(var j=0;j<h.length;j++)row[h[j]]=j<v.length?v[j]:'';rows.push(row)}return rows}
+function gv(c,k){var ks=Array.isArray(k)?k:[k];for(var i=0;i<ks.length;i++)if(c[ks[i]])return c[ks[i]];return''}
+
+var COLUMN_ALIASES={
+'Nom de la campagne':'Campaign name',
+'Nom de l\'ensemble de publicités':'Ad set name',
+'Nom de la publicité':'Ad name',
+'Nom du groupe d\'annonces':'Ad group name',
+'Coût (EUR)':'Cost (EUR)',
+'Portée':'Reach',
+'Clics (tous)':'Clicks (all)',
+'CTR (tous)':'CTR (all)',
+'Fréquence':'Frequency',
+'CPM (coût pour 1000 impressions)':'CPM',
+'Prospects sur Facebook':'Facebook leads',
+'Coût par prospect sur Facebook':'Cost per lead',
+'Clics':'Clicks',
+'Clics sur les liens':'Link clicks',
+'URL de la miniature de la création':'Ad creative thumbnail URL',
+'URL de l\'image de la création':'Ad creative image URL'
+};
+function normalizeRow(row){
+var out={};
+for(var k in row){
+if(!row.hasOwnProperty(k))continue;
+var nk=COLUMN_ALIASES[k]||k;
+out[nk]=row[k];
+}
+return out;
+}
+function normalizeRows(rows){
+if(!rows||!rows.length)return rows;
+var sample=rows[0],needsNorm=false;
+for(var k in sample){if(COLUMN_ALIASES[k]){needsNorm=true;break;}}
+if(!needsNorm)return rows;
+return rows.map(normalizeRow);
+}
+var _missingCols={};
+function safeCol(row,col){
+  if(row && col in row) return row[col];
+  if(!_missingCols[col]){_missingCols[col]=true;console.warn('⚠️ Colonne manquante: '+col)}
+  return '';
+}
+function showMissingWarning(){
+  var cols=Object.keys(_missingCols);
+  if(!cols.length)return;
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;padding:8px 16px;background:#f59e0b;color:#000;font:13px/1.4 sans-serif;text-align:center;z-index:99999;';
+  d.textContent='⚠️ '+cols.length+' colonne(s) manquante(s) dans les donn\u00e9es : '+cols.join(', ');
+  document.body.appendChild(d);
+  setTimeout(function(){d.remove()},15000);
+}
+
+
+/* META DATA */
+var META_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRiWc8yPpg7phWPVu5gl2kvhvtGyldz8reMO5MX6PbGz7iAtirz35vlJtez3JQgtO4Km0LMO6OOmn_9/pub?output=csv&gid=1832497913';
+var BRAND_PREFIX='GC_VIVAL';
+var SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9V5Ne938ST-1ZbUhTJuMDNfLaJC59tjlzO_LYa6IMq0ZoTr3rqIaZIicmaNKcihjZo0zUcBti2A89/pub?output=csv&gid=1011890354';
+var RAW_DATA=[],chartInstances={},currentPeriod='all';
+Chart.defaults.font.family="'DM Sans',system-ui,sans-serif";Chart.defaults.color='rgba(154,175,171,.4)';Chart.defaults.borderColor='rgba(0,131,123,.06)';Chart.defaults.font.size=11;Chart.defaults.plugins.legend.labels.usePointStyle=true;
+
+function loadMetaData(){if(!META_URL){renderMetaData();return}fetch(META_URL+'&_t='+Date.now()).then(function(r){return r.text()}).then(function(csv){var rows=normalizeRows(parseCSV(csv));RAW_DATA=[];rows.forEach(function(r){var name=r['Campaign name']||r['Nom de la campagne']||'';if(BRAND_PREFIX&&name.toUpperCase().indexOf(BRAND_PREFIX)<0)return;if(name.toLowerCase().indexOf('test')>=0||name.toLowerCase().indexOf('dummy')>=0)return;RAW_DATA.push({date:r['Date']||'',campaign:name,adset:r['Ad set name']||r["Nom de l'ensemble de publicités"]||'',spend:parseNum(r['Cost (EUR)']||r['Coût (EUR)']),impressions:parseNum(r['Impressions']),reach:0,clicks:parseNum(r['Clicks (all)']||r['Clics (tous)']),leads:parseNum(r['Facebook leads']||r['Prospects sur Facebook'])})});renderMetaData();renderCampaigns();showMissingWarning()}).catch(function(){renderMetaData()})}
+
+function getDateRange(m){var t=new Date(),to=t.toISOString().slice(0,10),fr;if(m==='7d'){fr=new Date(t);fr.setDate(fr.getDate()-6);fr=fr.toISOString().slice(0,10)}else if(m==='30d'){fr=new Date(t);fr.setDate(fr.getDate()-29);fr=fr.toISOString().slice(0,10)}else if(m==='month'){fr=to.slice(0,8)+'01'}else if(m==='lastmonth'){var d=new Date(t.getFullYear(),t.getMonth()-1,1);fr=d.toISOString().slice(0,10);var e=new Date(t.getFullYear(),t.getMonth(),0);to=e.toISOString().slice(0,10)}else if(m==='custom'){fr=document.getElementById('periodFrom').value;to=document.getElementById('periodTo').value}else return null;return{from:fr,to:to}}
+
+function setPeriod(m){currentPeriod=m;document.querySelectorAll('.period-btn').forEach(function(b){b.classList.remove('active')});if(m!=='custom'){var idx={'7d':0,'30d':1,'month':2,'lastmonth':3,'all':4}[m];var btns=document.querySelectorAll('.period-btn');if(idx!==undefined&&btns[idx])btns[idx].classList.add('active')}renderMetaData();renderCampaigns()}
+
+function getFiltered(){var r=currentPeriod==='all'?null:getDateRange(currentPeriod);return r?RAW_DATA.filter(function(d){return d.date>=r.from&&d.date<=r.to}):RAW_DATA}
+
+function renderMetaData(){
+  var data=getFiltered();
+  document.getElementById('periodTag').textContent=data.length?data.length+' entrées':'En attente de données';
+  function sum(k){var t=0;data.forEach(function(r){t+=r[k]});return t}
+  var ts=sum('spend'),ti=sum('impressions'),tr=sum('reach'),tc=sum('clicks'),tl=sum('leads');
+  var ctr=ti?tc/ti*100:0,cpl=tl?ts/tl:0;
+
+  /* Ticker */
+  function setTk(a,b,v){var e1=document.getElementById(a),e2=document.getElementById(b);if(e1)e1.textContent=v;if(e2)e2.textContent=v}
+  setTk('tkSpend','tkSpend2',data.length?'€'+fmtDec(ts):'—');
+  setTk('tkLeads','tkLeads2',data.length?fmtNum(tl):'—');
+  setTk('tkCPL','tkCPL2',data.length&&cpl?'€'+fmtDec(cpl):'—');
+  setTk('tkClicks','tkClicks2',data.length?fmtNum(tc):'—');
+  setTk('tkCTR','tkCTR2',data.length?fmtDec(ctr)+'%':'—');
+  setTk('tkImpr','tkImpr2',data.length?fmtNum(ti):'—');
+
+  if(!data.length){['kpiSpend','kpiImpr','kpiClicks','kpiCTR'].forEach(function(id){document.getElementById(id).innerHTML='<span class="skeleton"></span>'});Object.keys(chartInstances).forEach(function(k){chartInstances[k].destroy();delete chartInstances[k]});return}
+
+  /* KPI Rings */
+  animateCounter(document.getElementById('kpiSpend'),ts,function(n){return'€'+fmtDec(n)});
+  animateCounter(document.getElementById('kpiImpr'),ti,function(n){return fmtNum(n)});
+  animateCounter(document.getElementById('kpiClicks'),tc,function(n){return fmtNum(n)});
+  animateCounter(document.getElementById('kpiCTR'),ctr,function(n){return fmtDec(n)+'%'});
+  setTimeout(function(){setRing('ringSpend',.75);setRing('ringImpr',.9);setRing('ringClicks',.55);setRing('ringCTR',Math.min(ctr/5,1))},300);
+
+  /* Gauges */
+  var leadsGoal=Math.max(tl,50);var cplTarget=40;
+  setTimeout(function(){
+    setGauge('gaugeLeads',Math.min(tl/leadsGoal,1),'gaugeLeadsVal',fmtNum(tl));
+    setGauge('gaugeCPL',cpl?Math.min(cplTarget/cpl,1):0,'gaugeCPLVal',cpl?'€'+fmtDec(cpl):'—');
+  },500);
+
+  /* Heatmap */
+  var byDate={};data.forEach(function(r){if(!r.date)return;if(!byDate[r.date])byDate[r.date]={spend:0,clicks:0,impressions:0,leads:0};byDate[r.date].spend+=r.spend;byDate[r.date].clicks+=r.clicks;byDate[r.date].impressions+=r.impressions;byDate[r.date].leads+=r.leads});
+  var dates=Object.keys(byDate).sort();
+  var hm=document.getElementById('heatmap');hm.innerHTML='';
+  var maxL=0;dates.forEach(function(d){if(byDate[d].leads>maxL)maxL=byDate[d].leads});
+  if(maxL===0)maxL=1;
+  var last90=dates.slice(-90);
+  for(var di=0;di<90;di++){var dt=last90[di];var leads=dt?byDate[dt].leads:0;var lvl=leads===0?'':leads<=maxL*.2?'l1':leads<=maxL*.4?'l2':leads<=maxL*.6?'l3':leads<=maxL*.8?'l4':'l5';var cell=document.createElement('div');cell.className='heatmap-cell'+(lvl?' '+lvl:'');if(dt)cell.title=dt+' : '+leads+' lead(s)';hm.appendChild(cell)}
+
+  /* Charts */
+  var labels=dates.map(function(d){var p=d.split('-');return p[2]+'/'+p[1]});
+  var sv=dates.map(function(d){return byDate[d].spend}),lv=dates.map(function(d){return byDate[d].leads});
+  var cplArr=dates.map(function(d){var g=byDate[d];return g.leads?g.spend/g.leads:0});
+  var ctrArr=dates.map(function(d){var g=byDate[d];return g.impressions?g.clicks/g.impressions*100:0});
+
+  var bo={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{padding:14,font:{size:11,family:"'Barlow',sans-serif"}}},tooltip:{backgroundColor:'rgba(10,13,13,.92)',titleColor:'#F0EDEA',bodyColor:'#9AAFAB',borderColor:'rgba(0,131,123,.15)',borderWidth:1,cornerRadius:10,padding:12}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{position:'left',grid:{color:'rgba(0,131,123,.06)'}},y1:{position:'right',grid:{display:false}}}};
+  function mk(id,cfg){var el=document.getElementById(id);if(!el)return;if(chartInstances[id])chartInstances[id].destroy();chartInstances[id]=new Chart(el,cfg)}
+  mk('chartSpendLeads',{type:'bar',data:{labels:labels,datasets:[{label:'Dépenses (€)',data:sv,type:'bar',backgroundColor:'rgba(0,131,123,.15)',borderColor:'#00837B',borderWidth:2,borderRadius:6,yAxisID:'y'},{label:'Leads',data:lv,type:'line',backgroundColor:'rgba(228,66,93,.06)',borderColor:'#E4425D',borderWidth:2,pointRadius:3,tension:.4,yAxisID:'y1',fill:false}]},options:bo});
+  mk('chartCplCtr',{type:'line',data:{labels:labels,datasets:[{label:'CPL (€)',data:cplArr,backgroundColor:'rgba(228,66,93,.06)',borderColor:'#E4425D',borderWidth:2,pointRadius:3,tension:.4,yAxisID:'y',fill:true},{label:'CTR (%)',data:ctrArr,backgroundColor:'rgba(0,131,123,.06)',borderColor:'#00837B',borderWidth:2,pointRadius:3,tension:.4,yAxisID:'y1',fill:false}]},options:bo});
+}
+
+/* CAMPAIGNS */
+function renderCampaigns(){
+  var data=getFiltered(),byCamp={};
+  data.forEach(function(r){var n=r.campaign;if(!n)return;if(!byCamp[n])byCamp[n]={spend:0,leads:0,clicks:0,impressions:0};byCamp[n].spend+=r.spend;byCamp[n].leads+=r.leads;byCamp[n].clicks+=r.clicks;byCamp[n].impressions+=r.impressions});
+  var camps=Object.keys(byCamp).sort(function(a,b){return byCamp[b].spend-byCamp[a].spend});
+  var wrap=document.getElementById('campScroll');
+  if(!camps.length){wrap.innerHTML='<div class="cand-empty">'+(RAW_DATA.length?'Aucune campagne.':'En attente de données.')+'</div>';return}
+  var maxSpend=0;camps.forEach(function(n){if(byCamp[n].spend>maxSpend)maxSpend=byCamp[n].spend});
+  wrap.innerHTML='';
+  camps.forEach(function(name,i){var c=byCamp[name];var cpl=c.leads?c.spend/c.leads:0;var pct=maxSpend?c.spend/maxSpend*100:0;wrap.insertAdjacentHTML('beforeend','<div class="camp-item"><div class="camp-rank">#'+(i+1)+'</div><div class="camp-name">'+name+'</div><div class="camp-bar"><div class="camp-bar-fill" style="width:'+pct+'%"></div></div><div class="camp-metrics"><div><div class="camp-metric-label">Dépensé</div><div class="camp-metric-val">€'+fmtDec(c.spend)+'</div></div><div><div class="camp-metric-label">Leads</div><div class="camp-metric-val" style="color:var(--coral)">'+fmtNum(c.leads)+'</div></div><div><div class="camp-metric-label">CPL</div><div class="camp-metric-val">'+(cpl?'€'+fmtDec(cpl):'—')+'</div></div></div></div>')});
+}
+
+/* MAP */
+(function(){var map=L.map('mainMap',{zoomControl:true,attributionControl:false,scrollWheelZoom:false}).setView([46.2,2.5],6);L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16}).addTo(map);var icon=L.divIcon({className:'',html:'<div style="width:6px;height:6px;background:#00837B;border:1.5px solid #006B65;border-radius:50%;box-shadow:0 0 8px rgba(0,131,123,.4)"></div>',iconSize:[6,6],iconAnchor:[3,3]});[
+[46.58,.34],[46.81,2.26],[46.67,2.31],[46.12,2.07],[45.92,2.92],[46.35,2.96],[46.24,2.48],[46.41,2.61],[45.69,3.16],[45.51,3.12],[46.08,2.49],[45.40,2.88],[45.57,2.76],[46.20,1.87],[46.34,2.60],[45.62,2.73],[46.59,2.83],[45.95,3.33],[45.29,3.39],[45.86,3.55],[46.95,4.30],[45.38,4.28],[45.43,4.66],[46.04,4.07],[46.31,4.83],[47.02,4.84],[45.99,4.72],[45.84,4.78],[45.65,4.83],[45.59,4.77],[45.52,4.87],[45.47,4.51],[45.37,5.51],[45.35,5.59],[45.15,5.52],[45.26,5.88],[45.09,5.54],[45.08,5.72],[45.17,5.77],[45.67,5.65],[45.90,6.13],[45.87,5.94],[46.08,5.99],[46.37,6.48],[46.00,6.52],[45.98,6.34],[46.13,6.37],[45.17,6.43],[45.38,6.64],[44.52,3.50],[44.10,3.08],[43.84,4.36],[44.06,5.05],[44.14,4.81],[44.01,4.42],[44.13,4.08],[44.05,4.68],[43.95,4.81],[43.68,4.63],[43.50,4.99],[44.45,1.44],[44.61,2.03],[44.20,1.08],[44.35,1.55],[44.49,1.44],[44.27,0.35],[44.50,1.68],[44.37,1.21],[43.65,1.77],[43.73,1.38],[43.46,1.58],[43.65,0.59],[43.89,0.50],[43.81,0.36],[43.19,0.07],[43.08,0.37],[43.04,1.02],[43.01,1.09],[43.23,0.08],[43.10,0.57],[42.96,0.12],[42.72,0.63],[43.32,0.45],[43.30,-0.37],[43.49,-1.47],[43.21,-0.32],[43.09,-0.05],[44.09,0.22],[44.53,0.35],[44.53,0.08],[44.85,0.49],[44.89,1.22],[44.20,0.62],[44.74,-1.14],[44.54,-1.23],[44.04,-0.52],[43.68,-1.09],[44.12,0.19],[44.84,-0.58],[45.70,-0.33],[45.63,-1.03],[46.67,-1.43],[47.11,-2.10],[47.66,-2.76],[48.65,-2.00],[47.47,-0.56],[47.39,0.69],[47.01,2.40],[47.90,1.90],[46.82,0.55],[47.32,5.04],[47.24,6.02],[46.91,6.35],[46.67,5.55],[48.30,4.07],[48.20,3.28],[48.08,7.36],[49.12,6.18],[48.29,6.95],[49.89,2.30],[49.18,-0.37],[49.42,0.23],[49.36,0.08],[49.73,0.88],[50.52,1.59],[50.63,3.06],[49.68,3.12]
+].forEach(function(c){L.marker(c,{icon:icon}).addTo(map)})})();
+
+loadMetaData();
+
+/* CANDIDATES */
+var CANDIDATES=[],sortKey='date',sortDir=-1,currentStatusFilter='all';
+
+function getCandStatut(c){return(gv(c,['Statut','statut'])||'').trim()}
+function normStatut(s){var sl=s.toLowerCase().replace(/[éè]/g,'e').replace(/[àâ]/g,'a');if(!s||sl==='nouveau'||sl==='new')return'nouveau';if(sl.indexOf('contact')>=0||sl.indexOf('appel')>=0)return'contacte';if(sl.indexOf('non')>=0&&sl.indexOf('qualif')>=0)return'non-qualifie';if(sl.indexOf('qualif')>=0)return'qualifie';if(sl.indexOf('rdv')>=0||sl.indexOf('rendez')>=0)return'rdv';return'autre'}
+function statusLabel(n){return{nouveau:'Nouveau',contacte:'Contacté',qualifie:'Qualifié','non-qualifie':'Non qualifié',rdv:'RDV',autre:'Autre'}[n]||n}
+function isQualified(c){var q=(gv(c,['Qualifié','Qualifie','qualifié','qualifie'])||'').trim().toLowerCase();return q==='oui'||q==='yes'||q==='1'||q==='true'||q==='o'}
+function isNotQualified(c){var q=(gv(c,['Qualifié','Qualifie','qualifié','qualifie'])||'').trim().toLowerCase();return q==='non'||q==='no'||q==='0'||q==='false'}
+
+function loadCandidates(){
+  if(!SHEET_URL){updateCandUI();return}
+  fetch(SHEET_URL+'&_t='+Date.now()).then(function(r){return r.text()}).then(function(csv){
+    CANDIDATES=parseCSV(csv).filter(function(c){
+      var n=((gv(c,['Nom','nom'])||'')+(gv(c,['Prénom','Prenom','prenom'])||'')).toLowerCase();
+      var em=(gv(c,['E-mail','Email','email'])||'').toLowerCase();
+      if(n.indexOf('test')>=0||n.indexOf('dummy')>=0)return false;
+      if(em.indexOf('test')>=0||em.indexOf('example.com')>=0)return false;
+      if(!gv(c,['Nom','nom'])&&!gv(c,['Prénom','Prenom','prenom']))return false;
+      return true;
+    });
+    updateCandUI();
+  }).catch(function(e){console.error('Erreur chargement candidats:',e);updateCandUI()})
+}
+
+function updateCandUI(){
+  var t=CANDIDATES.length;
+  var qualCount=0,pendingCount=0;
+  CANDIDATES.forEach(function(c){
+    if(isQualified(c))qualCount++;
+    var ns=normStatut(getCandStatut(c));
+    if(ns==='nouveau'||ns==='contacte')pendingCount++;
+  });
+  var rate=t?Math.round(qualCount/t*100):0;
+
+  animateCounter(document.getElementById('candTotal'),t,function(n){return Math.round(n).toString()});
+  animateCounter(document.getElementById('candQualified'),qualCount,function(n){return Math.round(n).toString()});
+  animateCounter(document.getElementById('candPending'),pendingCount,function(n){return Math.round(n).toString()});
+  document.getElementById('candRate').textContent=t?rate+'%':'—';
+  document.getElementById('candRateSub').textContent=t?qualCount+'/'+t:'';
+
+  renderCandidates('');
+}
+
+function filterCandStatus(filter){
+  currentStatusFilter=filter;
+  document.querySelectorAll('.cand-filter-btn').forEach(function(b){b.classList.toggle('active',b.dataset.filter===filter)});
+  renderCandidates(document.getElementById('searchInput').value);
+}
+
+function sortCand(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=1}renderCandidates(document.getElementById('searchInput').value)}
+
+function renderCandidates(s){
+  var body=document.getElementById('candBody');
+  var f=CANDIDATES.filter(function(c){
+    /* status filter */
+    if(currentStatusFilter!=='all'){
+      var ns=normStatut(getCandStatut(c));
+      if(ns!==currentStatusFilter)return false;
+    }
+    /* text search */
+    if(s){
+      var q=s.toLowerCase();
+      for(var k in c)if(c[k]&&String(c[k]).toLowerCase().indexOf(q)>=0)return true;
+      return false;
+    }
+    return true;
+  });
+
+  /* Sort */
+  if(sortKey){
+    f.sort(function(a,b){
+      var va='',vb='';
+      if(sortKey==='date'){va=gv(a,['Date du lead','Date'])||'';vb=gv(b,['Date du lead','Date'])||''}
+      else if(sortKey==='nom'){va=(gv(a,['Nom','nom'])||'').toLowerCase();vb=(gv(b,['Nom','nom'])||'').toLowerCase()}
+      else if(sortKey==='commune'){va=(gv(a,['Commune souhaitée','Commune','Ville','ville'])||'').toLowerCase();vb=(gv(b,['Commune souhaitée','Commune','Ville','ville'])||'').toLowerCase()}
+      else if(sortKey==='tel'){va=gv(a,['Téléphone','Telephone','telephone'])||'';vb=gv(b,['Téléphone','Telephone','telephone'])||''}
+      else if(sortKey==='apport'){va=gv(a,['Apport personnel','Apport'])||'';vb=gv(b,['Apport personnel','Apport'])||''}
+      else if(sortKey==='experience'){va=(gv(a,['Expérience commerce','Experience commerce'])||'').toLowerCase();vb=(gv(b,['Expérience commerce','Experience commerce'])||'').toLowerCase()}
+      return va<vb?-sortDir:va>vb?sortDir:0;
+    });
+  }
+
+  document.querySelectorAll('.cand-table th').forEach(function(th){th.classList.remove('sorted')});
+
+  if(!f.length){
+    body.innerHTML='<tr><td colspan="9" class="cand-empty">'+(SHEET_URL?(CANDIDATES.length?'Aucun résultat pour ce filtre.':'Aucun candidat trouvé.'):'Connectez Google Sheets.')+'</td></tr>';
+    return;
+  }
+
+  body.innerHTML='';
+  f.forEach(function(c,i){
+    var ri=CANDIDATES.indexOf(c);
+    var nom=gv(c,['Nom','nom']),pre=gv(c,['Prénom','Prenom','prenom']);
+    var fn=(pre+' '+nom).trim()||'Candidat '+(i+1);
+    var ini=(pre?pre[0]:'')+(nom?nom[0]:'');
+    if(!ini)ini='?';
+    var dt=gv(c,['Date du lead','Date'])||'—';
+    var commune=gv(c,['Commune souhaitée','Commune','Ville','ville'])||'—';
+    var ph=gv(c,['Téléphone','Telephone','telephone'])||'—';
+    var apport=gv(c,['Apport personnel','Apport'])||'—';
+    var exp=gv(c,['Expérience commerce','Experience commerce'])||'—';
+    var statut=getCandStatut(c)||'Nouveau';
+    var ns=normStatut(statut);
+    var qualVal=gv(c,['Qualifié','Qualifie','qualifié','qualifie'])||'';
+    var qualClass=isQualified(c)?'qual-oui':isNotQualified(c)?'qual-non':'qual-na';
+    var qualIcon=isQualified(c)?'✓':isNotQualified(c)?'✗':'—';
+
+    /* Format date for display */
+    var dtDisplay=dt;
+    if(dt&&dt!=='—'){
+      var dp=dt.split(/[\/\-]/);
+      if(dp.length===3&&dp[0].length===4)dtDisplay=dp[2]+'/'+dp[1]+'/'+dp[0];
+    }
+
+    body.insertAdjacentHTML('beforeend',
+      '<tr onclick="openModal('+ri+')">'
+      +'<td><div class="td-avatar">'+ini.toUpperCase()+'</div></td>'
+      +'<td style="font-size:12px;color:var(--text2)">'+dtDisplay+'</td>'
+      +'<td class="td-name">'+fn+'</td>'
+      +'<td class="td-commune">'+commune+'</td>'
+      +'<td class="td-phone">'+ph+'</td>'
+      +'<td class="td-apport">'+apport+'</td>'
+      +'<td class="td-exp">'+exp+'</td>'
+      +'<td><span class="td-status-badge st-'+ns+'">'+statusLabel(ns)+'</span></td>'
+      +'<td><span class="td-qual-badge '+qualClass+'">'+qualIcon+'</span></td>'
+      +'</tr>'
+    );
+  });
+}
+
+function openModal(idx){
+  var c=CANDIDATES[idx];if(!c)return;
+  var nom=gv(c,['Nom','nom']),pre=gv(c,['Prénom','Prenom','prenom']);
+  var fn=(pre+' '+nom).trim()||'Candidat';
+  var ini=(pre?pre[0]:'')+(nom?nom[0]:'');if(!ini)ini='?';
+  var commune=gv(c,['Commune souhaitée','Commune','Ville','ville'])||'—';
+  var em=gv(c,['E-mail','Email','email'])||'—';
+  var ph=gv(c,['Téléphone','Telephone','telephone'])||'—';
+  var dt=gv(c,['Date du lead','Date'])||'—';
+  var camp=gv(c,['Campagne','campagne'])||'—';
+  var apport=gv(c,['Apport personnel','Apport'])||'—';
+  var exp=gv(c,['Expérience commerce','Experience commerce'])||'—';
+  var gere=gv(c,['A déjà géré une entreprise'])||'—';
+  var franchise=gv(c,['Connaît la franchise'])||'—';
+  var statut=getCandStatut(c)||'Nouveau';
+  var ns=normStatut(statut);
+  var dateRappel=gv(c,['Date de rappel'])||'—';
+  var delaiRappel=gv(c,['Délai de rappel (h)'])||'—';
+  var rappelePar=gv(c,['Rappelé par'])||'—';
+  var qualVal=gv(c,['Qualifié','Qualifie','qualifié','qualifie'])||'—';
+  var commentaire=gv(c,['Commentaire','commentaire'])||'';
+
+  document.getElementById('modalAvatar').textContent=ini.toUpperCase();
+  document.getElementById('modalName').textContent=fn;
+  document.getElementById('modalLoc').textContent=commune;
+
+  var b='';
+  /* Contact */
+  b+='<div class="modal-sect"><div class="modal-sect-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>Contact</div>';
+  b+='<div class="modal-info-grid">';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Prénom</div><div class="modal-info-val">'+(pre||'—')+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Nom</div><div class="modal-info-val">'+(nom||'—')+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">E-mail</div><div class="modal-info-val">'+em+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Téléphone</div><div class="modal-info-val">'+ph+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Date du lead</div><div class="modal-info-val">'+dt+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Campagne</div><div class="modal-info-val">'+camp+'</div></div>';
+  b+='</div></div>';
+
+  /* Profil franchise */
+  b+='<div class="modal-sect"><div class="modal-sect-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Profil franchise</div>';
+  b+='<div class="modal-info-grid">';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Commune souhaitée</div><div class="modal-info-val">'+commune+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Apport personnel</div><div class="modal-info-val">'+apport+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Expérience commerce</div><div class="modal-info-val">'+exp+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">A déjà géré une entreprise</div><div class="modal-info-val">'+gere+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Connaît la franchise</div><div class="modal-info-val">'+franchise+'</div></div>';
+  b+='</div></div>';
+
+  /* Suivi */
+  b+='<div class="modal-sect"><div class="modal-sect-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Suivi</div>';
+  b+='<div class="modal-info-grid">';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Statut</div><div class="modal-info-val"><span class="td-status-badge st-'+ns+'">'+statusLabel(ns)+'</span></div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Qualifié</div><div class="modal-info-val">'+qualVal+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Date de rappel</div><div class="modal-info-val">'+dateRappel+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Délai de rappel</div><div class="modal-info-val">'+delaiRappel+'</div></div>';
+  b+='<div class="modal-info-item"><div class="modal-info-label">Rappelé par</div><div class="modal-info-val">'+rappelePar+'</div></div>';
+  b+='</div></div>';
+
+  /* Commentaire */
+  if(commentaire){
+    b+='<div class="modal-sect"><div class="modal-sect-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Commentaire</div>';
+    b+='<div class="modal-resp"><div class="modal-resp-a">'+commentaire+'</div></div></div>';
+  }
+
+  document.getElementById('modalBody').innerHTML=b;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+document.getElementById('searchInput').addEventListener('input',function(){renderCandidates(this.value)});
+loadCandidates();
+</script>
+</body>
+</html>
