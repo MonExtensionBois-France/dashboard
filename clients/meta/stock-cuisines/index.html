@@ -631,7 +631,7 @@ function pPct(v){if(!v||v==='')return 0;var s=String(v).replace(/\s/g,'').replac
 function fmt(n,d){if(d===undefined)d=0;if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'k';return n.toFixed(d);}
 function fmtEur(n){return n.toFixed(2).replace('.',',')+' €';}
 function fmtPct(n){return n.toFixed(2).replace('.',',')+' %';}
-function parseDate(v){if(!v)return null;var s=String(v).trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return new Date(s.substring(0,10));if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){var p=s.split('/');return new Date(p[2]+'-'+p[1]+'-'+p[0]);}return new Date(s);}
+function parseDate(v){if(!v)return null;var s=String(v).trim();if(/^\d{4}-\d{2}-\d{2}/.test(s)){var p=s.substring(0,10).split('-');return new Date(+p[0],+p[1]-1,+p[2]);}if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){var p=s.split('/');return new Date(+p[2],+p[1]-1,+p[0]);}return new Date(s);}
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 var currentPeriod='30';
