@@ -7,7 +7,7 @@
 <link rel="icon" href="https://stockcuisines.com/wp-content/uploads/2023/04/cropped-CARRE-SIMPLE-scaled-2-32x32.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
@@ -38,8 +38,8 @@
   --radius-xs:6px;
   --shadow:0 8px 40px rgba(0,0,0,.5);
   --shadow-sm:0 2px 16px rgba(0,0,0,.3);
-  --font-display:'Playfair Display',serif;
-  --font-body:'Inter',sans-serif;
+  --font-display:'Oswald',sans-serif;
+  --font-body:'Nunito',sans-serif;
   --font-mono:'JetBrains Mono','Fira Code',monospace;
   --ease:cubic-bezier(.4,0,.2,1);
 }
@@ -55,10 +55,10 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 /* ═══════════════════════════════════
    LOADER
    ═══════════════════════════════════ */
-.loader{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-.loader-bg{position:absolute;inset:0;background:url('https://stockcuisines.com/wp-content/uploads/2023/05/encart-cuisine.jpg') center/cover no-repeat;animation:loaderZoom 6s ease-out forwards}
-.loader-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,11,9,.4) 0%,rgba(12,11,9,.85) 60%,rgba(12,11,9,.98) 100%)}
-@keyframes loaderZoom{from{transform:scale(1.15)}to{transform:scale(1)}}
+.loader{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:var(--bg)}
+.loader-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(219,116,0,.06) 0%,transparent 70%)}
+.loader-overlay{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23DB7400' stroke-opacity='.04' stroke-width='.5'/%3E%3C/svg%3E");background-size:60px 60px;animation:loaderGrid 20s linear infinite}
+@keyframes loaderGrid{from{background-position:0 0}to{background-position:60px 60px}}
 
 .loader-content{position:relative;z-index:2;text-align:center;opacity:0;animation:loaderFadeIn .8s ease .3s forwards}
 @keyframes loaderFadeIn{to{opacity:1}}
@@ -86,8 +86,8 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 
 .portail-hero{position:relative;min-height:50vh;display:flex;align-items:flex-end;padding:60px 0 0;overflow:hidden}
 .portail-hero-bg{position:absolute;inset:0}
-.portail-hero-img{position:absolute;inset:0;background:url('https://stockcuisines.com/wp-content/uploads/2022/08/encart-cuisine-1.jpg') center/cover no-repeat}
-.portail-hero-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,11,9,.3) 0%,rgba(12,11,9,.6) 40%,var(--bg) 100%)}
+.portail-hero-img{position:absolute;inset:0;background:radial-gradient(ellipse 90% 70% at 60% 30%,rgba(219,116,0,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 20% 80%,rgba(126,190,197,.05) 0%,transparent 50%)}
+.portail-hero-grad{position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,var(--bg) 100%);background-image:url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50h100M50 0v100' stroke='%23DB7400' stroke-opacity='.03' stroke-width='.5'/%3E%3C/svg%3E");background-size:100px 100px}
 
 .portail-hero-content{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:80px 32px 48px;width:100%}
 .portail-hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:40px;border:1px solid rgba(219,116,0,.25);background:rgba(219,116,0,.08);backdrop-filter:blur(8px);font-size:12px;font-weight:600;color:var(--orange-light);letter-spacing:1px;text-transform:uppercase;margin-bottom:20px}
@@ -120,9 +120,8 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-he
 .entry-card:hover{border-color:rgba(219,116,0,.3);transform:translateY(-4px);box-shadow:0 16px 60px rgba(219,116,0,.1)}
 .entry-card:hover::before,.entry-card:hover::after{opacity:1}
 
-.entry-thumb{width:140px;height:100px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;position:relative;z-index:1}
-.entry-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
-.entry-card:hover .entry-thumb img{transform:scale(1.08)}
+.entry-thumb{width:140px;height:100px;border-radius:var(--radius-sm);overflow:hidden;flex-shrink:0;position:relative;z-index:1;background:var(--surface-2);display:flex;align-items:center;justify-content:center;border:1px solid var(--border-subtle);transition:border-color .4s ease}
+.entry-card:hover .entry-thumb{border-color:var(--border)}
 
 .entry-info{flex:1;position:relative;z-index:1}
 .entry-tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;padding:4px 10px;border-radius:20px;background:rgba(219,116,0,.12);color:var(--orange-light);margin-bottom:10px}
@@ -349,7 +348,9 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:12px}
 
     <div class="entry-card" onclick="enterDashboard()">
       <div class="entry-thumb">
-        <img src="https://stockcuisines.com/wp-content/uploads/2023/01/facades-stockcuisines.jpg" alt="Cuisines Stock Cuisines">
+        <svg viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;padding:16px">
+          <rect x="4" y="8" width="32" height="20" rx="3" stroke="#DB7400" stroke-width="1.5" opacity=".6"/><rect x="4" y="32" width="32" height="20" rx="3" stroke="#7EBEC5" stroke-width="1.5" opacity=".6"/><rect x="44" y="8" width="32" height="44" rx="3" stroke="#DB7400" stroke-width="1.5" opacity=".4"/><circle cx="60" cy="30" r="10" stroke="#E89530" stroke-width="1.5" opacity=".5"/><path d="M55 30l4 4 8-8" stroke="#6abf69" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
+        </svg>
       </div>
       <div class="entry-info">
         <span class="entry-tag">Nouveau</span>
