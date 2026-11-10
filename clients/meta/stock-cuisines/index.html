@@ -54,15 +54,10 @@ body{font-family:var(--font-body);background:#fff;color:#333;line-height:1.6;ove
 .loader-content{position:relative;z-index:2;text-align:center;opacity:0;animation:loaderContentIn .8s ease .2s forwards}
 @keyframes loaderContentIn{to{opacity:1}}
 
-.loader-logo-wrap{position:relative;width:140px;height:140px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center}
-.loader-logo-wrap::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid transparent;border-top-color:var(--orange);border-right-color:rgba(219,116,0,.3);animation:loaderSpin 1.5s linear infinite}
-.loader-logo-wrap::after{content:'';position:absolute;inset:2px;border-radius:50%;border:1px solid transparent;border-bottom-color:var(--teal);animation:loaderSpinRev 2s linear infinite}
-@keyframes loaderSpin{to{transform:rotate(360deg)}}
-@keyframes loaderSpinRev{to{transform:rotate(-360deg)}}
-.loader-logo{width:110px;height:110px;border-radius:50%;object-fit:cover;box-shadow:0 0 30px rgba(219,116,0,.2)}
+.loader-logo-wrap{margin:0 auto 28px}
+.loader-logo{width:200px;height:auto;border-radius:12px;box-shadow:0 0 40px rgba(219,116,0,.2)}
 
-.loader-title{font-family:var(--font-display);font-size:24px;font-weight:600;color:#fff;letter-spacing:4px;text-transform:uppercase;margin-bottom:4px}
-.loader-subtitle{font-size:13px;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
+.loader-subtitle{font-size:13px;color:rgba(255,255,255,.35);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px}
 
 .loader-bar-wrap{width:220px;margin:0 auto}
 .loader-bar-track{height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
@@ -295,7 +290,6 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:11px}
     <div class="loader-logo-wrap">
       <img src="http://stockcuisines.com/wp-content/uploads/2022/09/logo-stockcuisine.jpg" alt="Stock Cuisines" class="loader-logo">
     </div>
-    <div class="loader-title">Stock Cuisines</div>
     <div class="loader-subtitle">Espace Marketing</div>
     <div class="loader-bar-wrap">
       <div class="loader-bar-track"><div class="loader-bar-fill"></div></div>
