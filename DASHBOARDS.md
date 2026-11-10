@@ -16,6 +16,7 @@
 | SHEET-H | `...OqMVaFMYFFqe...` | Body House Ecommerce |
 | SHEET-I | `...aNKcihjZo...` | Casino (leads), Spar (leads), Vival (leads) |
 | SHEET-J | `...whE-MnL_I` | Novances (propre sheet) |
+| SHEET-SC | `1t0PemB4...Q7j1Y` (gviz) | Stock Cuisines |
 
 ## Dashboards de référence
 
@@ -66,6 +67,7 @@
 | Body House (Villefranche) | `clients/meta/bodyhouse/villefranche/index.html` | Vercel | bodyhouse-villefranche.vercel.app | SHEET-F | Actif |
 | Body House (boutique unique) | `clients/meta/bodyhouse/bodyhouse-dashboard/boutique.html` | Vercel | bodyhouse-dashboard.vercel.app/boutique.html | SHEET-F | Actif |
 | Body House Ecommerce | `clients/meta/bodyhouse/bodyhouse-ecommerce/index.html` | Vercel | — | SHEET-H | Actif |
+| Stock Cuisines | `clients/meta/stock-cuisines/index.html` | Vercel | stock-cuisines.vercel.app | SHEET-SC | Actif (nouveau) |
 
 ### Clients Koven
 
