@@ -290,14 +290,16 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:11px}
   .campaign-status{align-self:center}
 
   /* DASHBOARD */
-  .header-inner{padding:10px 16px;gap:10px}
-  .btn-back{padding:6px 10px;font-size:11px}
-  .btn-back svg{width:14px;height:14px}
-  .header-logo{height:24px}
-  .header-title h1{font-size:12px}
-  .header-title span{font-size:10px}
-  .header-live{font-size:10px}
-  .header-live .dot{width:6px;height:6px}
+  .header-inner{padding:8px 12px;gap:8px;flex-wrap:wrap}
+  .header-left{gap:8px;flex:1;min-width:0}
+  .btn-back{padding:5px 8px;font-size:10px;gap:4px}
+  .btn-back svg{width:12px;height:12px}
+  .header-brand{gap:8px;min-width:0}
+  .header-logo{height:22px;border-radius:4px}
+  .header-title h1{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .header-title span{display:none}
+  .header-live{font-size:9px;white-space:nowrap}
+  .header-live .dot{width:5px;height:5px}
 
   .nav-inner{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .nav-inner::-webkit-scrollbar{display:none}
@@ -611,8 +613,9 @@ var COLUMN_ALIASES={
 'Source de la session':'Session source','source':'Session source','Support de la session':'Session medium','support':'Session medium',
 'Sessions':'Sessions','sessions':'Sessions','Utilisateurs':'Users','utilisateurs':'Users',
 'Nouveaux utilisateurs':'New users','nouveaux utilisateurs':'New users',
-'Taux d\'engagement':'Engagement rate','taux d\'engagement':'Engagement rate',
-'Durée moyenne de session':'Avg session duration','durée moyenne de session':'Avg session duration',
+'Taux d\'engagement':'Engagement rate','taux d\'engagement':'Engagement rate','Engagement rate':'Engagement rate',
+'Durée moyenne de session':'Avg session duration','durée moyenne de session':'Avg session duration','Average session duration':'Avg session duration',
+'Total users':'Users','Nombre total d\'utilisateurs':'Users',
 'Nombre d\'événements':'Event count','nombre d\'événements':'Event count',
 'date':'Date','Date':'Date'
 };
