@@ -158,6 +158,51 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:12px}
   .col-warning{transition:none!important}
 }
 
+/* ═══ PORTAIL ═══ */
+.portail{min-height:100vh;position:relative;overflow:hidden}
+.portail .page-bg{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+.portail .glow-1{position:absolute;width:600px;height:600px;top:-200px;right:-100px;background:radial-gradient(circle,rgba(219,116,0,.06) 0%,transparent 70%);border-radius:50%;animation:pfloat 20s ease infinite}
+.portail .glow-2{position:absolute;width:500px;height:500px;bottom:-150px;left:-100px;background:radial-gradient(circle,rgba(126,190,197,.04) 0%,transparent 70%);border-radius:50%;animation:pfloat 25s ease infinite reverse}
+@keyframes pfloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.05)}66%{transform:translate(-20px,15px) scale(.95)}}
+.portail .noise{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;opacity:.015;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.portail-inner{position:relative;z-index:2;max-width:900px;margin:0 auto;padding:60px 24px 80px}
+.p-hero{text-align:center;margin-bottom:56px}
+.p-logo-wrap{display:inline-block;margin-bottom:28px;position:relative}
+.p-logo-wrap::before{content:'';position:absolute;inset:-12px;background:linear-gradient(135deg,rgba(219,116,0,.12),transparent 60%);border-radius:22px;filter:blur(20px)}
+.p-logo{height:72px;border-radius:14px;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+.p-hero h1{font-family:var(--font-display);font-size:clamp(28px,5vw,42px);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;background:linear-gradient(135deg,#fff 0%,var(--orange-light) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.p-hero .p-tagline{font-size:15px;color:var(--text-2);letter-spacing:.5px}
+.p-hero .p-tagline strong{color:var(--orange-light);font-weight:700}
+.p-section{font-family:var(--font-display);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--text-3);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.p-section::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.p-cards{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:44px}
+.p-card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:26px;display:flex;align-items:center;gap:22px;cursor:pointer;transition:all .4s cubic-bezier(.25,.46,.45,.94);text-decoration:none;color:inherit;position:relative;overflow:hidden}
+.p-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(219,116,0,.1) 0%,transparent 50%);opacity:0;transition:opacity .4s ease}
+.p-card:hover{border-color:rgba(219,116,0,.3);transform:translateY(-3px);box-shadow:0 8px 40px rgba(0,0,0,.4)}
+.p-card:hover::before{opacity:1}
+.p-card-icon{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;position:relative;z-index:1;background:rgba(219,116,0,.1)}
+.p-card-body{flex:1;position:relative;z-index:1}
+.p-card-title{font-family:var(--font-display);font-size:17px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.p-card-desc{font-size:13px;color:var(--text-2);line-height:1.5}
+.p-card-arrow{font-size:20px;color:var(--text-3);transition:all .3s ease;position:relative;z-index:1}
+.p-card:hover .p-card-arrow{color:var(--orange);transform:translateX(4px)}
+.p-badge{display:inline-block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:3px 8px;border-radius:6px;margin-left:8px;vertical-align:middle}
+.p-badge.new{background:rgba(219,116,0,.12);color:var(--orange-light)}
+.p-badge.live{background:rgba(76,175,80,.15);color:var(--green)}
+.p-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:44px}
+.p-info{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:18px;text-align:center}
+.p-info-val{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--orange-light);margin-bottom:3px}
+.p-info-lbl{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.p-footer{text-align:center;padding-top:28px;border-top:1px solid rgba(255,255,255,.06)}
+.p-footer p{font-size:12px;color:var(--text-3)}
+.p-footer a{color:var(--orange);text-decoration:none}
+.p-footer a:hover{text-decoration:underline}
+.p-footer .powered{font-size:11px;color:var(--text-3);margin-top:6px;opacity:.5}
+
+.dashboard-wrap{display:none}
+.dashboard-wrap.active{display:block}
+.portail.hidden{display:none}
+
 /* ═══ RESPONSIVE ═══ */
 @media(max-width:1024px){
   .charts-row{grid-template-columns:1fr}
@@ -171,6 +216,9 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:12px}
   .chart-wrap{height:240px}
   .funnel-meta .fval{font-size:16px}
   .controls{flex-direction:column;align-items:flex-start}
+  .p-card{flex-direction:column;text-align:center;gap:16px}
+  .p-logo{height:56px}
+  .p-info-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:480px){
   .kpi-grid{grid-template-columns:1fr 1fr}
@@ -178,6 +226,7 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:12px}
   .kpi-value{font-size:22px}
   .main{padding:16px}
   .header-logo{height:36px}
+  .portail-inner{padding:40px 16px 60px}
 }
 </style>
 </head>
@@ -186,10 +235,71 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:12px}
 <!-- ═══ MISSING COLUMN WARNING ═══ -->
 <div class="col-warning" id="colWarning"></div>
 
+<!-- ═══════════════════════════════════
+     PORTAIL D'ACCUEIL
+     ═══════════════════════════════════ -->
+<div class="portail" id="portail">
+  <div class="page-bg"><div class="glow-1"></div><div class="glow-2"></div></div>
+  <div class="noise"></div>
+  <div class="portail-inner">
+    <div class="p-hero">
+      <div class="p-logo-wrap">
+        <img src="http://stockcuisines.com/wp-content/uploads/2022/09/logo-stockcuisine.jpg" alt="Stock Cuisines" class="p-logo">
+      </div>
+      <h1>Espace Marketing</h1>
+      <p class="p-tagline">Suivi des campagnes <strong>recrutement franchisés</strong> — Stock Cuisines</p>
+    </div>
+
+    <div class="p-section">Aperçu rapide</div>
+    <div class="p-info-grid">
+      <div class="p-info"><div class="p-info-val">1</div><div class="p-info-lbl">Campagne active</div></div>
+      <div class="p-info"><div class="p-info-val">2</div><div class="p-info-lbl">Canaux suivis</div></div>
+      <div class="p-info"><div class="p-info-val">10/11/2026</div><div class="p-info-lbl">Date de lancement</div></div>
+      <div class="p-info"><div class="p-info-val">6h & 13h</div><div class="p-info-lbl">Rafraîchissement</div></div>
+    </div>
+
+    <div class="p-section">Dashboards</div>
+    <div class="p-cards">
+      <div class="p-card" onclick="enterDashboard()">
+        <div class="p-card-icon">📊</div>
+        <div class="p-card-body">
+          <div class="p-card-title">Dashboard Recrutement Franchisés <span class="p-badge new">Nouveau</span></div>
+          <div class="p-card-desc">Vue d'ensemble, Meta Ads, GA4 — KPI, graphiques, entonnoir de conversion, export CSV. Sélection de période avec comparaison automatique.</div>
+        </div>
+        <div class="p-card-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="p-section">Campagnes actives</div>
+    <div class="p-cards">
+      <div class="p-card" style="cursor:default" onclick="event.stopPropagation()">
+        <div class="p-card-icon" style="background:rgba(66,103,178,.12)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z" fill="#4267B2"/></svg>
+        </div>
+        <div class="p-card-body">
+          <div class="p-card-title">SC_FRANCHISE_LEADS_FR-METROPOLES <span class="p-badge live">Active</span></div>
+          <div class="p-card-desc">Lead Ads Meta — Recrutement de candidats franchisés sur les métropoles françaises. Lancée le 10 novembre 2026.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-footer">
+      <p>Propulsé par <a href="https://meta-advertising.io" target="_blank">Meta-Advertising</a></p>
+      <div class="powered">Données actualisées automatiquement via The Sheep</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     DASHBOARD (masqué par défaut)
+     ═══════════════════════════════════ -->
+<div class="dashboard-wrap" id="dashboardWrap">
+
 <!-- ═══ HEADER ═══ -->
 <header class="header">
 <div class="header-inner">
   <div class="header-brand">
+    <div onclick="backToPortail()" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);color:var(--text-3);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;transition:all .3s ease;margin-right:8px" onmouseover="this.style.borderColor='var(--orange)';this.style.color='var(--orange)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-3)'">← Portail</div>
     <img src="http://stockcuisines.com/wp-content/uploads/2022/09/logo-stockcuisine.jpg" alt="Stock Cuisines" class="header-logo">
     <div class="header-title">
       <h1>Recrutement Franchisés</h1>
@@ -324,6 +434,8 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:12px}
 </div>
 
 </main>
+
+</div><!-- /dashboard-wrap -->
 
 <script>
 /* ═══════════════════════════════════════════
@@ -942,8 +1054,22 @@ function showSetupMessage(){
     +'</div></div>';
 }
 
+// ─── PORTAIL / DASHBOARD NAVIGATION ───
+var dataLoaded=false;
+function enterDashboard(){
+  document.getElementById('portail').classList.add('hidden');
+  document.getElementById('dashboardWrap').classList.add('active');
+  if(!dataLoaded){loadData();dataLoaded=true;}
+  window.scrollTo(0,0);
+}
+function backToPortail(){
+  document.getElementById('dashboardWrap').classList.remove('active');
+  document.getElementById('portail').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+
 // ─── INIT ───
-loadData();
+// Data loads on dashboard enter, not on page load
 </script>
 </body>
 </html>
