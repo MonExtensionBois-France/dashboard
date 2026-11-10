@@ -499,8 +499,8 @@ td.num{font-family:var(--font-mono);text-align:right;font-size:11px}
 })();
 
 /* ═══════════ DASHBOARD ENGINE ═══════════ */
-var SHEET_ID='1t0PemB43ajYcdpgtIvKmEQ81Suz81e2UL9jbDhQ7j1Y';
-var GIDS={meta:'0',ga4:'0'};
+var PUB_BASE='https://docs.google.com/spreadsheets/d/e/2PACX-1vTfTJz3BtJFeoTDSH00mfpv4BleUm6pWmcQ_-ZQ9HePp1m8TX70rJK9mjwsAkAGLUA3gD9cZWw6qXpb/pub?output=csv&single=true&gid=';
+var GIDS={meta:'1610544247',ga4:'1267284294'};
 
 var COLUMN_ALIASES={
 'Nom de la campagne':'Campaign name','ID de la campagne':'Campaign ID','ID de campagne':'Campaign ID',
@@ -629,7 +629,7 @@ document.querySelectorAll('.period-btn[data-period]').forEach(function(btn){btn.
 function loadData(){
   var loaded=0,total=2,hasData=false;
   function done(){loaded++;if(loaded>=total){var allDates=DATA.meta.concat(DATA.ga4).map(function(r){return r['Date']||r['date']}).filter(Boolean).sort();var last=allDates.length?allDates[allDates.length-1]:null;if(last){document.getElementById('lastUpdate').textContent='Dernière donnée : '+last;hasData=true;}if(!hasData){document.getElementById('lastUpdate').textContent='En attente de données';}applyPeriod();}}
-  function fetchSheet(key,gid){var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&gid='+gid+'&_t='+Date.now();Papa.parse(url,{download:true,header:true,skipEmptyLines:true,complete:function(r){var rows=r.data||[];if(rows.length&&rows[0]){var fk=Object.keys(rows[0])[0]||'';if(fk.indexOf('DOCTYPE')!==-1||fk.indexOf('html')!==-1){console.warn(key+': classeur non accessible');DATA[key]=[];done();return;}}DATA[key]=normalizeRows(rows);console.log(key+': '+DATA[key].length+' lignes');done();},error:function(){console.error('Erreur chargement '+key);DATA[key]=[];done();}});}
+  function fetchSheet(key,gid){Papa.parse(PUB_BASE+gid+'&_t='+Date.now(),{download:true,header:true,skipEmptyLines:true,complete:function(r){DATA[key]=normalizeRows(r.data||[]);console.log(key+': '+DATA[key].length+' lignes');done();},error:function(){console.error('Erreur chargement '+key);DATA[key]=[];done();}});}
   fetchSheet('meta',GIDS.meta);fetchSheet('ga4',GIDS.ga4);
 }
 
