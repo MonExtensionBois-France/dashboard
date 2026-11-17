@@ -624,7 +624,7 @@ var CAMPAIGNS=[
     leads_gid:'0',
     leads_sheet:LEADS_SHEET,
     marquee:'RECRUTEMENT FRANCHISÉS ★ +60 RESTAURANTS EN FRANCE ★ PAR VOUS, POUR TOUS',
-    matchCampaign:function(n){n=(n||'').toLowerCase();return n.indexOf('ssf')===-1&&n.indexOf('salon')===-1&&n.indexOf('street food')===-1;}
+    matchCampaign:function(n){return (n||'').indexOf('07-09/11/26')===-1;}
   },
   {
     id:'salon',
@@ -640,7 +640,7 @@ var CAMPAIGNS=[
     leads_gid:'0',
     leads_sheet:LEADS_SHEET,
     marquee:'SALON DE LA STREET FOOD 2026 ★ 7ème ÉDITION ★ PARIS NORD VILLEPINTE ★ 7-9 NOVEMBRE',
-    matchCampaign:function(n){n=(n||'').toLowerCase();return n.indexOf('ssf')!==-1||n.indexOf('salon')!==-1||n.indexOf('street food')!==-1;}
+    matchCampaign:function(n){return (n||'').indexOf('07-09/11/26')!==-1;}
   }
 ];
 
