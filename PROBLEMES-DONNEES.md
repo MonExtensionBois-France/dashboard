@@ -12,10 +12,6 @@ Certains onglets de classeurs Google Sheets ne sont pas publies sur le web. Les 
 
 | GID | Client | Onglet | Impact |
 |-----|--------|--------|--------|
-| `1347913954` | Escapad | Meta Ads | Dashboard Escapad : pas de donnees Meta |
-| `1283782540` | Escapad | Google Ads | Dashboard Escapad : pas de donnees Google |
-| `2059473408` | Escapad | TikTok Ads | Dashboard Escapad : pas de donnees TikTok |
-| `256908481` | Escapad | GA4 | Dashboard Escapad : pas de donnees GA4 |
 | `1325169406` | Mamie Bigoude | Meta France | Dashboard Mamie Bigoude : pas de donnees Meta nationales |
 | `1713978084` | Mamie Bigoude | Google Ads | Dashboard Mamie Bigoude : pas de donnees Google |
 | `17155295` | Mamie Bigoude | GA4 | Dashboard Mamie Bigoude : pas de donnees GA4 |
@@ -136,7 +132,7 @@ Certains onglets contiennent des lignes vides en fin de fichier ou des doublons 
 
 | Priorite | Action | Impact |
 |----------|--------|--------|
-| **P0** | Publier tous les onglets de SHEET-E sur le web | 4 clients sans donnees (Escapad, Mamie Bigoude, YUJO, M&D) |
+| **P0** | Publier tous les onglets de SHEET-E sur le web | 3 clients sans donnees (Mamie Bigoude, YUJO, M&D) |
 | **P0** | Publier les onglets Casino/Spar/Vival dans SHEET-A | 3 clients sans donnees Meta |
 | **P0** | Publier les onglets leads Novances dans SHEET-J | Novances sans leads |
 | **P0** | Publier l'onglet leads Bouillon Batignolles dans SHEET-J | Bouillon sans candidats |

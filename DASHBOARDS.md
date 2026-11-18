@@ -10,7 +10,7 @@
 | SHEET-B | `...EWMTmrsc` | Sooner, Forum des images, Le Pacte, Detect Réseaux | EN |
 | SHEET-C | `...ZWw6qXpb` | Franchise Board, Le DUO, Body House recrutement, Odygo, Hapik, Novances, Écrin Végétal, By Pauline, Five Pizza | FR ou EN selon onglet |
 | SHEET-D | `...Pog6Dxx1` | Moulin d'Elise, ôCargo, Impact Accelerator, Le 17.45, LRDM, Dropdrone, Detect Réseaux, Bistrot de Villages, Bouillon Batignolles | FR ou EN selon onglet |
-| SHEET-E | `...XoZUYk8v` | Mamie Bigoude, Mother & Daughter, YUJO, Escapad | FR ou EN selon onglet |
+| SHEET-E | `...XoZUYk8v` | Mamie Bigoude, Mother & Daughter, YUJO | FR ou EN selon onglet |
 | SHEET-F | `...1FHVjdzD` | Body House (boutiques multi-villes) | FR |
 | SHEET-G | `...XWcqfGlR` | Exteco (toutes villes), MEB (toutes villes) | FR |
 | SHEET-H | `...OqMVaFMYFFqe...` | Body House Ecommerce | FR |
@@ -54,7 +54,6 @@
 | Mamie Bigoude | `clients/meta/mamie-bigoude/MamieBigoude-dashboard/index.html` | GitHub Pages | mamiebigoude.github.io/... | SHEET-E | gid=1325169406 (FR Meta), 1713978084 (Google), 17155295 (GA4), 1180339242 (Nimes), 1619662920 (Bourges), 910601949 (Saint-Malo), 1269997890 (Chateauroux) | EN (alias FR→EN) | Actif |
 | Mother & Daughter | `clients/meta/mother-daughter/index.html` | — | — | SHEET-E | gid=66695541 (Meta), 392350086 (GA4), 1734203864 (leads) | EN (alias FR→EN) | Actif |
 | YUJO Ramen | `clients/meta/yujo-ramen/index.html` | Vercel | yujo-ramen.vercel.app | SHEET-E | gid=1667708153 (Meta), 376592647 (GA4) | EN (alias FR→EN) | Actif |
-| Escapad | `clients/meta/escapad/index.html` | Vercel | escapad-dashboard.vercel.app | SHEET-E | gid=1347913954 (Meta), 1283782540 (Google), 2059473408 (TikTok), 256908481 (GA4) | EN (alias FR→EN) | Actif |
 | AS-AGT | `clients/meta/as-agt/ASAGT-dashboard/index.html` | GitHub Pages | asagt.github.io/... | SHEET-A | gid=1597510134 (Meta), 339874225 (LinkedIn) | EN (alias FR→EN) | Actif |
 | Histoires d'ô | `clients/meta/histoires-do/HistoiresDo-dashboard/index.html` | GitHub Pages / Vercel | histoires-do-dashboard.vercel.app | SHEET-A | — | EN (alias FR→EN) | Actif |
 | Flash Repair | `clients/meta/flash-repair/dashboard.html` | — | — | SHEET-A | — | EN (alias FR→EN) | Actif |

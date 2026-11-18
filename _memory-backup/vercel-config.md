@@ -13,7 +13,6 @@
 | rapport-bodyhit | https://rapport-bodyhit.vercel.app | `_everfruit/bodyhit-saintlazare/` |
 | koven-agency | https://koven-agency.vercel.app | `_koven/` |
 | koven-portal | https://koven-portal.vercel.app | `_koven/` |
-| escapad-dashboard | https://escapad-dashboard.vercel.app | `clients/meta/escapad/` |
 | flash-repair-dashboard | https://flash-repair-dashboard.vercel.app | `clients/meta/flash-repair/` |
 | crying-tiger-dashboard | https://crying-tiger-dashboard.vercel.app | `clients/meta/crying-tiger/` |
 | olla-dashboard | https://olla-dashboard.vercel.app | `clients/meta/olla/` |

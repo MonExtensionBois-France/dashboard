@@ -164,7 +164,6 @@ Le systeme complet (`safeCol` + `showMissingWarning`) est deploye sur tous les d
 
 | Dashboard | Alias FR→EN | Cache-buster | Warning colonnes | Corrections specifiques |
 |-----------|:-----------:|:------------:|:----------------:|------------------------|
-| Escapad | oui | oui | oui | Fusion lignes par date, filtre dates inline |
 | Mamie Bigoude | oui | oui | oui | Multi-restos (7 GIDs), vues par ville |
 | YUJO Ramen | oui | oui | oui | Meta + GA4 |
 | Mother & Daughter | oui | oui | oui | Meta + GA4 + leads |
