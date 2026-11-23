@@ -73,7 +73,7 @@
 | Client | Fichier de référence | Plateforme | URL | Classeur(s) | GID(s) | Colonnes | Statut |
 |--------|---------------------|------------|-----|-------------|--------|----------|--------|
 | Toa Sushi | `clients/koven/toa-sushi/dashboard-toa-sushi.html` | GitHub Pages | toa-sushi.github.io/... | SHEET-A | — | EN (alias FR→EN) | Actif |
-| Novances | `clients/koven/novances/index.html` | Vercel | novances-paca.vercel.app | SHEET-C, SHEET-J | gid=1921068796 (Meta sur SHEET-C), gid=1917525205 (leads Medecins), 1212881150 (leads Restaurateurs), 1610436699 (leads Repreneurs) sur SHEET-J | EN (alias FR→EN) | Actif |
+| Novances | `clients/koven/novances/index.html` | Vercel | novances-paca.vercel.app | SHEET-C, SHEET-J | gid=1921068796 (multi-blocs A:P/T:W/Z:AD/AG:AI sur SHEET-C), gid=1917525205 (leads Medecins), 1212881150 (leads Restaurateurs), 1610436699 (leads Repreneurs) sur SHEET-J | Multi-blocs par index de colonnes (3 verticales, 2 bureaux) | Actif |
 
 ### Exteco (toutes villes — classeur SHEET-G)
 
