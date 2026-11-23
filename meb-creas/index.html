@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEB — Visuels Publicitaires</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f7f5f2;
+            color: #2c2c2c;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, h4, h5 { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        :root {
+            --green-dark: #2d5a27;
+            --green: #5a8f29;
+            --green-light: #7ab648;
+            --green-pale: #e8f3dc;
+            --terra: #c4825e;
+            --terra-light: #d4a07a;
+            --terra-pale: #fdf0e8;
+            --beige: #f7f5f2;
+            --beige-warm: #f0ebe4;
+            --white: #ffffff;
+            --text-dark: #2c2c2c;
+            --text-mid: #5a5a5a;
+            --text-light: #8a8a8a;
+            --border: #e5e0d8;
+            --border-light: #ede9e3;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.10);
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Header ──────────────────────────────────────────── */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+        }
+        .header-top {
+            background: var(--green-dark);
+            padding: 8px 24px;
+        }
+        .header-top-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .header-top-link {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+        }
+        .header-top-link:hover { color: #fff; }
+        .header-main {
+            padding: 14px 24px;
+        }
+        .header-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-logo {
+            height: 44px;
+            width: auto;
+        }
+        .header-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .header-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--green-dark);
+            letter-spacing: -0.02em;
+        }
+        .header-subtitle {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .back-link {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--green-dark);
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .back-link:hover {
+            background: var(--green-pale);
+        }
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--green-pale);
+            border: 1px solid rgba(90, 143, 41, 0.25);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--green);
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green-light);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        /* ── Filters ─────────────────────────────────────────── */
+        .controls-wrap {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 20px 24px 0;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .control-group {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .control-group.grow { flex: 1; min-width: 280px; }
+        .control-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+        .filter-chip {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--text-mid);
+            font-family: 'Inter', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .filter-chip:hover {
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .filter-chip.active {
+            background: var(--green-dark);
+            border-color: var(--green-dark);
+            color: #fff;
+        }
+        .date-inputs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 4px;
+        }
+        .date-inputs input[type="date"] {
+            font-family: inherit;
+            font-size: 12px;
+            padding: 5px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--text-dark);
+            outline: none;
+            transition: border-color .2s;
+        }
+        .date-inputs input[type="date"]:focus {
+            border-color: var(--green);
+        }
+        .date-inputs .date-apply {
+            padding: 5px 12px;
+            border-radius: 8px;
+            border: none;
+            background: var(--green-dark);
+            color: #fff;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .date-inputs .date-apply:hover {
+            background: var(--green);
+        }
+
+        /* ── Summary Stats ───────────────────────────────────── */
+        .summary-bar {
+            max-width: 1440px;
+            margin: 20px auto 0;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+        .stat-card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .stat-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--green-dark);
+        }
+
+        /* ── Grid ────────────────────────────────────────────── */
+        .grid-container {
+            max-width: 1440px;
+            margin: 24px auto 40px;
+            padding: 0 24px;
+        }
+        .crea-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* ── Card ────────────────────────────────────────────── */
+        .crea-card {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+        }
+        .crea-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-image-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: var(--beige-warm);
+            overflow: hidden;
+        }
+        .card-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .crea-card:hover .card-image-wrap img {
+            transform: scale(1.04);
+        }
+        .card-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 14px;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .card-image-placeholder svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.3;
+        }
+
+        .badge-city {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: var(--green-dark);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 6px;
+            letter-spacing: 0.02em;
+        }
+        .badge-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 6px;
+        }
+        .badge-status.active {
+            background: var(--green-pale);
+            color: var(--green-dark);
+        }
+        .badge-status.paused {
+            background: var(--terra-pale);
+            color: var(--terra);
+        }
+        .badge-status.other {
+            background: #eee;
+            color: #888;
+        }
+
+        .card-body {
+            padding: 16px 18px 14px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .card-ad-name {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.35;
+        }
+        .card-body-text {
+            font-size: 13px;
+            color: var(--text-mid);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1;
+        }
+        .card-cta-badge {
+            align-self: flex-start;
+            background: var(--terra-pale);
+            border: 1px solid rgba(196, 130, 94, 0.3);
+            color: var(--terra);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .card-kpis {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid var(--border-light);
+            background: #fcfaf8;
+        }
+        .kpi-item {
+            padding: 12px 10px;
+            text-align: center;
+            border-right: 1px solid var(--border-light);
+        }
+        .kpi-item:last-child { border-right: none; }
+        .kpi-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 3px;
+        }
+        .kpi-value {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        .kpi-value.highlight {
+            color: var(--green);
+        }
+
+        /* ── Ad Set Detail ───────────────────────────────────── */
+        .adset-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 14px;
+            cursor: pointer;
+            border-top: 1px solid var(--border-light);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: var(--transition);
+            user-select: none;
+        }
+        .adset-toggle:hover {
+            color: var(--green);
+            background: var(--green-pale);
+        }
+        .adset-toggle svg {
+            transition: transform 0.25s ease;
+        }
+        .adset-detail {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease;
+        }
+        .adset-detail.open {
+            max-height: 400px;
+        }
+        .adset-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .adset-table thead th {
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: 10px;
+            border-bottom: 1px solid var(--border-light);
+            background: #faf8f5;
+        }
+        .adset-table tbody td {
+            padding: 8px 10px;
+            color: var(--text-mid);
+            border-bottom: 1px solid var(--border-light);
+            white-space: nowrap;
+        }
+        .adset-table tbody tr:last-child td { border-bottom: none; }
+        .adset-table .adset-name {
+            color: var(--text-dark);
+            font-weight: 500;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── Loading ─────────────────────────────────────────── */
+        .loading-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 20px;
+            gap: 20px;
+        }
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid var(--border);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* ── Error / Empty ───────────────────────────────────── */
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 20px;
+            gap: 16px;
+            text-align: center;
+        }
+        .error-state svg { width: 48px; height: 48px; color: #d9534f; }
+        .error-state h3 { font-size: 18px; color: var(--text-dark); }
+        .error-state p { font-size: 14px; color: var(--text-mid); max-width: 400px; }
+        .error-state button {
+            margin-top: 8px;
+            padding: 10px 24px;
+            background: var(--green);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-xs);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .error-state button:hover { background: var(--green-dark); }
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-light);
+            font-size: 15px;
+        }
+
+        /* ── Responsive ──────────────────────────────────────── */
+        @media (max-width: 1100px) {
+            .crea-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .header-inner { flex-wrap: wrap; }
+            .header-title { font-size: 17px; }
+            .controls-wrap { flex-direction: column; gap: 10px; }
+            .summary-bar { grid-template-columns: repeat(2, 1fr); }
+            .crea-grid { grid-template-columns: 1fr; }
+            .stat-value { font-size: 22px; }
+        }
+        @media (max-width: 480px) {
+            .header-main { padding: 12px 16px; }
+            .header-title { font-size: 15px; }
+            .header-subtitle { font-size: 10px; }
+            .header-logo { height: 32px; }
+            .controls-wrap { padding: 0 16px; }
+            .summary-bar, .grid-container { padding: 0 16px; }
+            .control-group { padding: 10px 14px; gap: 8px; }
+            .summary-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card { padding: 14px 16px; }
+            .card-kpis { grid-template-columns: repeat(2, 1fr); }
+            .kpi-item:nth-child(2) { border-right: none; }
+            .kpi-item:nth-child(3) { border-top: 1px solid var(--border-light); }
+            .kpi-item:nth-child(4) { border-top: 1px solid var(--border-light); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--beige); }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bbb; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .crea-card { animation: fadeInUp 0.4s ease both; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-top">
+            <div class="header-top-inner">
+                <a href="https://www.mon-extension-bois.com/" target="_blank" class="header-top-link">mon-extension-bois.com</a>
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="header-inner">
+                <div class="header-left">
+                    <img src="https://www.mon-extension-bois.com/wp-content/uploads/2025/03/extension-bois-logo.png"
+                         alt="Mon Extension Bois" class="header-logo"
+                         onerror="this.style.display='none'">
+                    <div class="header-title-group">
+                        <h1 class="header-title">Visuels Publicitaires</h1>
+                        <span class="header-subtitle">Performances Meta Ads — Toutes agences</span>
+                    </div>
+                </div>
+                <a href="https://monextensionbois-france.github.io/dashboard/" class="back-link">&larr; Retour au portail</a>
+                <div class="live-badge">
+                    <span class="live-dot"></span>
+                    Données en direct
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="controls-wrap">
+        <div class="control-group grow" id="filtersBar">
+            <span class="control-label">Ville</span>
+            <button class="filter-chip active" data-city="all">Toutes</button>
+        </div>
+        <div class="control-group">
+            <span class="control-label">Période</span>
+            <button class="filter-chip active" data-period="all">Tout</button>
+            <button class="filter-chip" data-period="7d">7j</button>
+            <button class="filter-chip" data-period="30d">30j</button>
+            <button class="filter-chip" data-period="90d">3 mois</button>
+            <button class="filter-chip" data-period="custom">Personnalisé</button>
+            <div class="date-inputs" id="dateInputs" style="display:none">
+                <input type="date" id="dateStart">
+                <span style="color:var(--text-light);font-size:12px">→</span>
+                <input type="date" id="dateEnd">
+                <button class="date-apply" id="dateApply">Appliquer</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-bar" id="summaryBar">
+        <div class="stat-card">
+            <span class="stat-label">Visuels actifs</span>
+            <span class="stat-value" id="statCount">—</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Dépenses totales</span>
+            <span class="stat-value" id="statSpend">—</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Leads générés</span>
+            <span class="stat-value" id="statLeads">—</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">CPL moyen</span>
+            <span class="stat-value" id="statCPL">—</span>
+        </div>
+    </div>
+
+    <div class="grid-container" id="gridContainer">
+        <div class="loading-overlay" id="loadingState">
+            <div class="spinner"></div>
+            <span class="loading-text">Chargement des visuels...</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        const PUB_KEY = '2PACX-1vTgtIHThvJaikT-EErGEFf0RbNFl_-QVBnCHIIGDBrVRcg-giq8-JbKXUH8-VXgPWUKhGPcXWcqfGlR';
+        const CREAS_SOURCES = [
+            { city: 'Lille',       gid: '1975622040' },
+            { city: 'Metz',        gid: '1559975860' },
+            { city: 'Arras',       gid: '507324401' },
+            { city: 'Cambrai',     gid: '1403354487' },
+            { city: 'La Rochelle', gid: '1999066977' },
+            { city: 'Vosges',      gid: '1032275197' },
+            { city: 'National',    gid: '760619422' },
+            { city: 'Franchise',   gid: '349372918' },
+        ];
+
+        let allCreas = [];
+        let allRawRows = [];
+        let activeCity = 'all';
+        let activePeriod = 'all';
+        let customStart = null;
+        let customEnd = null;
+
+        const gridContainer  = document.getElementById('gridContainer');
+        const filtersBar     = document.getElementById('filtersBar');
+        const statCount      = document.getElementById('statCount');
+        const statSpend      = document.getElementById('statSpend');
+        const statLeads      = document.getElementById('statLeads');
+        const statCPL        = document.getElementById('statCPL');
+
+        function pNum(v) {
+            if (v == null) return 0;
+            const s = String(v).trim();
+            if (s === '' || s === '-') return 0;
+            const cleaned = s.replace(/[\s ]/g, '').replace(',', '.');
+            const n = parseFloat(cleaned);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function fmtEur(n) {
+            return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+        }
+        function fmtInt(n) {
+            return Math.round(n).toLocaleString('fr-FR');
+        }
+        function fmtPct(n) {
+            return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
+        }
+
+        const CTA_MAP = {
+            'LEARN_MORE': 'En savoir plus',
+            'SIGN_UP': "S'inscrire",
+            'CONTACT_US': 'Nous contacter',
+            'GET_QUOTE': 'Obtenir un devis',
+            'APPLY_NOW': 'Postuler',
+            'BOOK_NOW': 'Réserver',
+            'DOWNLOAD': 'Télécharger',
+            'SHOP_NOW': 'Acheter',
+            'SUBSCRIBE': "S'abonner",
+            'SEND_MESSAGE': 'Envoyer un message',
+            'CALL_NOW': 'Appeler',
+            'GET_OFFER': "Obtenir l'offre",
+            'REQUEST_TIME': 'Prendre rendez-vous',
+            'SEE_MORE': 'Voir plus',
+            'WATCH_MORE': 'Voir la vidéo',
+            'NO_BUTTON': 'Aucun',
+            'MESSAGE_PAGE': 'Envoyer un message',
+            'WHATSAPP_MESSAGE': 'WhatsApp',
+        };
+        function translateCTA(raw) {
+            if (!raw) return '';
+            const key = raw.trim().toUpperCase();
+            return CTA_MAP[key] || raw.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function translateStatus(raw) {
+            if (!raw) return { label: 'Inconnu', cls: 'other' };
+            const s = raw.trim().toUpperCase();
+            if (s === 'ACTIVE') return { label: 'Actif', cls: 'active' };
+            if (s === 'PAUSED') return { label: 'En pause', cls: 'paused' };
+            if (s === 'DELETED') return { label: 'Supprimé', cls: 'other' };
+            if (s === 'ARCHIVED') return { label: 'Archivé', cls: 'other' };
+            return { label: raw, cls: 'other' };
+        }
+
+        function getBaseName(adName) {
+            if (!adName) return '';
+            return adName
+                .replace(/^Mon\s*Extension\s*Bois[_\-\s]*/i, '')
+                .replace(/^LeadAds[_\-\s]*/i, '')
+                .replace(/^[A-Za-zÀ-ÿ]+[_\-\s]*\d{4,}[_\-\s]*/i, '')
+                .replace(/^(Extension\s*&\s*D[eé]pendance|Confort\s*&\s*Premium|Advantage\s*\+[^_]*)[_\-\s]*/i, '')
+                .replace(/\s*-\s*Copie\s*$/i, '')
+                .replace(/_/g, ' ')
+                .trim();
+        }
+
+        function prettifyName(baseName) {
+            if (!baseName) return 'Sans nom';
+            return baseName.charAt(0).toUpperCase() + baseName.slice(1);
+        }
+
+        function getHiResURL(url) {
+            return url || '';
+        }
+
+        function simplifyAdSet(adSetName) {
+            if (!adSetName) return '';
+            return adSetName
+                .replace(/^Mon\s*Extension\s*Bois[_\-\s]*/i, '')
+                .replace(/^LeadAds[_\-\s]*/i, '')
+                .replace(/^[A-Za-zÀ-ÿ]+[_\-\s]*\d{4,}[_\-\s]*/i, '')
+                .replace(/_/g, ' ')
+                .trim() || adSetName;
+        }
+
+        async function fetchRawData() {
+            const rows = [];
+            const results = await Promise.allSettled(CREAS_SOURCES.map(async (src) => {
+                const url = `https://docs.google.com/spreadsheets/d/e/${PUB_KEY}/pub?output=csv&single=true&gid=${src.gid}`;
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const text = await resp.text();
+                const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+                return { city: src.city, data: parsed.data || [] };
+            }));
+            for (const r of results) {
+                if (r.status === 'fulfilled' && r.value.data.length > 0) {
+                    for (const obj of r.value.data) {
+                        obj._city = r.value.city;
+                        rows.push(obj);
+                    }
+                } else if (r.status === 'rejected') {
+                    console.error('Erreur chargement:', r.reason);
+                }
+            }
+            if (rows.length === 0) throw new Error('Aucune donnée chargée');
+            return rows;
+        }
+
+        function getDateRange() {
+            const now = new Date();
+            if (activePeriod === 'custom' && customStart && customEnd) {
+                return { start: customStart, end: customEnd };
+            }
+            if (activePeriod === '7d') {
+                const s = new Date(now); s.setDate(s.getDate() - 7);
+                return { start: s.toISOString().slice(0,10), end: now.toISOString().slice(0,10) };
+            }
+            if (activePeriod === '30d') {
+                const s = new Date(now); s.setDate(s.getDate() - 30);
+                return { start: s.toISOString().slice(0,10), end: now.toISOString().slice(0,10) };
+            }
+            if (activePeriod === '90d') {
+                const s = new Date(now); s.setDate(s.getDate() - 90);
+                return { start: s.toISOString().slice(0,10), end: now.toISOString().slice(0,10) };
+            }
+            return null;
+        }
+
+        function aggregateRows(rows) {
+            const range = getDateRange();
+            const filtered = range
+                ? rows.filter(r => { const d = (r["Date"] || '').trim(); return d >= range.start && d <= range.end; })
+                : rows;
+
+            const map = {};
+            for (const row of filtered) {
+                const adName = row["Nom de la publicité"] || '';
+                if (!adName) continue;
+
+                const base = getBaseName(adName);
+                const key = base.toLowerCase() + '||' + row._city;
+                const adSet = row["Nom de l'ensemble de publicités"] || '';
+
+                const imp   = pNum(row["Impressions"]);
+                const clicks = pNum(row["Clics (tous)"]);
+                const cost  = pNum(row["Coût (EUR)"]);
+                const linkClicks = pNum(row["Clics sur les liens"]);
+                const leads = pNum(row["Prospects sur Facebook"]);
+                const ctr   = pNum(row["CTR (tous)"]);
+
+                if (!map[key]) {
+                    map[key] = {
+                        baseName: base,
+                        imageURL: row["URL de l'image de la création de l'annonce"] || '',
+                        bodyText: row["Texte de l'actif du corps"] || '',
+                        headline: row["Titre de la création"] || '',
+                        cta: row["Type d'appel à l'action de l'annonce"] || '',
+                        status: row["Statut de l'annonce"] || '',
+                        city: row._city,
+                        impressions: 0, clicks: 0, cost: 0, linkClicks: 0, leads: 0,
+                        _ctrSum: 0, _ctrW: 0,
+                        adSets: {}
+                    };
+                }
+                const agg = map[key];
+                agg.impressions += imp;
+                agg.clicks += clicks;
+                agg.cost += cost;
+                agg.linkClicks += linkClicks;
+                agg.leads += leads;
+                agg._ctrSum += ctr * imp;
+                agg._ctrW += imp;
+
+                if (!agg.imageURL && row["URL de l'image de la création de l'annonce"])
+                    agg.imageURL = row["URL de l'image de la création de l'annonce"];
+                const bt = row["Texte de l'actif du corps"] || '';
+                if (bt.length > agg.bodyText.length) agg.bodyText = bt;
+                if (row["Statut de l'annonce"] === 'ACTIVE') agg.status = 'ACTIVE';
+
+                const setKey = simplifyAdSet(adSet);
+                if (!agg.adSets[setKey]) {
+                    agg.adSets[setKey] = { impressions: 0, clicks: 0, cost: 0, leads: 0 };
+                }
+                agg.adSets[setKey].impressions += imp;
+                agg.adSets[setKey].clicks += clicks;
+                agg.adSets[setKey].cost += cost;
+                agg.adSets[setKey].leads += leads;
+            }
+
+            return Object.values(map).map(c => {
+                c.ctr = c._ctrW > 0 ? (c._ctrSum / c._ctrW) : 0;
+                c.cpl = c.leads > 0 ? (c.cost / c.leads) : 0;
+                c.simpleName = prettifyName(c.baseName);
+                c.adSetList = Object.entries(c.adSets)
+                    .map(([name, d]) => ({ name, ...d, cpl: d.leads > 0 ? d.cost / d.leads : 0 }))
+                    .sort((a, b) => b.cost - a.cost);
+                delete c._ctrSum;
+                delete c._ctrW;
+                delete c.adSets;
+                return c;
+            });
+        }
+
+        function buildFilters(creas) {
+            const cities = [...new Set(creas.map(c => c.city))].sort();
+            filtersBar.querySelectorAll('.filter-chip[data-city]:not([data-city="all"])').forEach(el => el.remove());
+            cities.forEach(city => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-chip';
+                btn.dataset.city = city;
+                btn.textContent = city;
+                btn.addEventListener('click', () => setActiveCity(city));
+                filtersBar.appendChild(btn);
+            });
+        }
+
+        function setActiveCity(city) {
+            activeCity = city;
+            filtersBar.querySelectorAll('.filter-chip').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.city === city);
+            });
+            render();
+        }
+
+        document.querySelector('.filter-chip[data-city="all"]').addEventListener('click', () => setActiveCity('all'));
+
+        function updateSummary(filtered) {
+            const count = filtered.length;
+            const totalSpend = filtered.reduce((s, c) => s + c.cost, 0);
+            const totalLeads = filtered.reduce((s, c) => s + c.leads, 0);
+            const avgCPL = totalLeads > 0 ? totalSpend / totalLeads : 0;
+
+            statCount.textContent = fmtInt(count);
+            statSpend.innerHTML = fmtEur(totalSpend);
+            statLeads.textContent = fmtInt(totalLeads);
+            statCPL.innerHTML = totalLeads > 0 ? fmtEur(avgCPL) : '—';
+        }
+
+        function render() {
+            let filtered = activeCity === 'all'
+                ? [...allCreas]
+                : allCreas.filter(c => c.city === activeCity);
+
+            filtered.sort((a, b) => b.cost - a.cost);
+            updateSummary(filtered);
+
+            let html = '<div class="crea-grid">';
+
+            if (filtered.length === 0) {
+                html += '<div class="empty-state">Aucun visuel trouvé pour ce filtre.</div>';
+            } else {
+                filtered.forEach((c, idx) => {
+                    const st = translateStatus(c.status);
+                    const ctaLabel = translateCTA(c.cta);
+                    const delay = Math.min(idx * 0.06, 0.8);
+                    const cardId = 'detail-' + idx;
+                    const hasMultipleSets = c.adSetList.length > 1;
+
+                    let detailHTML = '';
+                    if (hasMultipleSets) {
+                        detailHTML = `
+                        <div class="adset-toggle" onclick="document.getElementById('${cardId}').classList.toggle('open')">
+                            <span>${c.adSetList.length} ensembles de pubs</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+                        <div class="adset-detail" id="${cardId}">
+                            <table class="adset-table">
+                                <thead><tr><th>Ensemble</th><th>Dép.</th><th>Leads</th><th>CPL</th></tr></thead>
+                                <tbody>
+                                ${c.adSetList.map(s => `
+                                    <tr>
+                                        <td class="adset-name">${escHTML(s.name)}</td>
+                                        <td>${fmtEur(s.cost)}</td>
+                                        <td>${fmtInt(s.leads)}</td>
+                                        <td>${s.leads > 0 ? fmtEur(s.cpl) : '—'}</td>
+                                    </tr>`).join('')}
+                                </tbody>
+                            </table>
+                        </div>`;
+                    }
+
+                    html += `
+                    <div class="crea-card" style="animation-delay: ${delay}s">
+                        <div class="card-image-wrap">
+                            ${c.imageURL
+                                ? `<img src="${escHTML(getHiResURL(c.imageURL))}" alt="${escHTML(c.simpleName)}" loading="lazy" decoding="async" fetchpriority="low" onerror="this.parentNode.innerHTML='<div class=\\'card-image-placeholder\\'><svg viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\'/><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'/><path d=\\'M21 15l-5-5L5 21\\'/></svg><span>Image indisponible</span></div>'">`
+                                : `<div class="card-image-placeholder">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                        <path d="M21 15l-5-5L5 21"/>
+                                    </svg>
+                                    <span>Pas de visuel</span>
+                                  </div>`
+                            }
+                            <span class="badge-city">${escHTML(c.city)}</span>
+                            <span class="badge-status ${st.cls}">${st.label}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-ad-name">${escHTML(c.simpleName)}</div>
+                            ${c.bodyText ? `<div class="card-body-text">${escHTML(c.bodyText)}</div>` : ''}
+                            ${ctaLabel ? `<span class="card-cta-badge">${escHTML(ctaLabel)}</span>` : ''}
+                        </div>
+                        <div class="card-kpis">
+                            <div class="kpi-item">
+                                <div class="kpi-label">Dépenses</div>
+                                <div class="kpi-value">${fmtEur(c.cost)}</div>
+                            </div>
+                            <div class="kpi-item">
+                                <div class="kpi-label">Leads</div>
+                                <div class="kpi-value highlight">${fmtInt(c.leads)}</div>
+                            </div>
+                            <div class="kpi-item">
+                                <div class="kpi-label">CPL</div>
+                                <div class="kpi-value">${c.leads > 0 ? fmtEur(c.cpl) : '—'}</div>
+                            </div>
+                            <div class="kpi-item">
+                                <div class="kpi-label">CTR</div>
+                                <div class="kpi-value">${c.impressions > 0 ? fmtPct(c.ctr) : '—'}</div>
+                            </div>
+                        </div>
+                        ${detailHTML}
+                    </div>`;
+                });
+            }
+
+            html += '</div>';
+            gridContainer.innerHTML = html;
+        }
+
+        function escHTML(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function showError(msg) {
+            gridContainer.innerHTML = `
+                <div class="error-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <h3>Erreur de chargement</h3>
+                    <p>${escHTML(msg)}</p>
+                    <button onclick="location.reload()">Réessayer</button>
+                </div>`;
+        }
+
+        function refreshFromRaw() {
+            allCreas = aggregateRows(allRawRows);
+            buildFilters(allCreas);
+            render();
+        }
+
+        function setPeriod(period) {
+            activePeriod = period;
+            document.querySelectorAll('.filter-chip[data-period]').forEach(b => {
+                b.classList.toggle('active', b.dataset.period === period);
+            });
+            const di = document.getElementById('dateInputs');
+            di.style.display = period === 'custom' ? 'flex' : 'none';
+            if (period !== 'custom') refreshFromRaw();
+        }
+
+        document.querySelectorAll('.filter-chip[data-period]').forEach(btn => {
+            btn.addEventListener('click', () => setPeriod(btn.dataset.period));
+        });
+
+        document.getElementById('dateApply').addEventListener('click', () => {
+            customStart = document.getElementById('dateStart').value;
+            customEnd = document.getElementById('dateEnd').value;
+            if (customStart && customEnd) refreshFromRaw();
+        });
+
+        async function init() {
+            if (typeof Papa === 'undefined') {
+                showError('PapaParse non chargé. Vérifiez votre connexion ou désactivez votre bloqueur de pub.');
+                return;
+            }
+            try {
+                document.getElementById('loadingState').style.display = 'flex';
+                allRawRows = await fetchRawData();
+                allCreas = aggregateRows(allRawRows);
+                document.getElementById('loadingState').style.display = 'none';
+                buildFilters(allCreas);
+                render();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loadingState').style.display = 'none';
+                showError(err.message || 'Impossible de charger les données depuis Google Sheets.');
+            }
+        }
+
+        init();
+    })();
+    </script>
+</body>
+</html>
